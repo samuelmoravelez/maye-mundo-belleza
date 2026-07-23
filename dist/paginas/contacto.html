@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto | Maye Mundo Belleza</title>
+    <meta name="description" content="Contáctanos en Maye Mundo Belleza. Estamos en Medellín, Colombia. Escríbenos por WhatsApp o visítanos de lunes a sábado de 9am a 7pm.">
+    <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/contacto-SaNIeo34.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/productos.data-CR48lO6O.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-B2G__6RL.js">
+  <link rel="stylesheet" crossorigin href="/assets/productos-D9zstUOT.css">
+  <link rel="stylesheet" crossorigin href="/assets/main-CfttoqEt.css">
+  <link rel="stylesheet" crossorigin href="/assets/contacto-DEM_Bhp2.css">
+</head>
+<body>
+
+    <!-- BARRA DE ANUNCIO -->
+    <div class="barra-anuncio">
+        <p>
+            <i class="ri-truck-line barra-anuncio__icono"></i>
+            Envíos a todo el país — Escríbenos por WhatsApp
+            <i class="ri-whatsapp-line barra-anuncio__icono"></i>
+        </p>
+    </div>
+
+    <!-- CABECERA -->
+    <header class="header-principal">
+        <div class="contenedor header-grid">
+            <div class="logo">
+                <a href="../index.html">
+                    <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" alt="Logo de Maye Mundo Belleza" class="logo-imagen">
+                    <h1>Maye<span>Mundo Belleza</span></h1>
+                </a>
+            </div>
+            <nav class="navegacion" id="menu-principal">
+                <a href="../index.html">Inicio</a>
+                <a href="productos.html">Productos</a>
+                <a href="contacto.html" class="activo">Contacto</a>
+            </nav>
+            <div class="iconos-header">
+                <a href="productos.html" aria-label="Ir al catálogo"><i class="ri-search-line"></i></a>
+                <a href="#" class="icono-carrito" aria-label="Carrito de compras">
+                    <i class="ri-shopping-bag-3-line"></i>
+                    <span class="contador-carrito">0</span>
+                </a>
+                <button class="btn-menu" id="btn-menu" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="contacto-hero hero-seccion">
+        <div class="contenedor hero-seccion__contenido">
+            <span class="hero-seccion__etiqueta">Estamos para ayudarte</span>
+            <h2 class="hero-seccion__titulo">Hablemos de tu belleza</h2>
+            <p class="hero-seccion__descripcion">
+                Escríbenos, llámanos o visítanos. Nuestro equipo está listo para
+                asesorarte y encontrar el producto perfecto para ti.
+            </p>
+        </div>
+    </section>
+
+    <!-- FORMULARIO + INFO -->
+    <main class="contacto-principal">
+        <div class="contenedor contacto-grid">
+
+            <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+            <div class="contacto-form-bloque">
+                <h2 class="contacto-form-bloque__titulo">Envíanos un mensaje</h2>
+                <p class="contacto-form-bloque__subtitulo">
+                    Completa el formulario y te respondemos en menos de 24 horas.
+                </p>
+
+                <!-- Mensaje de éxito (oculto por defecto) -->
+                <div class="form-mensaje form-mensaje--exito" id="form-mensaje-exito" hidden>
+                    <i class="ri-checkbox-circle-line form-mensaje__icono"></i>
+                    <div>
+                        <p class="form-mensaje__titulo">¡Mensaje enviado!</p>
+                        <p class="form-mensaje__texto" data-texto>
+                            Gracias por escribirnos. Te responderemos en menos de 24 horas.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Mensaje de error (oculto por defecto) -->
+                <div class="form-mensaje form-mensaje--error" id="form-mensaje-error" hidden>
+                    <i class="ri-error-warning-line form-mensaje__icono"></i>
+                    <div>
+                        <p class="form-mensaje__titulo">Error al enviar</p>
+                        <p class="form-mensaje__texto" data-texto>
+                            Hubo un problema. Por favor intenta de nuevo o escríbenos por WhatsApp.
+                        </p>
+                    </div>
+                </div>
+
+                <form class="contacto-form" action="https://formspree.io/f/mzdnvoyj"
+                      method="POST" novalidate>
+
+                    <div class="form-fila">
+                        <div class="form-grupo">
+                            <label for="nombre">Nombre *</label>
+                            <input type="text" id="nombre" name="nombre"
+                                   placeholder="Tu nombre" autocomplete="given-name" required>
+                            <span class="campo-error" aria-live="polite"></span>
+                        </div>
+                        <div class="form-grupo">
+                            <label for="apellido">Apellido</label>
+                            <input type="text" id="apellido" name="apellido"
+                                   placeholder="Tu apellido" autocomplete="family-name">
+                        </div>
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="email">Correo electrónico *</label>
+                        <input type="email" id="email" name="email"
+                               placeholder="correo@ejemplo.com" autocomplete="email" required>
+                        <span class="campo-error" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="telefono">Teléfono (opcional)</label>
+                        <input type="tel" id="telefono" name="telefono"
+                               placeholder="+57 300 000 0000" autocomplete="tel">
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="asunto">¿En qué te podemos ayudar? *</label>
+                        <select id="asunto" name="asunto" required>
+                            <option value="" disabled selected>Selecciona un tema</option>
+                            <option value="productos">Consulta sobre productos</option>
+                            <option value="pedido">Hacer un pedido</option>
+                            <option value="envio">Información de envíos</option>
+                            <option value="asesoria">Asesoría personalizada</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                        <span class="campo-error" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-grupo">
+                        <label for="mensaje">Mensaje *</label>
+                        <textarea id="mensaje" name="mensaje"
+                                  placeholder="Cuéntanos cómo podemos ayudarte..." required></textarea>
+                        <span class="campo-error" aria-live="polite"></span>
+                    </div>
+
+                    <button type="submit" class="btn-form">
+                        <i class="ri-send-plane-fill"></i>
+                        Enviar mensaje
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- COLUMNA DERECHA: INFORMACIÓN -->
+            <div class="contacto-info-bloque">
+
+                <div class="info-tarjeta">
+                    <div class="info-tarjeta__icono"><i class="ri-map-pin-line"></i></div>
+                    <div class="info-tarjeta__cuerpo">
+                        <span class="info-tarjeta__etiqueta">Dirección</span>
+                        <p class="info-tarjeta__valor">Medellín, Antioquia, Colombia</p>
+                    </div>
+                </div>
+
+                <div class="info-tarjeta">
+                    <div class="info-tarjeta__icono"><i class="ri-phone-line"></i></div>
+                    <div class="info-tarjeta__cuerpo">
+                        <span class="info-tarjeta__etiqueta">Teléfono / WhatsApp</span>
+                        <p class="info-tarjeta__valor">
+                            <a href="https://wa.me/573003091641" target="_blank" rel="noopener noreferrer">
+                                +57 300 309 1641
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="info-tarjeta">
+                    <div class="info-tarjeta__icono"><i class="ri-mail-line"></i></div>
+                    <div class="info-tarjeta__cuerpo">
+                        <span class="info-tarjeta__etiqueta">Correo electrónico</span>
+                        <p class="info-tarjeta__valor">
+                            <a href="mailto:mayemundobelleza@gmail.com">
+                                mayemundobelleza@gmail.com
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="info-tarjeta">
+                    <div class="info-tarjeta__icono"><i class="ri-time-line"></i></div>
+                    <div class="info-tarjeta__cuerpo">
+                        <span class="info-tarjeta__etiqueta">Horario de atención</span>
+                        <p class="info-tarjeta__valor">Lunes a Sábado<br>9:00 a.m. – 7:00 p.m.</p>
+                    </div>
+                </div>
+
+                <div class="contact-map">
+                    <iframe
+                        title="Ubicación de Maye Mundo Belleza en Medellín"
+                        src="https://www.google.com/maps/embed?pb=!3m2!1ses!2sus!4v1784080160495!5m2!1ses!2sus!6m8!1m7!1s_Qchf1-XgBYVNyeq1Fev9g!2m2!1d6.336250156809227!2d-75.55798064181052!3f277.6225894074462!4f11.508190381646159!5f0.7820865974627469"
+                        allowfullscreen loading="lazy"
+                        referrerpolicy="strict-origin-when-cross-origin">
+                    </iframe>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- CANALES DIRECTOS -->
+    <section class="contacto-canales">
+        <div class="contenedor">
+            <h2 class="contacto-canales__titulo">Contáctanos directamente</h2>
+            <p class="contacto-canales__subtitulo">Elige el canal que prefieras, estamos en todos lados.</p>
+            <div class="canales-grid">
+                <a href="https://wa.me/573003091641?text=Hola!%20Vi%20tu%20p%C3%A1gina%20web%20y%20quiero%20hacer%20una%20consulta"
+                   class="canal-tarjeta canal-tarjeta--whatsapp"
+                   target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
+                    <div class="canal-tarjeta__icono"><i class="ri-whatsapp-line"></i></div>
+                    <span class="canal-tarjeta__nombre">WhatsApp</span>
+                    <span class="canal-tarjeta__accion">Escríbenos ahora</span>
+                </a>
+                <a href="https://www.instagram.com/mayemundo_belleza1"
+                   class="canal-tarjeta canal-tarjeta--instagram"
+                   target="_blank" rel="noopener noreferrer" aria-label="Seguirnos en Instagram">
+                    <div class="canal-tarjeta__icono"><i class="ri-instagram-line"></i></div>
+                    <span class="canal-tarjeta__nombre">Instagram</span>
+                    <span class="canal-tarjeta__accion">@mayemundo_belleza1</span>
+                </a>
+                <a href="https://www.tiktok.com/@mundo.belleza.bello"
+                   class="canal-tarjeta canal-tarjeta--tiktok"
+                   target="_blank" rel="noopener noreferrer" aria-label="Seguirnos en TikTok">
+                    <div class="canal-tarjeta__icono"><i class="ri-tiktok-line"></i></div>
+                    <span class="canal-tarjeta__nombre">TikTok</span>
+                    <span class="canal-tarjeta__accion">@mundo.belleza.bello</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="contenedor">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Maye Mundo Belleza</h3>
+                    <p>Tu tienda de belleza de confianza en Medellín. Productos capilares, maquillaje y cuidado de la piel.</p>
+                    <div class="footer-redes">
+                        <a href="https://www.instagram.com/mayemundo_belleza1" target="_blank" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+                        <a href="https://www.tiktok.com/@mundo.belleza.bello" target="_blank" aria-label="TikTok"><i class="ri-tiktok-line"></i></a>
+                        <a href="https://wa.me/573003091641" target="_blank" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Navegación</h3>
+                    <a href="../index.html">Inicio</a>
+                    <a href="productos.html">Productos</a>
+                    <a href="contacto.html">Contacto</a>
+                </div>
+                <div class="footer-col">
+                    <h3>Contacto</h3>
+                    <p><i class="ri-map-pin-fill footer-col__icono"></i> Medellín, Colombia</p>
+                    <p><i class="ri-phone-fill footer-col__icono"></i> +57 300 309 1641</p>
+                    <p><a href="mailto:mayemundobelleza@gmail.com"><i class="ri-mail-fill footer-col__icono"></i> mayemundobelleza@gmail.com</a></p>
+                    <p><i class="ri-time-fill footer-col__icono"></i> Lun–Sáb: 9am – 7pm</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Maye Mundo Belleza. Todos los derechos reservados.</p>
+                <p>Hecho con <i class="ri-heart-fill footer-bottom__icono"></i> en Medellín</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón flotante WhatsApp -->
+    <a href="https://wa.me/573003091641?text=Hola!%20Vi%20tu%20p%C3%A1gina%20web%20y%20quiero%20hacer%20una%20consulta"
+       class="whatsapp-flotante" target="_blank" rel="noopener noreferrer" aria-label="Escríbenos por WhatsApp">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+    </a>
+
+</body>
+</html>

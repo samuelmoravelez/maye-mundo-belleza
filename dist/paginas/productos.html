@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos | Maye Mundo Belleza</title>
+    <meta name="description" content="Explora nuestra selección de productos de belleza: cuidado capilar, maquillaje, uñas y más. Envíos a todo Colombia.">
+    <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/productos-BDdN-zWe.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/productos.data-CR48lO6O.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-B2G__6RL.js">
+  <link rel="stylesheet" crossorigin href="/assets/productos-D9zstUOT.css">
+  <link rel="stylesheet" crossorigin href="/assets/main-CfttoqEt.css">
+  <link rel="stylesheet" crossorigin href="/assets/productos-Cw78k1qL.css">
+  <link rel="stylesheet" crossorigin href="/assets/index-Bss7FXWo.css">
+</head>
+<body>
+
+    <!-- BARRA DE ANUNCIO -->
+    <div class="barra-anuncio">
+        <p>
+            <i class="ri-truck-line barra-anuncio__icono"></i>
+            Envíos a todo el país — Escríbenos por WhatsApp
+            <i class="ri-whatsapp-line barra-anuncio__icono"></i>
+        </p>
+    </div>
+
+    <!-- CABECERA -->
+    <header class="header-principal">
+        <div class="contenedor header-grid">
+            <div class="logo">
+                <a href="../index.html">
+                    <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" alt="Logo de Maye Mundo Belleza" class="logo-imagen">
+                    <h1>Maye<span>Mundo Belleza</span></h1>
+                </a>
+            </div>
+            <nav class="navegacion" id="menu-principal">
+                <a href="../index.html">Inicio</a>
+                <a href="productos.html" class="activo">Productos</a>
+                <a href="contacto.html">Contacto</a>
+            </nav>
+            <div class="iconos-header">
+                <a href="productos.html" aria-label="Buscar productos"><i class="ri-search-line"></i></a>
+                <a href="#" class="icono-carrito" aria-label="Carrito de compras">
+                    <i class="ri-shopping-bag-3-line"></i>
+                    <span class="contador-carrito">0</span>
+                </a>
+                <button class="btn-menu" id="btn-menu" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="productos-hero hero-seccion">
+        <div class="contenedor hero-seccion__contenido">
+            <span class="hero-seccion__etiqueta">Nuestro Catálogo</span>
+            <h2 class="hero-seccion__titulo">Encuentra tu producto ideal</h2>
+            <p class="hero-seccion__descripcion">
+                Productos seleccionados para realzar tu belleza natural.
+                Cuidado capilar, maquillaje, uñas y mucho más.
+            </p>
+        </div>
+    </section>
+
+    <!-- CATEGORÍAS VISUALES (labels conectados a JS via data-categoria) -->
+    <section class="categorias-visuales">
+        <div class="contenedor">
+            <div class="categorias-grid">
+                <button class="categoria-card activo" data-categoria="todos">
+                    <span class="categoria-card__icono"><i class="ri-apps-2-fill"></i></span>
+                    <span class="categoria-card__nombre">Todos</span>
+                </button>
+                <button class="categoria-card" data-categoria="capilar">
+                    <span class="categoria-card__icono"><i class="ri-scissors-2-fill"></i></span>
+                    <span class="categoria-card__nombre">Capilar</span>
+                </button>
+                <button class="categoria-card" data-categoria="maquillaje">
+                    <span class="categoria-card__icono"><i class="ri-palette-fill"></i></span>
+                    <span class="categoria-card__nombre">Maquillaje</span>
+                </button>
+                <button class="categoria-card" data-categoria="unas">
+                    <span class="categoria-card__icono"><i class="ri-sparkling-fill"></i></span>
+                    <span class="categoria-card__nombre">Uñas</span>
+                </button>
+                <button class="categoria-card" data-categoria="skincare">
+                    <span class="categoria-card__icono"><i class="ri-leaf-fill"></i></span>
+                    <span class="categoria-card__nombre">Skincare</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CATÁLOGO DINÁMICO -->
+    <main class="productos-catalogo">
+        <div class="contenedor">
+
+            <!-- Pills de filtro (JS activa la clase) -->
+            <div class="filtros-wrap" role="group" aria-label="Filtrar por categoría">
+                <div class="filtros-pills">
+                    <button class="filtro-pill activo" data-categoria="todos">Todos</button>
+                    <button class="filtro-pill" data-categoria="capilar">Cuidado Capilar</button>
+                    <button class="filtro-pill" data-categoria="maquillaje">Maquillaje</button>
+                    <button class="filtro-pill" data-categoria="unas">Uñas</button>
+                    <button class="filtro-pill" data-categoria="skincare">Skincare</button>
+                </div>
+            </div>
+
+            <!-- Cabecera con buscador y contador -->
+            <div class="catalogo-cabecera">
+                <label class="catalogo-buscador" for="busqueda-catalogo">
+                    <i class="ri-search-line"></i>
+                    <input type="search" id="busqueda-catalogo"
+                           placeholder="Buscar producto..." autocomplete="off">
+                </label>
+                <span class="catalogo-contador" id="contador-resultados">Cargando...</span>
+            </div>
+
+            <!-- Grilla dinámica — llenada por productos.js -->
+            <div class="grilla-productos" id="grilla-catalogo" aria-live="polite">
+                <!-- Skeleton mientras carga -->
+                <div class="tarjeta-producto"><div class="imagen-producto-wrapper skeleton" style="height:300px"></div></div>
+                <div class="tarjeta-producto"><div class="imagen-producto-wrapper skeleton" style="height:300px"></div></div>
+                <div class="tarjeta-producto"><div class="imagen-producto-wrapper skeleton" style="height:300px"></div></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- CTA ASESORÍA -->
+    <section class="productos-cta">
+        <div class="contenedor productos-cta__contenido">
+            <div class="productos-cta__texto">
+                <h2 class="productos-cta__titulo">¿No encuentras lo que buscas?</h2>
+                <p class="productos-cta__descripcion">
+                    Nuestras asesoras están listas para ayudarte a elegir el producto
+                    perfecto para tu tipo de cabello y piel.
+                </p>
+            </div>
+            <a href="https://wa.me/573003091641?text=Hola!%20Quiero%20asesor%C3%ADa%20personalizada%20sobre%20productos"
+               class="btn btn-cta-blanco" target="_blank" rel="noopener noreferrer">
+                <i class="ri-whatsapp-line"></i> Recibir asesoría gratis
+            </a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="contenedor">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Maye Mundo Belleza</h3>
+                    <p>Tu tienda de belleza de confianza en Medellín. Productos capilares, maquillaje y cuidado de la piel.</p>
+                    <div class="footer-redes">
+                        <a href="https://www.instagram.com/mayemundo_belleza1" target="_blank" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+                        <a href="https://www.tiktok.com/@mundo.belleza.bello" target="_blank" aria-label="TikTok"><i class="ri-tiktok-line"></i></a>
+                        <a href="https://wa.me/573003091641" target="_blank" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Navegación</h3>
+                    <a href="../index.html">Inicio</a>
+                    <a href="productos.html">Productos</a>
+                    <a href="contacto.html">Contacto</a>
+                </div>
+                <div class="footer-col">
+                    <h3>Contacto</h3>
+                    <p><i class="ri-map-pin-fill footer-col__icono"></i> Medellín, Colombia</p>
+                    <p><i class="ri-phone-fill footer-col__icono"></i> +57 300 309 1641</p>
+                    <p><a href="mailto:mayemundobelleza@gmail.com"><i class="ri-mail-fill footer-col__icono"></i> mayemundobelleza@gmail.com</a></p>
+                    <p><i class="ri-time-fill footer-col__icono"></i> Lun–Sáb: 9am – 7pm</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Maye Mundo Belleza. Todos los derechos reservados.</p>
+                <p>Hecho con <i class="ri-heart-fill footer-bottom__icono"></i> en Medellín</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón flotante WhatsApp -->
+    <a href="https://wa.me/573003091641?text=Hola!%20Vi%20tu%20p%C3%A1gina%20web%20y%20quiero%20hacer%20una%20consulta"
+       class="whatsapp-flotante" target="_blank" rel="noopener noreferrer" aria-label="Escríbenos por WhatsApp">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+    </a>
+
+</body>
+</html>

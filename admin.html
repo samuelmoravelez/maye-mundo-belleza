@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin | Maye Mundo Belleza</title>
+    <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
+
+    <!-- Remix Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <script type="module" src="/js/entries/entry-admin.js"></script>
+</head>
+<body class="admin-body">
+
+    <!-- ── PANTALLA DE LOGIN ── -->
+    <div id="pantalla-login" class="admin-login">
+        <div class="admin-login__card">
+            <div class="admin-login__logo">
+                <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" alt="Logo">
+                <span>Maye Mundo Belleza</span>
+            </div>
+            <h1 class="admin-login__titulo">Panel de Administración</h1>
+            <p class="admin-login__sub">Acceso exclusivo para administradores</p>
+
+            <form id="form-login" novalidate>
+                <div class="admin-login__grupo">
+                    <label for="admin-usuario">Usuario</label>
+                    <input type="text" id="admin-usuario" class="admin-login__input"
+                           placeholder="admin" autocomplete="username">
+                </div>
+                <div class="admin-login__grupo">
+                    <label for="admin-password">Contraseña</label>
+                    <input type="password" id="admin-password" class="admin-login__input"
+                           placeholder="••••••••" autocomplete="current-password">
+                    <p class="admin-login__error" id="login-error">
+                        <i class="ri-error-warning-line"></i>
+                        <span>Credenciales incorrectas</span>
+                    </p>
+                </div>
+                <button type="submit" class="admin-login__btn">
+                    <i class="ri-lock-unlock-line"></i>
+                    Ingresar al panel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── PANEL PRINCIPAL ── -->
+    <div id="panel-admin" class="admin-layout" style="display:none">
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <div class="admin-sidebar__header">
+                <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" alt="Logo">
+                <div class="admin-sidebar__brand">
+                    Admin Panel
+                    <span>Maye Mundo Belleza</span>
+                </div>
+            </div>
+
+            <nav class="admin-nav">
+                <button class="admin-nav__item activo" data-seccion="productos">
+                    <i class="ri-store-2-line"></i>
+                    Productos
+                </button>
+                <button class="admin-nav__item" data-seccion="estadisticas">
+                    <i class="ri-bar-chart-2-line"></i>
+                    Estadísticas
+                </button>
+            </nav>
+
+            <div class="admin-sidebar__footer">
+                <button class="admin-logout" id="btn-logout">
+                    <i class="ri-logout-box-line"></i>
+                    Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- Contenido -->
+        <main class="admin-main">
+            <div class="admin-topbar">
+                <span class="admin-topbar__titulo" id="topbar-titulo">Gestión de Productos</span>
+                <div class="admin-topbar__acciones">
+                    <a href="/index.html" target="_blank" style="display:flex;align-items:center;gap:6px;color:#64748b;font-size:0.82rem;font-family:var(--fuente-titulos);">
+                        <i class="ri-external-link-line"></i> Ver tienda
+                    </a>
+                </div>
+            </div>
+
+            <div class="admin-content">
+
+                <!-- Stats -->
+                <div class="admin-stats" id="admin-stats">
+                    <div class="admin-stat">
+                        <div class="admin-stat__icono"><i class="ri-store-2-line"></i></div>
+                        <div>
+                            <div class="admin-stat__num" id="stat-total">0</div>
+                            <div class="admin-stat__label">Total productos</div>
+                        </div>
+                    </div>
+                    <div class="admin-stat">
+                        <div class="admin-stat__icono"><i class="ri-eye-line"></i></div>
+                        <div>
+                            <div class="admin-stat__num" id="stat-visibles">0</div>
+                            <div class="admin-stat__label">Visibles</div>
+                        </div>
+                    </div>
+                    <div class="admin-stat">
+                        <div class="admin-stat__icono" style="background:rgba(239,68,68,0.15);color:#f87171"><i class="ri-archive-line"></i></div>
+                        <div>
+                            <div class="admin-stat__num" id="stat-agotados">0</div>
+                            <div class="admin-stat__label">Agotados</div>
+                        </div>
+                    </div>
+                    <div class="admin-stat">
+                        <div class="admin-stat__icono" style="background:rgba(234,179,8,0.15);color:#facc15"><i class="ri-eye-off-line"></i></div>
+                        <div>
+                            <div class="admin-stat__num" id="stat-ocultos">0</div>
+                            <div class="admin-stat__label">Ocultos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de productos -->
+                <div class="admin-tabla-wrap">
+                    <div class="admin-tabla-header">
+                        <div class="admin-buscar">
+                            <i class="ri-search-line"></i>
+                            <input type="text" id="admin-buscar-input" placeholder="Buscar producto...">
+                        </div>
+                        <button class="btn-nuevo-producto" id="btn-nuevo-producto">
+                            <i class="ri-add-line"></i>
+                            Nuevo producto
+                        </button>
+                    </div>
+
+                    <div style="overflow-x:auto">
+                        <table class="admin-tabla">
+                            <thead>
+                                <tr>
+                                    <th>Imagen</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Precio</th>
+                                    <th>Stock</th>
+                                    <th>Etiqueta</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-tabla-body">
+                                <!-- Filas generadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ── MODAL CRUD ── -->
+    <div class="admin-modal-overlay oculto" id="modal-overlay">
+        <div class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+            <div class="admin-modal__header">
+                <h2 class="admin-modal__titulo" id="modal-titulo">Nuevo producto</h2>
+                <button class="admin-modal__cerrar" id="modal-cerrar" aria-label="Cerrar">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="admin-modal__body">
+                <form id="form-producto" novalidate>
+                    <input type="hidden" id="producto-id">
+
+                    <div class="admin-form-fila">
+                        <div class="admin-form-grupo">
+                            <label for="p-nombre">Nombre *</label>
+                            <input type="text" id="p-nombre" placeholder="Ej: Sérum Vitamina C" required>
+                        </div>
+                        <div class="admin-form-grupo">
+                            <label for="p-categoria">Categoría *</label>
+                            <select id="p-categoria" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="capilar">Cuidado Capilar</option>
+                                <option value="maquillaje">Maquillaje</option>
+                                <option value="unas">Uñas</option>
+                                <option value="skincare">Skincare</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-fila">
+                        <div class="admin-form-grupo">
+                            <label for="p-precio">Precio (COP) *</label>
+                            <input type="number" id="p-precio" placeholder="45000" min="0" required>
+                        </div>
+                        <div class="admin-form-grupo">
+                            <label for="p-precio-anterior">Precio anterior (opcional)</label>
+                            <input type="number" id="p-precio-anterior" placeholder="60000" min="0">
+                        </div>
+                    </div>
+
+                    <div class="admin-form-fila">
+                        <div class="admin-form-grupo">
+                            <label for="p-stock">Stock</label>
+                            <input type="number" id="p-stock" placeholder="10" min="0">
+                        </div>
+                        <div class="admin-form-grupo">
+                            <label for="p-etiqueta">Etiqueta</label>
+                            <select id="p-etiqueta">
+                                <option value="">Sin etiqueta</option>
+                                <option value="nuevo">Nuevo</option>
+                                <option value="popular">Más vendido</option>
+                                <option value="oferta">Oferta</option>
+                                <option value="agotado">Agotado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-grupo">
+                        <label for="p-imagen">URL de imagen *</label>
+                        <input type="url" id="p-imagen" placeholder="https://res.cloudinary.com/..." required>
+                    </div>
+
+                    <div class="admin-form-grupo">
+                        <label for="p-descripcion">Descripción</label>
+                        <textarea id="p-descripcion" placeholder="Describe brevemente el producto..."></textarea>
+                    </div>
+
+                    <div class="admin-form-grupo">
+                        <label for="p-whatsapp">Texto WhatsApp (URL encoded)</label>
+                        <input type="text" id="p-whatsapp" placeholder="Hola!%20Me%20interesa%20el%20producto">
+                    </div>
+
+                    <div class="admin-modal__footer">
+                        <button type="button" class="btn-admin-cancelar" id="modal-cancelar">Cancelar</button>
+                        <button type="submit" class="btn-admin-guardar">
+                            <i class="ri-save-line"></i>
+                            Guardar producto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── CONFIRM ELIMINAR ── -->
+    <div class="admin-confirm-overlay oculto" id="confirm-overlay">
+        <div class="admin-confirm">
+            <div class="admin-confirm__icono"><i class="ri-delete-bin-5-line" style="color:#f87171"></i></div>
+            <h3 class="admin-confirm__titulo">Eliminar producto</h3>
+            <p class="admin-confirm__texto">Esta acción no se puede deshacer. El producto será eliminado del catálogo.</p>
+            <div class="admin-confirm__botones">
+                <button class="btn-admin-cancelar" id="confirm-cancelar">Cancelar</button>
+                <button class="btn-confirmar-si" id="confirm-si">Sí, eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── TOAST ── -->
+    <div class="admin-toast oculto" id="admin-toast">
+        <i class="ri-checkbox-circle-line" id="toast-icono"></i>
+        <span id="toast-texto"></span>
+    </div>
+
+</body>
+</html>
