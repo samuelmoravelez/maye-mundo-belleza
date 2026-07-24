@@ -1,54 +1,23 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maye Mundo Belleza | Tienda Oficial</title>
-    <meta name="description" content="Descubre los mejores productos capilares, maquillaje y cuidado de la piel en Maye Mundo Belleza. Tienda física en Medellín y envíos a todo el país.">
+    <title>Maye Mundo Belleza | Tienda Oficial en Medellín</title>
+    <meta name="description" content="Descubre los mejores productos capilares, maquillaje y cuidado de la piel en Maye Mundo Belleza. Tienda física en Medellín y envíos a todo el país. Asesoría personalizada por WhatsApp.">
     <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script type="module" src="/js/entries/entry-index.js"></script>
 </head>
 <body>
 
-    <!-- BARRA DE ANUNCIO -->
-    <div class="barra-anuncio">
-        <p>
-            <i class="ri-truck-line barra-anuncio__icono"></i>
-            Envíos a todo el país — Escríbenos por WhatsApp
-            <i class="ri-whatsapp-line barra-anuncio__icono"></i>
-        </p>
-    </div>
-
-    <!-- CABECERA -->
-    <header class="header-principal">
-        <div class="contenedor header-grid">
-            <div class="logo">
-                <a href="index.html">
-                    <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" alt="Logo de Maye Mundo Belleza" class="logo-imagen">
-                    <h1>Maye<span>Mundo Belleza</span></h1>
-                </a>
-            </div>
-            <nav class="navegacion" id="menu-principal">
-                <a href="index.html" class="activo">Inicio</a>
-                <a href="paginas/productos.html">Productos</a>
-                <a href="paginas/contacto.html">Contacto</a>
-            </nav>
-            <div class="iconos-header">
-                <a href="paginas/productos.html" aria-label="Ir al catálogo"><i class="ri-search-line"></i></a>
-                <a href="#" class="icono-carrito" aria-label="Carrito de compras">
-                    <i class="ri-shopping-bag-3-line"></i>
-                    <span class="contador-carrito">0</span>
-                </a>
-                <button class="btn-menu" id="btn-menu" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
-                    <span></span><span></span><span></span>
-                </button>
-            </div>
-        </div>
-    </header>
+    {{> barra-anuncio }}
+    {{> header }}
 
     <main id="contenido-principal">
 
@@ -58,16 +27,18 @@
                 <span class="subtitulo-hero">
                     <i class="ri-award-line"></i> Nueva Colección 2025
                 </span>
-                <h2 class="titulo-hero">Resalta tu <em>belleza</em> natural</h2>
+                <h1 class="titulo-hero">Resalta tu <em>belleza</em> natural</h1>
                 <p class="descripcion-hero">
                     Descubre los mejores productos capilares, maquillaje y cuidado de
                     la piel seleccionados con cuidado para realzar lo mejor de ti.
                 </p>
                 <div class="botones-hero">
-                    <a href="paginas/productos.html" class="btn btn-primario">
+                    <a href="/maye-mundo-belleza/paginas/productos.html" class="btn btn-primario">
                         <i class="ri-store-2-line"></i> Ver catálogo
                     </a>
-                    <a href="https://wa.me/573003091641" target="_blank" rel="noopener noreferrer" class="btn btn-secundario">
+                    <a href="#" data-cta-whatsapp
+                       data-wa-mensaje="Hola!%20Quiero%20asesor%C3%ADa%20gratuita%20para%20elegir%20mis%20productos%20de%20belleza."
+                       class="btn btn-secundario" target="_blank" rel="noopener noreferrer">
                         <i class="ri-whatsapp-line"></i> Asesoría gratis
                     </a>
                 </div>
@@ -106,7 +77,9 @@
                 <div class="sobre-nosotros__imagen-wrap">
                     <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784423015/maye_trjxjc.png"
                          alt="Maye Mundo Belleza — tienda de belleza en Medellín"
-                         class="sobre-nosotros__imagen">
+                         class="sobre-nosotros__imagen"
+                         loading="lazy"
+                         width="600" height="700">
                     <span class="sobre-nosotros__badge">
                         <i class="ri-calendar-check-line"></i> Desde 2025
                     </span>
@@ -135,7 +108,8 @@
                             <span>Atención personalizada</span>
                         </div>
                     </div>
-                    <a href="https://wa.me/573003091641?text=Hola!%20Quiero%20conocer%20m%C3%A1s%20sobre%20Maye%20Mundo%20Belleza"
+                    <a href="#" data-cta-whatsapp
+                       data-wa-mensaje="Hola!%20Quiero%20conocer%20m%C3%A1s%20sobre%20Maye%20Mundo%20Belleza."
                        class="btn btn-primario sobre-nosotros__cta"
                        target="_blank" rel="noopener noreferrer">
                         <i class="ri-whatsapp-line"></i> Hablar con nosotros
@@ -151,46 +125,61 @@
                 <p class="subtitulo-seccion">Los favoritos de nuestras clientas en la tienda</p>
                 <div class="grilla-productos">
                     <article class="tarjeta-producto">
-                        <div class="imagen-producto-wrapper">
-                            <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784217237/22_w4x1qk.png" alt="Tratamiento Capilar Hidratante Premium" class="imagen-producto" loading="lazy">
-                            <span class="etiqueta-producto nuevo">Nuevo</span>
-                        </div>
+                        <a href="/maye-mundo-belleza/paginas/producto.html?id=1" class="tarjeta-producto__enlace" aria-label="Ver detalle del Tratamiento Hidratante Premium">
+                            <div class="imagen-producto-wrapper">
+                                <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784217237/22_w4x1qk.png"
+                                     alt="Tratamiento Capilar Hidratante Premium"
+                                     class="imagen-producto"
+                                     loading="lazy" width="400" height="400">
+                                <span class="etiqueta-producto nuevo">Nuevo</span>
+                            </div>
+                        </a>
                         <div class="info-producto">
                             <span class="categoria-tag">Cuidado Capilar</span>
-                            <h3 class="nombre-producto">Tratamiento Hidratante Premium</h3>
+                            <h3 class="nombre-producto"><a href="/maye-mundo-belleza/paginas/producto.html?id=1">Tratamiento Hidratante Premium</a></h3>
                             <div class="precio-wrapper"><span class="precio-producto">$45.000 COP</span></div>
-                            <button class="btn-comprar-tarjeta"><span><i class="ri-shopping-bag-3-line"></i> Agregar al carrito</span></button>
+                            <button class="btn-comprar-tarjeta" data-destacado-id="1" data-destacado-nombre="Tratamiento Hidratante Premium" data-destacado-precio="45000" data-destacado-imagen="https://res.cloudinary.com/ocnnxclz/image/upload/v1784217237/22_w4x1qk.png"><span><i class="ri-shopping-bag-3-line"></i> Agregar al carrito</span></button>
                         </div>
                     </article>
                     <article class="tarjeta-producto">
-                        <div class="imagen-producto-wrapper">
-                            <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784217490/33_oldm9d.png" alt="Labial Mate Larga Duración" class="imagen-producto" loading="lazy">
-                            <span class="etiqueta-producto popular">Más vendido</span>
-                        </div>
+                        <a href="/maye-mundo-belleza/paginas/producto.html?id=2" class="tarjeta-producto__enlace" aria-label="Ver detalle del Labial Mate Larga Duración">
+                            <div class="imagen-producto-wrapper">
+                                <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784217490/33_oldm9d.png"
+                                     alt="Labial Mate Larga Duración"
+                                     class="imagen-producto"
+                                     loading="lazy" width="400" height="400">
+                                <span class="etiqueta-producto popular">Más vendido</span>
+                            </div>
+                        </a>
                         <div class="info-producto">
                             <span class="categoria-tag">Maquillaje</span>
-                            <h3 class="nombre-producto">Labial Mate Larga Duración</h3>
+                            <h3 class="nombre-producto"><a href="/maye-mundo-belleza/paginas/producto.html?id=2">Labial Mate Larga Duración</a></h3>
                             <div class="precio-wrapper">
                                 <span class="precio-producto">$28.000 COP</span>
                                 <span class="precio-anterior">$35.000 COP</span>
                             </div>
-                            <button class="btn-comprar-tarjeta"><span><i class="ri-shopping-bag-3-line"></i> Agregar al carrito</span></button>
+                            <button class="btn-comprar-tarjeta" data-destacado-id="2" data-destacado-nombre="Labial Mate Larga Duración" data-destacado-precio="28000" data-destacado-imagen="https://res.cloudinary.com/ocnnxclz/image/upload/v1784217490/33_oldm9d.png"><span><i class="ri-shopping-bag-3-line"></i> Agregar al carrito</span></button>
                         </div>
                     </article>
                     <article class="tarjeta-producto">
-                        <div class="imagen-producto-wrapper">
-                            <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784217905/profesional_fs469j.png" alt="Esmalte Efecto Gel Profesional" class="imagen-producto" loading="lazy">
-                        </div>
+                        <a href="/maye-mundo-belleza/paginas/producto.html?id=3" class="tarjeta-producto__enlace" aria-label="Ver detalle del Esmalte Efecto Gel Profesional">
+                            <div class="imagen-producto-wrapper">
+                                <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784217905/profesional_fs469j.png"
+                                     alt="Esmalte Efecto Gel Profesional"
+                                     class="imagen-producto"
+                                     loading="lazy" width="400" height="400">
+                            </div>
+                        </a>
                         <div class="info-producto">
                             <span class="categoria-tag">Uñas</span>
-                            <h3 class="nombre-producto">Esmalte Efecto Gel Profesional</h3>
+                            <h3 class="nombre-producto"><a href="/maye-mundo-belleza/paginas/producto.html?id=3">Esmalte Efecto Gel Profesional</a></h3>
                             <div class="precio-wrapper"><span class="precio-producto">$12.000 COP</span></div>
-                            <button class="btn-comprar-tarjeta"><span><i class="ri-shopping-bag-3-line"></i> Agregar al carrito</span></button>
+                            <button class="btn-comprar-tarjeta" data-destacado-id="3" data-destacado-nombre="Esmalte Efecto Gel Profesional" data-destacado-precio="12000" data-destacado-imagen="https://res.cloudinary.com/ocnnxclz/image/upload/v1784217905/profesional_fs469j.png"><span><i class="ri-shopping-bag-3-line"></i> Agregar al carrito</span></button>
                         </div>
                     </article>
                 </div>
                 <div style="text-align:center;margin-top:40px">
-                    <a href="paginas/productos.html" class="btn btn-primario">
+                    <a href="/maye-mundo-belleza/paginas/productos.html" class="btn btn-primario">
                         <i class="ri-arrow-right-line"></i> Ver todos los productos
                     </a>
                 </div>
@@ -221,8 +210,10 @@
                     <h2 class="titulo-seccion">Conoce Maye Mundo Belleza</h2>
                     <p class="subtitulo-seccion">Un vistazo a nuestra experiencia, productos e identidad de marca.</p>
                     <div class="video-wrapper">
-                        <video src="https://res.cloudinary.com/ocnnxclz/video/upload/v1784218403/2222_m4av0x.mp4"
-                               controls playsinline></video>
+                        <video controls playsinline
+                               poster="https://res.cloudinary.com/ocnnxclz/image/upload/v1784423015/maye_trjxjc.png">
+                            <source src="https://res.cloudinary.com/ocnnxclz/video/upload/v1784218403/2222_m4av0x.mp4" type="video/mp4">
+                        </video>
                     </div>
                 </div>
             </div>
@@ -240,7 +231,7 @@
                             ¿Realizan envíos a todo Colombia?
                             <span class="faq-pregunta__icono"><i class="ri-add-line"></i></span>
                         </button>
-                        <div class="faq-respuesta">
+                        <div class="faq-respuesta" role="region">
                             <div class="faq-respuesta__contenido">
                                 Sí, realizamos envíos a todo el territorio nacional. El costo y tiempo de envío varía según tu ciudad. Puedes consultarnos directamente por WhatsApp para más detalles.
                             </div>
@@ -252,7 +243,7 @@
                             ¿Cómo hago mi pedido?
                             <span class="faq-pregunta__icono"><i class="ri-add-line"></i></span>
                         </button>
-                        <div class="faq-respuesta">
+                        <div class="faq-respuesta" role="region">
                             <div class="faq-respuesta__contenido">
                                 El proceso es muy sencillo: elige tu producto, haz clic en "Pedir por WhatsApp" y nuestro equipo te atiende inmediatamente para coordinar el pago y envío.
                             </div>
@@ -264,7 +255,7 @@
                             ¿Los productos son originales y seguros?
                             <span class="faq-pregunta__icono"><i class="ri-add-line"></i></span>
                         </button>
-                        <div class="faq-respuesta">
+                        <div class="faq-respuesta" role="region">
                             <div class="faq-respuesta__contenido">
                                 Absolutamente. Todos nuestros productos son 100% originales, adquiridos directamente de distribuidores autorizados. No vendemos imitaciones ni productos vencidos.
                             </div>
@@ -276,7 +267,7 @@
                             ¿Qué métodos de pago aceptan?
                             <span class="faq-pregunta__icono"><i class="ri-add-line"></i></span>
                         </button>
-                        <div class="faq-respuesta">
+                        <div class="faq-respuesta" role="region">
                             <div class="faq-respuesta__contenido">
                                 Aceptamos Nequi, Daviplata, transferencia bancaria, efectivo en tienda y efectivo contraentrega (disponible en ciudades seleccionadas).
                             </div>
@@ -288,7 +279,7 @@
                             ¿Puedo visitar la tienda física?
                             <span class="faq-pregunta__icono"><i class="ri-add-line"></i></span>
                         </button>
-                        <div class="faq-respuesta">
+                        <div class="faq-respuesta" role="region">
                             <div class="faq-respuesta__contenido">
                                 Por supuesto. Estamos en Medellín, Antioquia, de lunes a sábado de 9:00 a.m. a 7:00 p.m. Te esperamos para brindarte una asesoría personalizada y sin compromiso.
                             </div>
@@ -301,52 +292,8 @@
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="contenedor">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>Maye Mundo Belleza</h3>
-                    <p>Tu tienda de belleza de confianza en Medellín. Productos capilares, maquillaje y cuidado de la piel.</p>
-                    <div class="footer-redes">
-                        <a href="https://www.instagram.com/mayemundo_belleza1" target="_blank" aria-label="Instagram">
-                            <i class="ri-instagram-line"></i>
-                        </a>
-                        <a href="https://www.tiktok.com/@mundo.belleza.bello" target="_blank" aria-label="TikTok">
-                            <i class="ri-tiktok-line"></i>
-                        </a>
-                        <a href="https://wa.me/573003091641" target="_blank" aria-label="WhatsApp">
-                            <i class="ri-whatsapp-line"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h3>Navegación</h3>
-                    <a href="index.html">Inicio</a>
-                    <a href="paginas/productos.html">Productos</a>
-                    <a href="paginas/contacto.html">Contacto</a>
-                    <a href="admin.html">Admin</a>
-                </div>
-                <div class="footer-col">
-                    <h3>Contacto</h3>
-                    <p><i class="ri-map-pin-fill footer-col__icono"></i> Medellín, Colombia</p>
-                    <p><i class="ri-phone-fill footer-col__icono"></i> +57 300 309 1641</p>
-                    <p><a href="mailto:mayemundobelleza@gmail.com"><i class="ri-mail-fill footer-col__icono"></i> mayemundobelleza@gmail.com</a></p>
-                    <p><i class="ri-time-fill footer-col__icono"></i> Lun–Sáb: 9am – 7pm</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Maye Mundo Belleza. Todos los derechos reservados.</p>
-                <p>Hecho con <i class="ri-heart-fill footer-bottom__icono"></i> en Medellín</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Botón flotante WhatsApp -->
-    <a href="https://wa.me/573003091641?text=Hola!%20Vi%20tu%20p%C3%A1gina%20web%20y%20quiero%20hacer%20una%20consulta"
-       class="whatsapp-flotante" target="_blank" rel="noopener noreferrer" aria-label="Escríbenos por WhatsApp">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
-    </a>
+    {{> footer }}
+    {{> whatsapp-flotante }}
 
 </body>
 </html>

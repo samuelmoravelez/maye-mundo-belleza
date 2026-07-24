@@ -9,52 +9,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script type="module" src="/js/entries/entry-productos.js"></script>
 </head>
 <body>
 
-    <!-- BARRA DE ANUNCIO -->
-    <div class="barra-anuncio">
-        <p>
-            <i class="ri-truck-line barra-anuncio__icono"></i>
-            Envíos a todo el país — Escríbenos por WhatsApp
-            <i class="ri-whatsapp-line barra-anuncio__icono"></i>
-        </p>
-    </div>
-
-    <!-- CABECERA -->
-    <header class="header-principal">
-        <div class="contenedor header-grid">
-            <div class="logo">
-                <a href="../index.html">
-                    <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" alt="Logo de Maye Mundo Belleza" class="logo-imagen">
-                    <h1>Maye<span>Mundo Belleza</span></h1>
-                </a>
-            </div>
-            <nav class="navegacion" id="menu-principal">
-                <a href="../index.html">Inicio</a>
-                <a href="productos.html" class="activo">Productos</a>
-                <a href="contacto.html">Contacto</a>
-            </nav>
-            <div class="iconos-header">
-                <a href="productos.html" aria-label="Buscar productos"><i class="ri-search-line"></i></a>
-                <a href="#" class="icono-carrito" aria-label="Carrito de compras">
-                    <i class="ri-shopping-bag-3-line"></i>
-                    <span class="contador-carrito">0</span>
-                </a>
-                <button class="btn-menu" id="btn-menu" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
-                    <span></span><span></span><span></span>
-                </button>
-            </div>
-        </div>
-    </header>
+    {{> barra-anuncio }}
+    {{> header }}
 
     <!-- HERO -->
     <section class="productos-hero hero-seccion">
         <div class="contenedor hero-seccion__contenido">
             <span class="hero-seccion__etiqueta">Nuestro Catálogo</span>
-            <h2 class="hero-seccion__titulo">Encuentra tu producto ideal</h2>
+            <h1 class="hero-seccion__titulo">Encuentra tu producto ideal</h1>
             <p class="hero-seccion__descripcion">
                 Productos seleccionados para realzar tu belleza natural.
                 Cuidado capilar, maquillaje, uñas y mucho más.
@@ -136,52 +105,16 @@
                     perfecto para tu tipo de cabello y piel.
                 </p>
             </div>
-            <a href="https://wa.me/573003091641?text=Hola!%20Quiero%20asesor%C3%ADa%20personalizada%20sobre%20productos"
+            <a href="#" data-cta-whatsapp
+               data-wa-mensaje="Hola!%20Quiero%20asesor%C3%ADa%20personalizada%20sobre%20productos"
                class="btn btn-cta-blanco" target="_blank" rel="noopener noreferrer">
                 <i class="ri-whatsapp-line"></i> Recibir asesoría gratis
             </a>
         </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="contenedor">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>Maye Mundo Belleza</h3>
-                    <p>Tu tienda de belleza de confianza en Medellín. Productos capilares, maquillaje y cuidado de la piel.</p>
-                    <div class="footer-redes">
-                        <a href="https://www.instagram.com/mayemundo_belleza1" target="_blank" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
-                        <a href="https://www.tiktok.com/@mundo.belleza.bello" target="_blank" aria-label="TikTok"><i class="ri-tiktok-line"></i></a>
-                        <a href="https://wa.me/573003091641" target="_blank" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h3>Navegación</h3>
-                    <a href="../index.html">Inicio</a>
-                    <a href="productos.html">Productos</a>
-                    <a href="contacto.html">Contacto</a>
-                </div>
-                <div class="footer-col">
-                    <h3>Contacto</h3>
-                    <p><i class="ri-map-pin-fill footer-col__icono"></i> Medellín, Colombia</p>
-                    <p><i class="ri-phone-fill footer-col__icono"></i> +57 300 309 1641</p>
-                    <p><a href="mailto:mayemundobelleza@gmail.com"><i class="ri-mail-fill footer-col__icono"></i> mayemundobelleza@gmail.com</a></p>
-                    <p><i class="ri-time-fill footer-col__icono"></i> Lun–Sáb: 9am – 7pm</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Maye Mundo Belleza. Todos los derechos reservados.</p>
-                <p>Hecho con <i class="ri-heart-fill footer-bottom__icono"></i> en Medellín</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Botón flotante WhatsApp -->
-    <a href="https://wa.me/573003091641?text=Hola!%20Vi%20tu%20p%C3%A1gina%20web%20y%20quiero%20hacer%20una%20consulta"
-       class="whatsapp-flotante" target="_blank" rel="noopener noreferrer" aria-label="Escríbenos por WhatsApp">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
-    </a>
+    {{> footer }}
+    {{> whatsapp-flotante }}
 
 </body>
 </html>

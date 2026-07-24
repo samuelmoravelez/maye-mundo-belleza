@@ -4,6 +4,7 @@
 
 import { obtenerProductos, formatearPrecio, ETIQUETAS } from '../data/productos.data.js';
 import { agregarItem } from '../utils/carrito.js';
+import { waLink } from '../utils/constants.js';
 
 // ── ESTADO ────────────────────────────────────────────────────────────────────
 let productos       = [];
@@ -89,8 +90,20 @@ function renderizar() {
             <div class="catalogo-vacio">
                 <i class="ri-search-line catalogo-vacio__icono"></i>
                 <p class="catalogo-vacio__texto">No encontramos productos con ese criterio.</p>
-                <button class="catalogo-vacio__btn" onclick="location.reload()">Ver todos</button>
+                <button class="catalogo-vacio__btn" id="catalogo-ver-todos">Ver todos</button>
             </div>`;
+        const btnReset = document.getElementById('catalogo-ver-todos');
+        if (btnReset) {
+            btnReset.addEventListener('click', () => {
+                categoriaActiva = 'todos';
+                textoBusqueda  = '';
+                if (inputBusqueda) inputBusqueda.value = '';
+                document.querySelectorAll('[data-categoria]').forEach(e => e.classList.remove('activo'));
+                document.querySelectorAll('[data-categoria="todos"]').forEach(e => e.classList.add('activo'));
+                renderizar();
+                grilla.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
         return;
     }
 
@@ -107,7 +120,7 @@ function renderizar() {
 function tarjetaHTML(p) {
     const agotado  = p.stock === 0 || p.etiqueta === 'agotado';
     const etiqData = p.etiqueta && ETIQUETAS[p.etiqueta];
-    const waURL    = `https://wa.me/573003091641?text=${p.whatsapp || encodeURIComponent(`Hola! Me interesa el producto ${p.nombre}`)}`;
+    const waURL    = waLink(p.whatsapp || encodeURIComponent(`Hola! Me interesa el producto ${p.nombre}`));
 
     const etiqHTML = etiqData
         ? `<span class="etiqueta-producto ${etiqData.clase}">${etiqData.texto}</span>`
@@ -136,20 +149,25 @@ function tarjetaHTML(p) {
                <span><i class="ri-shopping-bag-3-line"></i> Agregar al carrito</span>
            </button>`;
 
+    const detalleURL = `/maye-mundo-belleza/paginas/producto.html?id=${p.id}`;
+
     return `
     <article class="tarjeta-producto${agotado ? ' agotada' : ''}" data-id="${p.id}">
-        <div class="imagen-producto-wrapper">
-            <img src="${p.imagen}"
-                 alt="${p.nombre}"
-                 class="imagen-producto"
-                 loading="lazy"
-                 onerror="this.src='https://placehold.co/400x400/FAF7F2/2A8C64?text=Maye'">
-            ${etiqHTML}
-            ${agotado ? '<div class="overlay-agotado"><span>Agotado</span></div>' : ''}
-        </div>
+        <a href="${detalleURL}" class="tarjeta-producto__enlace" aria-label="Ver detalle de ${p.nombre.replace(/"/g, '&quot;')}">
+            <div class="imagen-producto-wrapper">
+                <img src="${p.imagen}"
+                     alt="${p.nombre}"
+                     class="imagen-producto"
+                     loading="lazy"
+                     width="400" height="400"
+                     onerror="this.src='https://placehold.co/400x400/FAF7F2/2A8C64?text=Maye'">
+                ${etiqHTML}
+                ${agotado ? '<div class="overlay-agotado"><span>Agotado</span></div>' : ''}
+            </div>
+        </a>
         <div class="info-producto">
             <span class="categoria-tag">${categoriaLabel(p.categoria)}</span>
-            <h3 class="nombre-producto">${p.nombre}</h3>
+            <h3 class="nombre-producto"><a href="${detalleURL}">${p.nombre}</a></h3>
             ${precioHTML}
             ${btnHTML}
         </div>

@@ -1,5 +1,5 @@
 // js/pages/admin.js
-// Panel de Administración — CRUD completo con localStorage
+// Panel de Administración — CRUD completo con Storage centralizado.
 // Credenciales demo: usuario: admin / contraseña: maye2025
 
 import {
@@ -10,10 +10,12 @@ import {
     CATEGORIAS,
     ETIQUETAS,
 } from '../data/productos.data.js';
+import Storage from '../utils/storage.js';
+import { STORAGE_KEYS } from '../utils/constants.js';
 
 // ── CREDENCIALES (frontend-only, simuladas) ──────────────────────────────────
 const CREDENCIALES = { usuario: 'admin', password: 'maye2025' };
-const SESSION_KEY  = 'maye_admin_session';
+const SESSION_KEY  = STORAGE_KEYS.ADMIN_SESSION;
 
 // ── ESTADO ────────────────────────────────────────────────────────────────────
 let productos         = [];
@@ -61,7 +63,7 @@ export function iniciarAdmin() {
     }
 
     function cerrarSesion() {
-        sessionStorage.removeItem(SESSION_KEY);
+        Storage.eliminar(SESSION_KEY, { tipo: Storage.TIPOS.session });
         panelAdmin.style.display    = 'none';
         pantallaLogin.style.display = 'flex';
         document.getElementById('admin-usuario').value  = '';
@@ -273,14 +275,14 @@ export function iniciarAdmin() {
     // ── REGISTRO DE EVENTOS ───────────────────────────────────────────────────
 
     // Si ya tiene sesión, ir directo al panel
-    if (sessionStorage.getItem(SESSION_KEY) === 'true') mostrarPanel();
+    if (Storage.obtener(SESSION_KEY, false, { tipo: Storage.TIPOS.session }) === true) mostrarPanel();
 
     formLogin.addEventListener('submit', (e) => {
         e.preventDefault();
         const u = document.getElementById('admin-usuario').value.trim();
         const p = document.getElementById('admin-password').value;
         if (u === CREDENCIALES.usuario && p === CREDENCIALES.password) {
-            sessionStorage.setItem(SESSION_KEY, 'true');
+            Storage.guardar(SESSION_KEY, 'true', { tipo: Storage.TIPOS.session });
             loginError.classList.remove('visible');
             mostrarPanel();
         } else {

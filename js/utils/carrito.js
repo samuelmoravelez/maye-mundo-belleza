@@ -1,11 +1,23 @@
 // js/utils/carrito.js
 // Responsabilidad: toda la lógica del carrito de compras.
-// Persiste en localStorage bajo la clave 'maye_carrito'.
+// Persiste en localStorage bajo la clave STORAGE_KEYS.CARRITO.
 // No depende de ningún componente UI — es pura lógica de datos.
+// TODO acceso a almacenamiento pasa por js/utils/storage.js, dejando
+// el proyecto listo para migrar a backend sin tocar este módulo.
 
 import { formatearPrecio } from '../data/productos.data.js';
+import Storage from './storage.js';
+import { STORAGE_KEYS, waLink } from './constants.js';
 
-const CLAVE = 'maye_carrito';
+const CLAVE = STORAGE_KEYS.CARRITO;
+
+let _waLinkFn = waLink;
+
+/**
+ * Permite sobrescribir el generador de enlaces (para tests o aislar dependencias).
+ * @internal
+ */
+export function _establecerWaLink(fn) { _waLinkFn = fn; }
 
 // ── ESTRUCTURA de cada ítem ────────────────────────────────────────────────
 // { id, nombre, precio, imagen, cantidad }
@@ -13,8 +25,8 @@ const CLAVE = 'maye_carrito';
 // ── LECTURA ────────────────────────────────────────────────────────────────
 export function obtenerItems() {
     try {
-        const raw = localStorage.getItem(CLAVE);
-        return raw ? JSON.parse(raw) : [];
+        const items = Storage.obtener(CLAVE, []);
+        return Array.isArray(items) ? items : [];
     } catch {
         return [];
     }
@@ -22,8 +34,7 @@ export function obtenerItems() {
 
 // ── ESCRITURA ──────────────────────────────────────────────────────────────
 function persistir(items) {
-    localStorage.setItem(CLAVE, JSON.stringify(items));
-    // Emitir evento global para que cualquier componente escuche
+    Storage.guardar(CLAVE, items);
     window.dispatchEvent(new CustomEvent('carrito-actualizado', { detail: { items } }));
 }
 
@@ -73,7 +84,7 @@ export function calcularTotal() {
     return obtenerItems().reduce((acc, i) => acc + i.precio * i.cantidad, 0);
 }
 
-// ── MENSAJE WHATSAPP ───────────────────────────────────────────────────────
+// ── WHATSAPP ───────────────────────────────────────────────────────────────
 export function generarMensajeWhatsApp() {
     const items = obtenerItems();
     if (items.length === 0) return null;
@@ -97,4 +108,10 @@ export function generarMensajeWhatsApp() {
     ].join('\n');
 
     return encodeURIComponent(mensaje);
+}
+
+export function generarEnlaceWhatsApp() {
+    const msg = generarMensajeWhatsApp();
+    if (!msg) return null;
+    return _waLinkFn(msg);
 }

@@ -13,8 +13,7 @@ import {
     generarMensajeWhatsApp,
 } from '../utils/carrito.js';
 import { formatearPrecio } from '../data/productos.data.js';
-
-const WA_NUMERO = '573003091641';
+import { waLink } from '../utils/constants.js';
 
 // ── REFERENCIAS DOM (se resuelven en iniciar) ──────────────────────────────
 let overlay, drawer, cuerpo, badgeHeader, btnCerrar, btnVaciar, btnWhatsApp;
@@ -124,7 +123,7 @@ function adjuntarEventos() {
     btnWhatsApp.addEventListener('click', () => {
         const msg = generarMensajeWhatsApp();
         if (!msg) return;
-        window.open(`https://wa.me/${WA_NUMERO}?text=${msg}`, '_blank', 'noopener,noreferrer');
+        window.open(waLink(msg), '_blank', 'noopener,noreferrer');
     });
 }
 

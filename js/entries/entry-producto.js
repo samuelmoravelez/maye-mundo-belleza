@@ -1,12 +1,12 @@
-// js/entries/entry-productos.js
+// js/entries/entry-producto.js
 import '../../css/variables.css';
 import '../../css/global.css';
 import '../../css/carrito.css';
-import '../../css/productos.css';
+import '../../css/producto.css';
 
 import '../main.js';
-import { iniciarCatalogo } from '../pages/productos.js';
+import { iniciarDetalleProducto } from '../pages/producto.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    iniciarCatalogo();
+    iniciarDetalleProducto();
 });

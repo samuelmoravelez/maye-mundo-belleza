@@ -12,11 +12,19 @@ export function iniciarBotonesCarrito() {
         const btn = tarjeta.querySelector('.btn-comprar-tarjeta');
         if (!btn || btn.disabled) return;
 
-        // Leer datos del producto desde el DOM de la tarjeta
-        const id     = Number(tarjeta.dataset.id) || generarIdDesdeNombre(tarjeta);
-        const nombre = tarjeta.querySelector('.nombre-producto')?.textContent.trim() ?? 'Producto';
-        const imagen = tarjeta.querySelector('.imagen-producto')?.src ?? '';
-        const precio = parsearPrecio(tarjeta.querySelector('.precio-producto')?.textContent ?? '0');
+        // Leer datos del producto: priorizar atributos data-destacado del botón
+        // (usados en home) y hacer fallback a la data del article
+        const id     = Number(btn.dataset.destacadoId)
+                    || Number(tarjeta.dataset.id)
+                    || generarIdDesdeNombre(tarjeta);
+        const nombre = btn.dataset.destacadoNombre
+                    || tarjeta.querySelector('.nombre-producto')?.textContent.trim()
+                    || 'Producto';
+        const imagen = btn.dataset.destacadoImagen
+                    || tarjeta.querySelector('.imagen-producto')?.src
+                    || '';
+        const precio = Number(btn.dataset.destacadoPrecio)
+                    || parsearPrecio(tarjeta.querySelector('.precio-producto')?.textContent ?? '0');
 
         btn.addEventListener('click', (e) => {
             e.preventDefault();
