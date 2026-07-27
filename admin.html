@@ -29,9 +29,9 @@
 
             <form id="form-login" novalidate>
                 <div class="admin-login__grupo">
-                    <label for="admin-usuario">Usuario</label>
-                    <input type="text" id="admin-usuario" class="admin-login__input"
-                           placeholder="admin" autocomplete="username">
+                    <label for="admin-usuario">Correo electrónico</label>
+                    <input type="email" id="admin-usuario" class="admin-login__input"
+                           placeholder="admin@mayebelleza.com" autocomplete="email">
                 </div>
                 <div class="admin-login__grupo">
                     <label for="admin-password">Contraseña</label>
@@ -39,7 +39,7 @@
                            placeholder="••••••••" autocomplete="current-password">
                     <p class="admin-login__error" id="login-error">
                         <i class="ri-error-warning-line"></i>
-                        <span>Credenciales incorrectas</span>
+                        <span>Credenciales incorrectas o sin permisos de administrador</span>
                     </p>
                 </div>
                 <button type="submit" class="admin-login__btn">
@@ -87,7 +87,7 @@
             <div class="admin-topbar">
                 <span class="admin-topbar__titulo" id="topbar-titulo">Gestión de Productos</span>
                 <div class="admin-topbar__acciones">
-                    <a href="/index.html" target="_blank" style="display:flex;align-items:center;gap:6px;color:#64748b;font-size:0.82rem;font-family:var(--fuente-titulos);">
+                    <a href="/maye-mundo-belleza/index.html" target="_blank" style="display:flex;align-items:center;gap:6px;color:#64748b;font-size:0.82rem;font-family:var(--fuente-titulos);">
                         <i class="ri-external-link-line"></i> Ver tienda
                     </a>
                 </div>

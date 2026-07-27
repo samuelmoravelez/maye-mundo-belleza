@@ -10,9 +10,12 @@ export const WHATSAPP_DEFAULT_MESSAGE = encodeURIComponent(
 );
 
 export const STORAGE_KEYS = Object.freeze({
-    PRODUCTOS: 'maye_productos',
-    CARRITO:   'maye_carrito',
+    PRODUCTOS:     'maye_productos',
+    CARRITO:       'maye_carrito',
     ADMIN_SESSION: 'maye_admin_session',
+    // ── Auth (módulo unificado) ──────────────────────────
+    USERS:         'maye_users',
+    SESSION:       'maye_session',
 });
 
 export const SCHEMA_VERSION = 1;

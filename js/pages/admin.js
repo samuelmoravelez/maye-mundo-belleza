@@ -1,6 +1,6 @@
 // js/pages/admin.js
 // Panel de Administración — CRUD completo con Storage centralizado.
-// Credenciales demo: usuario: admin / contraseña: maye2025
+// La autenticación ahora la gestiona authService.js (módulo unificado).
 
 import {
     obtenerProductos,
@@ -11,11 +11,8 @@ import {
     ETIQUETAS,
 } from '../data/productos.data.js';
 import Storage from '../utils/storage.js';
-import { STORAGE_KEYS } from '../utils/constants.js';
-
-// ── CREDENCIALES (frontend-only, simuladas) ──────────────────────────────────
-const CREDENCIALES = { usuario: 'admin', password: 'maye2025' };
-const SESSION_KEY  = STORAGE_KEYS.ADMIN_SESSION;
+import { STORAGE_KEYS, RUTAS } from '../utils/constants.js';
+import { login, logout, isAdmin, AUTH_ERRORS } from '../utils/authService.js';
 
 // ── ESTADO ────────────────────────────────────────────────────────────────────
 let productos         = [];
@@ -63,11 +60,9 @@ export function iniciarAdmin() {
     }
 
     function cerrarSesion() {
-        Storage.eliminar(SESSION_KEY, { tipo: Storage.TIPOS.session });
-        panelAdmin.style.display    = 'none';
-        pantallaLogin.style.display = 'flex';
-        document.getElementById('admin-usuario').value  = '';
-        document.getElementById('admin-password').value = '';
+        logout().then(() => {
+            window.location.replace(RUTAS.HOME);
+        });
     }
 
     function cargarProductos() {
@@ -274,21 +269,28 @@ export function iniciarAdmin() {
 
     // ── REGISTRO DE EVENTOS ───────────────────────────────────────────────────
 
-    // Si ya tiene sesión, ir directo al panel
-    if (Storage.obtener(SESSION_KEY, false, { tipo: Storage.TIPOS.session }) === true) mostrarPanel();
+    // Si ya tiene sesión de admin activa, ir directo al panel
+    if (isAdmin()) {
+        mostrarPanel();
+    }
 
-    formLogin.addEventListener('submit', (e) => {
+    formLogin.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const u = document.getElementById('admin-usuario').value.trim();
-        const p = document.getElementById('admin-password').value;
-        if (u === CREDENCIALES.usuario && p === CREDENCIALES.password) {
-            Storage.guardar(SESSION_KEY, 'true', { tipo: Storage.TIPOS.session });
+        const emailInput = document.getElementById('admin-usuario');
+        const passInput  = document.getElementById('admin-password');
+        const email    = emailInput.value.trim();
+        const password = passInput.value;
+
+        const resultado = await login({ email, password });
+
+        if (resultado.ok && resultado.user?.role === 'admin') {
             loginError.classList.remove('visible');
             mostrarPanel();
         } else {
+            // Credenciales inválidas o no es admin
             loginError.classList.add('visible');
-            document.getElementById('admin-password').value = '';
-            document.getElementById('admin-password').focus();
+            passInput.value = '';
+            passInput.focus();
         }
     });
 

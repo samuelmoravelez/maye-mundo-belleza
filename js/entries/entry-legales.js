@@ -3,11 +3,16 @@ import '../../css/variables.css';
 import '../../css/global.css';
 import '../../css/carrito.css';
 import '../../css/legales.css';
+import '../../css/auth.css';
 
 import '../main.js';
+import { iniciarAuthModal } from '../components/authModal.js';
+import { inicializarAdmin } from '../utils/authService.js';
 
-// Nada de lógica extra por ahora. El sidebar sticky funciona solo con CSS.
 document.addEventListener('DOMContentLoaded', () => {
+    inicializarAdmin();
+    iniciarAuthModal();
+
     // Resaltar link del sidebar al scrollear (IntersectionObserver básico)
     const secciones = document.querySelectorAll('.legal-seccion');
     const links     = document.querySelectorAll('[data-legal-link]');
@@ -25,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     secciones.forEach(s => observer.observe(s));
 
-    // Smooth-scroll nativo del navegador al hacer click en links del sidebar
     links.forEach(link => {
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
