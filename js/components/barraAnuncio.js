@@ -5,7 +5,7 @@
 
 import { BARRA_ANUNCIOS } from '../utils/constants.js';
 
-const ROTACION_MS = 6500; // 6.5s por mensaje
+const ROTACION_MS = 3500; // 3.5s por mensaje
 const DURACION_FMS = 450; // duración fade
 
 export function iniciarBarraAnuncio() {

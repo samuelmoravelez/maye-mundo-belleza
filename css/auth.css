@@ -5,24 +5,37 @@
 
 /* ── 1. OVERLAY ─────────────────────────────────────────────────────────────── */
 .auth-overlay {
+    /* Fijo sobre TODO el viewport, incluido header sticky y menú móvil */
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 18, 0.55);
+    background: rgba(15, 23, 18, 0.6);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    z-index: var(--z-modal);
+
+    /*
+     * z-index explícito con valor entero alto para romper cualquier stacking
+     * context creado por el header (position:sticky) o el carrito drawer.
+     * No usamos la variable --z-modal para evitar herencia rota en algunos
+     * navegadores móviles que no resuelven custom properties en z-index.
+     */
+    z-index: 9000;
+
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
+
+    /* Estado inicial: invisible pero en el DOM (evita reflow al abrir) */
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .auth-overlay.auth-overlay--visible {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 /* ── 2. CARD MODAL ──────────────────────────────────────────────────────────── */
@@ -32,14 +45,28 @@
     width: 100%;
     max-width: 460px;
     box-shadow: 0 32px 64px rgba(0, 0, 0, 0.18), 0 8px 16px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
+    /*
+     * overflow:hidden en el contenedor padre recortaba .auth-modal__cuerpo
+     * antes de que el scroll interno pudiera activarse en iOS Safari.
+     * Movemos overflow al cuerpo interno y dejamos visible aquí.
+     */
+    overflow: visible;
     position: relative;
     transform: translateY(24px) scale(0.97);
     transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.3s ease;
     opacity: 0;
+    /*
+     * max-height con fallback para navegadores que no soporten dvh.
+     * dvh ("dynamic viewport height") excluye la barra de dirección móvil,
+     * evitando que el modal quede cortado en Chrome/Safari para Android/iOS.
+     */
     max-height: 92vh;
+    max-height: 92dvh;
     display: flex;
     flex-direction: column;
+    /* Aplicamos el clip al propio modal, no al overlay */
+    border-radius: var(--radio-2xl);
+    clip-path: none; /* Reset por si algún ancestro lo forzaba */
 }
 
 .auth-overlay--visible .auth-modal {
@@ -153,11 +180,19 @@
 /* ── 4. CUERPO CON SCROLL ───────────────────────────────────────────────────── */
 .auth-modal__cuerpo {
     padding: 32px 32px 28px;
+    /*
+     * El scroll va aquí, NO en .auth-modal, para que border-radius
+     * del contenedor no recorte el contenido en iOS.
+     */
     overflow-y: auto;
+    overflow-x: hidden;
     flex: 1;
-    /* scroll suave */
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    /* Clip interno para mantener bordes redondeados en el scroll */
+    border-radius: 0 0 var(--radio-2xl) var(--radio-2xl);
+    /* Previene que el contenido desborde el borde inferior redondeado */
+    overscroll-behavior: contain;
 }
 
 /* ── 5. PANELES LOGIN / REGISTRO ────────────────────────────────────────────── */
@@ -661,37 +696,99 @@
 .auth-fortaleza--fuerte .auth-fortaleza__texto { color: var(--verde-principal); }
 
 /* ── 15. RESPONSIVE ─────────────────────────────────────────────────────────── */
-@media (max-width: 520px) {
-    .auth-modal {
-        max-width: 100%;
-        border-radius: var(--radio-xl) var(--radio-xl) 0 0;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        max-height: 92vh;
-    }
 
+/*
+ * BOTTOM-SHEET en móvil (≤ 520px)
+ * ─────────────────────────────────
+ * El modal se convierte en una hoja que sube desde abajo.
+ * Animación: translateY(100%) → translateY(0).
+ *
+ * PROBLEMA ANTERIOR: el overlay usaba align-items:flex-end solo en móvil,
+ * lo que chocaba con el estado de transición del modal (translateY(24px)
+ * definido en desktop) y producía un flash invisible antes de posicionarse.
+ *
+ * SOLUCIÓN: separar completamente el estado de entrada móvil del de desktop
+ * usando un transform inicial diferente y sobre-escribir todas las
+ * propiedades conflictivas en este breakpoint.
+ */
+@media (max-width: 520px) {
+
+    /* El overlay pasa a alinear desde abajo */
     .auth-overlay {
         align-items: flex-end;
         padding: 0;
+        /* Aislamiento de stacking context explícito */
+        isolation: isolate;
     }
 
-    .auth-overlay--visible .auth-modal {
-        transform: translateY(0) scale(1);
-    }
-
+    /* Estado CERRADO en móvil: el modal está fuera de pantalla abajo */
     .auth-overlay .auth-modal {
+        max-width: 100%;
+        width: 100%;
+        border-radius: var(--radio-xl) var(--radio-xl) 0 0;
+        /* Clip interno: ahora solo en la parte superior */
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        /* Animación de entrada: sube desde abajo (override del desktop) */
         transform: translateY(100%);
+        opacity: 1; /* visible desde el inicio, la posición lo oculta */
+        max-height: 92vh;
+        max-height: 92dvh;
+        /* Safe area para notch en iPhone */
+        padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    .auth-modal__cuerpo { padding: 24px 20px 32px; }
-    .auth-modal__header { padding: 20px 20px 0; }
-    .auth-campos-fila   { grid-template-columns: 1fr; }
+    /* Estado ABIERTO en móvil */
+    .auth-overlay--visible .auth-modal {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    /* Ajuste de padding interno */
+    .auth-modal__cuerpo {
+        padding: 24px 20px 32px;
+        border-radius: 0; /* sin bordes inferiores en bottom-sheet */
+    }
+    .auth-modal__header {
+        padding: 20px 20px 0;
+    }
+
+    /* Campos en columna única */
+    .auth-campos-fila {
+        grid-template-columns: 1fr;
+    }
+
+    /* Indicador visual de "arrastra para cerrar" */
+    .auth-modal__header::before {
+        content: '';
+        display: block;
+        width: 36px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 2px;
+        margin: 0 auto 14px;
+    }
 }
 
+/* Dropdown de usuario: ajuste de posición en pantallas estrechas */
 @media (max-width: 768px) {
     .auth-user-dropdown {
-        right: -20px;
+        right: -8px;
+        min-width: 180px;
+    }
+}
+
+/* En pantallas muy pequeñas el dropdown ocupa todo el ancho disponible */
+@media (max-width: 360px) {
+    .auth-user-dropdown {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 220px;
+    }
+    .auth-header-usuario:focus-within .auth-user-dropdown,
+    .auth-header-usuario:hover .auth-user-dropdown,
+    .auth-user-dropdown--abierto {
+        transform: translateX(-50%) translateY(0);
     }
 }

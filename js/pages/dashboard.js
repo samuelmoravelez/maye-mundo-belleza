@@ -11,7 +11,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
-    getSession, logout, AUTH_KEYS, ROLES,
+    getSession, logout, AUTH_KEYS, ROLES, STATUS, ADMIN_PRINCIPAL_ID,
+    actualizarUsuarioPorAdmin, toggleUserStatus, deleteUserById,
 } from '../utils/authService.js';
 import Storage from '../utils/storage.js';
 import { STORAGE_KEYS, RUTAS, waLink } from '../utils/constants.js';
@@ -92,9 +93,47 @@ function activarVista(viewId) {
     viewActual = viewId;
 }
 
-// ── Sidebar toggle (responsive) ────────────────────────────────────────────
+// ── Sidebar toggle + backdrop (responsive) ────────────────────────────────
+let _backdrop = null;
+
+function _crearBackdrop() {
+    if (_backdrop) return _backdrop;
+    _backdrop = document.createElement('div');
+    _backdrop.className = 'db-sidebar-backdrop';
+    _backdrop.id        = 'db-sidebar-backdrop';
+    _backdrop.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(_backdrop);
+    // Cerrar sidebar al tocar el backdrop
+    _backdrop.addEventListener('click', () => cerrarSidebarMovil());
+    return _backdrop;
+}
+
+function abrirSidebarMovil() {
+    const sidebar = document.getElementById('db-sidebar');
+    if (!sidebar) return;
+    sidebar.classList.add('db-sidebar--abierto');
+    document.getElementById('db-menu-btn')?.setAttribute('aria-expanded', 'true');
+    const bd = _crearBackdrop();
+    // Pequeño delay para que la transición CSS sea visible
+    requestAnimationFrame(() => bd.classList.add('db-sidebar-backdrop--visible'));
+}
+
+function cerrarSidebarMovil() {
+    const sidebar = document.getElementById('db-sidebar');
+    if (!sidebar) return;
+    sidebar.classList.remove('db-sidebar--abierto');
+    document.getElementById('db-menu-btn')?.setAttribute('aria-expanded', 'false');
+    _backdrop?.classList.remove('db-sidebar-backdrop--visible');
+}
+
 function toggleSidebar() {
-    document.getElementById('db-sidebar')?.classList.toggle('db-sidebar--abierto');
+    const sidebar = document.getElementById('db-sidebar');
+    if (!sidebar) return;
+    if (sidebar.classList.contains('db-sidebar--abierto')) {
+        cerrarSidebarMovil();
+    } else {
+        abrirSidebarMovil();
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -553,27 +592,69 @@ function renderAdminPedidos() {
 // PANEL ADMIN — Usuarios
 // ─────────────────────────────────────────────────────────────────────────────
 function renderAdminUsuarios() {
-    const users  = getUsers().filter(u => u.role === ROLES.CLIENT);
-    const orders = getOrders();
-    const tbody  = document.getElementById('db-users-tbody');
+    const allUsers = getUsers();
+    const orders   = getOrders();
+    const tbody    = document.getElementById('db-users-tbody');
     if (!tbody) return;
 
-    if (users.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6"><div class="db-empty"><i class="ri-user-3-line"></i><p>No hay clientes registrados</p></div></td></tr>`;
+    if (allUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="db-empty">
+            <i class="ri-user-3-line"></i><p>No hay usuarios registrados</p>
+        </div></td></tr>`;
         return;
     }
 
-    tbody.innerHTML = users.map(u => {
-        const userOrders = orders.filter(o => o.userId === u.id);
-        const total      = userOrders.reduce((s,o) => s + (o.total??0), 0);
-        const ini        = iniciales(u.name);
+    tbody.innerHTML = allUsers.map(u => {
+        const userOrders     = orders.filter(o => o.userId === u.id);
+        const totalCompras   = userOrders.reduce((s, o) => s + (o.total ?? 0), 0);
+        const ini            = iniciales(u.name);
+        const esSesionActiva = u.id === session.id;
+        const esProtegido    = u.id === ADMIN_PRINCIPAL_ID;
+
+        // ── Status badge (retrocompatible: sin status → active) ────────────
+        const statusActual = u.status ?? STATUS.ACTIVE;
+        const esActivo     = statusActual === STATUS.ACTIVE;
+        const statusBadge  = esActivo
+            ? `<span class="db-badge db-badge--verde"><i class="ri-checkbox-circle-line"></i> Activo</span>`
+            : `<span class="db-badge db-badge--rojo"><i class="ri-forbid-line"></i> Inactivo</span>`;
+
+        // ── Rol badge ──────────────────────────────────────────────────────
+        const rolBadge = u.role === ROLES.ADMIN
+            ? `<span class="db-badge db-badge--lila"><i class="ri-shield-star-line"></i> Admin</span>`
+            : `<span class="db-badge db-badge--gris">Cliente</span>`;
+
+        // ── Botones de acción con protecciones visuales ────────────────────
+        // Toggle estado: desactivado para el propio admin o cuenta protegida
+        const puedeToggle  = !esSesionActiva && !esProtegido;
+        const toggleTitle  = esSesionActiva  ? 'No puedes inactivar tu propia sesión'
+                           : esProtegido     ? 'Cuenta de administrador principal protegida'
+                           : esActivo        ? 'Inactivar usuario'
+                           : 'Activar usuario';
+        const toggleIcon   = esActivo ? 'ri-toggle-fill' : 'ri-toggle-line';
+        const toggleColor  = esActivo ? 'color:#f97316' : 'color:var(--verde-principal)';
+
+        // Eliminar: desactivado para sesión activa y cuenta protegida
+        const puedeEliminar = !esSesionActiva && !esProtegido;
+        const elimTitle     = esSesionActiva ? 'No puedes eliminar tu propia cuenta'
+                            : esProtegido    ? 'La cuenta principal no puede eliminarse'
+                            : 'Eliminar usuario';
+
         return `
-        <tr>
+        <tr style="${!esActivo ? 'opacity:0.65' : ''}">
             <td>
                 <div style="display:flex;align-items:center;gap:10px">
-                    <div class="db-sidebar__avatar" style="width:34px;height:34px;font-size:0.75rem;flex-shrink:0">${ini}</div>
+                    <div class="db-sidebar__avatar"
+                         style="width:34px;height:34px;font-size:0.75rem;flex-shrink:0;
+                                ${u.role === ROLES.ADMIN ? 'background:linear-gradient(135deg,var(--lila-oscuro),var(--lila-acento))' : ''}
+                                ${!esActivo ? 'filter:grayscale(0.8)' : ''}">
+                        ${ini}
+                    </div>
                     <div>
-                        <div class="db-table__bold">${u.name}</div>
+                        <div class="db-table__bold">
+                            ${u.name}
+                            ${esSesionActiva ? `<span style="font-size:0.65rem;background:rgba(42,140,100,0.1);color:var(--verde-principal);padding:1px 6px;border-radius:10px;margin-left:4px;font-family:var(--fuente-titulos);font-weight:700">Tú</span>` : ''}
+                            ${esProtegido    ? `<span style="font-size:0.65rem;background:rgba(184,160,228,0.15);color:var(--lila-oscuro);padding:1px 6px;border-radius:10px;margin-left:4px;font-family:var(--fuente-titulos);font-weight:700"><i class="ri-shield-line"></i></span>` : ''}
+                        </div>
                         <div class="db-table__muted">${u.email}</div>
                     </div>
                 </div>
@@ -581,10 +662,49 @@ function renderAdminUsuarios() {
             <td class="db-table__muted">${u.phone || '—'}</td>
             <td>${fmtFecha(u.createdAt)}</td>
             <td>${userOrders.length}</td>
-            <td class="db-table__price">${formatearPrecio(total)}</td>
-            <td><span class="db-badge db-badge--verde">Activo</span></td>
+            <td class="db-table__price">${formatearPrecio(totalCompras)}</td>
+            <td>${rolBadge}</td>
+            <td>${statusBadge}</td>
+            <td>
+                <div class="db-table__actions">
+                    <!-- Editar -->
+                    <button class="db-btn db-btn--sm db-btn--icon"
+                            data-usr-edit="${u.id}"
+                            title="Editar datos"
+                            aria-label="Editar ${u.name}">
+                        <i class="ri-pencil-line"></i>
+                    </button>
+                    <!-- Toggle estado -->
+                    <button class="db-btn db-btn--sm db-btn--icon"
+                            data-usr-toggle="${u.id}"
+                            title="${toggleTitle}"
+                            aria-label="${toggleTitle}"
+                            ${puedeToggle ? '' : 'disabled style="opacity:0.35;cursor:not-allowed"'}>
+                        <i class="${toggleIcon}" style="${toggleColor}"></i>
+                    </button>
+                    <!-- Eliminar -->
+                    <button class="db-btn db-btn--sm db-btn--icon db-btn--danger"
+                            data-usr-del="${u.id}"
+                            title="${elimTitle}"
+                            aria-label="${elimTitle}"
+                            ${puedeEliminar ? '' : 'disabled style="opacity:0.35;cursor:not-allowed"'}>
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </td>
         </tr>`;
     }).join('');
+
+    // Vincular eventos de la tabla
+    tbody.querySelectorAll('[data-usr-edit]').forEach(btn => {
+        btn.addEventListener('click', () => abrirModalEditarUsuario(btn.dataset.usrEdit));
+    });
+    tbody.querySelectorAll('[data-usr-toggle]:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', () => pedirConfirmToggleUsuario(btn.dataset.usrToggle));
+    });
+    tbody.querySelectorAll('[data-usr-del]:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', () => pedirConfirmEliminarUsuario(btn.dataset.usrDel));
+    });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -594,6 +714,260 @@ async function handleLogout() {
     await logout();
     window.location.replace(RUTAS.HOME);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PANEL ADMIN — Modal Editar Usuario
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Mensajes de error legibles para el modal de usuario
+const USR_ERROR_MSG = {
+    FORBIDDEN:      'No tienes permisos para realizar esta acción.',
+    USER_NOT_FOUND: 'Usuario no encontrado.',
+    EMAIL_IN_USE:   'Este correo ya está registrado por otro usuario.',
+    INVALID_EMAIL:  'Ingresa un correo electrónico válido.',
+    EMPTY_FIELDS:   'El nombre y el correo son obligatorios.',
+    LAST_ADMIN:     'No puedes quitarte el rol de administrador si eres el único admin del sistema.',
+    WEAK_PASSWORD:  'La nueva contraseña debe tener al menos 6 caracteres.',
+};
+
+function _modalEditarUsuario(abrir) {
+    const el = document.getElementById('db-modal-usuario');
+    if (!el) return;
+    el.classList.toggle('db-modal-overlay--visible', abrir);
+
+    if (!abrir) {
+        // Limpiar alerta y hints al cerrar
+        _usrOcultarAlerta();
+        document.getElementById('db-usr-pass-hint').textContent = '';
+        document.getElementById('db-usr-password').type = 'password';
+        document.getElementById('db-usr-toggle-pass')
+            .querySelector('i').className = 'ri-eye-line';
+    }
+}
+
+function _usrMostrarAlerta(msg) {
+    const el   = document.getElementById('db-usr-alerta');
+    const span = document.getElementById('db-usr-alerta-texto');
+    if (!el || !span) return;
+    span.textContent = msg;
+    el.style.display = 'flex';
+}
+
+function _usrOcultarAlerta() {
+    const el = document.getElementById('db-usr-alerta');
+    if (el) el.style.display = 'none';
+}
+
+function abrirModalEditarUsuario(userId) {
+    const users = getUsers();
+    const u     = users.find(x => x.id === userId);
+    if (!u) { toast('Usuario no encontrado', 'error'); return; }
+
+    // Rellenar campos con los datos actuales
+    document.getElementById('db-usr-form')?.reset();
+    _usrOcultarAlerta();
+
+    document.getElementById('db-usr-id').value       = u.id;
+    document.getElementById('db-usr-nombre').value   = u.name;
+    document.getElementById('db-usr-email').value    = u.email;
+    document.getElementById('db-usr-telefono').value = u.phone ?? '';
+    document.getElementById('db-usr-rol').value      = u.role;
+    document.getElementById('db-usr-password').value = '';
+    document.getElementById('db-usr-pass-hint').textContent = '';
+
+    // Si es el único admin, bloquear el selector de rol para evitar
+    // que se quite accidentalmente el rol admin
+    const rolSelect    = document.getElementById('db-usr-rol');
+    const totalAdmins  = users.filter(x => x.role === ROLES.ADMIN).length;
+    const esUnicoAdmin = u.role === ROLES.ADMIN && totalAdmins === 1;
+    rolSelect.disabled = esUnicoAdmin;
+    rolSelect.title    = esUnicoAdmin
+        ? 'No puedes cambiar el rol: eres el único administrador'
+        : '';
+
+    _modalEditarUsuario(true);
+    setTimeout(() => document.getElementById('db-usr-nombre')?.focus(), 200);
+}
+
+function guardarUsuarioAdmin(e) {
+    e.preventDefault();
+    _usrOcultarAlerta();
+
+    const userId       = document.getElementById('db-usr-id').value;
+    const name         = document.getElementById('db-usr-nombre').value.trim();
+    const email        = document.getElementById('db-usr-email').value.trim();
+    const phone        = document.getElementById('db-usr-telefono').value.trim();
+    const role         = document.getElementById('db-usr-rol').value;
+    const nuevaPassword= document.getElementById('db-usr-password').value;
+
+    // Validación rápida en cliente antes de llamar al servicio
+    if (!name) {
+        _usrMostrarAlerta('El nombre completo es obligatorio.');
+        document.getElementById('db-usr-nombre').focus();
+        return;
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        _usrMostrarAlerta('Ingresa un correo electrónico válido.');
+        document.getElementById('db-usr-email').focus();
+        return;
+    }
+    if (nuevaPassword && nuevaPassword.length < 6) {
+        _usrMostrarAlerta('La nueva contraseña debe tener al menos 6 caracteres.');
+        document.getElementById('db-usr-password').focus();
+        return;
+    }
+
+    // Deshabilitar botón mientras se procesa
+    const btnGuardar = document.getElementById('db-usr-modal-guardar');
+    if (btnGuardar) btnGuardar.disabled = true;
+
+    const resultado = actualizarUsuarioPorAdmin(userId, {
+        name, email, phone, role,
+        nuevaPassword: nuevaPassword || undefined,
+    });
+
+    if (btnGuardar) btnGuardar.disabled = false;
+
+    if (!resultado.ok) {
+        const msg = USR_ERROR_MSG[resultado.error] ?? 'Error inesperado. Intenta de nuevo.';
+        _usrMostrarAlerta(msg);
+        return;
+    }
+
+    // Éxito: actualizar referencias en memoria y re-renderizar tabla
+    _modalEditarUsuario(false);
+    renderAdminUsuarios();
+
+    // Si el usuario editado era el admin activo, actualizar sidebar
+    if (resultado.user.id === session.id) {
+        session = { ...session, name: resultado.user.name, email: resultado.user.email };
+        renderSidebarUser();
+    }
+
+    toast(`Usuario "${resultado.user.name}" actualizado correctamente`);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PANEL ADMIN — Confirmar acciones sobre usuario (toggle + eliminar)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Estado interno del confirm de usuario
+let _usrConfirmTarget  = null; // userId
+let _usrConfirmAccion  = null; // 'toggle' | 'delete'
+
+/**
+ * Abre el modal de confirmación adaptando su contenido según la acción.
+ * @param {'toggle'|'delete'} accion
+ * @param {string} userId
+ */
+function _abrirConfirmUsuario(accion, userId) {
+    const users      = getUsers();
+    const u          = users.find(x => x.id === userId);
+    if (!u) return;
+
+    const userOrders  = getOrders().filter(o => o.userId === userId);
+    const tieneOrders = userOrders.length > 0;
+    const esActivo    = (u.status ?? STATUS.ACTIVE) === STATUS.ACTIVE;
+
+    _usrConfirmTarget = userId;
+    _usrConfirmAccion = accion;
+
+    // Adaptar contenido del modal según la acción
+    const iconEl  = document.getElementById('db-cusr-icono');
+    const titleEl = document.getElementById('db-cusr-titulo');
+    const textEl  = document.getElementById('db-cusr-texto');
+    const warnEl  = document.getElementById('db-cusr-advertencia');
+    const warnTxt = document.getElementById('db-cusr-advertencia-texto');
+    const btnSi   = document.getElementById('db-cusr-si');
+    const btnIcon = document.getElementById('db-cusr-si-icon');
+    const btnLbl  = document.getElementById('db-cusr-si-label');
+
+    if (accion === 'toggle') {
+        iconEl.innerHTML  = esActivo
+            ? `<i class="ri-user-forbid-line" style="color:#f97316"></i>`
+            : `<i class="ri-user-follow-line" style="color:var(--verde-principal)"></i>`;
+        titleEl.textContent = esActivo ? 'Inactivar usuario' : 'Activar usuario';
+        textEl.textContent  = esActivo
+            ? `¿Inactivar la cuenta de "${u.name}"? No podrá iniciar sesión hasta que sea reactivada.`
+            : `¿Reactivar la cuenta de "${u.name}"? Podrá volver a iniciar sesión.`;
+        btnSi.style.background   = esActivo ? '#f97316' : 'var(--verde-principal)';
+        btnSi.style.borderColor  = esActivo ? '#f97316' : 'var(--verde-principal)';
+        btnIcon.className        = esActivo ? 'ri-forbid-line' : 'ri-checkbox-circle-line';
+        btnLbl.textContent       = esActivo ? 'Sí, inactivar' : 'Sí, activar';
+        warnEl.style.display     = 'none';
+
+    } else { // delete
+        iconEl.innerHTML  = `<i class="ri-delete-bin-5-line" style="color:#ef4444"></i>`;
+        titleEl.textContent = 'Eliminar usuario';
+        textEl.textContent  = `¿Eliminar permanentemente la cuenta de "${u.name}"? Esta acción no se puede deshacer.`;
+        btnSi.style.background  = '#ef4444';
+        btnSi.style.borderColor = '#ef4444';
+        btnIcon.className       = 'ri-delete-bin-line';
+        btnLbl.textContent      = 'Sí, eliminar';
+
+        // Advertencia si tiene historial de pedidos
+        if (tieneOrders) {
+            warnEl.style.display  = 'flex';
+            warnTxt.textContent   =
+                `Este usuario tiene ${userOrders.length} pedido(s) en el historial. ` +
+                `Se recomienda Inactivar en lugar de eliminar para conservar el registro de ventas.`;
+        } else {
+            warnEl.style.display = 'none';
+        }
+    }
+
+    // Abrir modal
+    document.getElementById('db-confirm-usuario')
+        ?.classList.add('db-confirm-overlay--visible');
+}
+
+function _cerrarConfirmUsuario() {
+    _usrConfirmTarget = null;
+    _usrConfirmAccion = null;
+    document.getElementById('db-confirm-usuario')
+        ?.classList.remove('db-confirm-overlay--visible');
+}
+
+function _ejecutarConfirmUsuario() {
+    if (!_usrConfirmTarget || !_usrConfirmAccion) return;
+
+    if (_usrConfirmAccion === 'toggle') {
+        const res = toggleUserStatus(_usrConfirmTarget);
+        if (!res.ok) {
+            const msgs = {
+                SELF_ACTION:       'No puedes cambiar el estado de tu propia sesión.',
+                PROTECTED_ACCOUNT: 'Esta cuenta está protegida y no puede ser modificada.',
+                USER_NOT_FOUND:    'Usuario no encontrado.',
+                FORBIDDEN:         'No tienes permisos para esta acción.',
+            };
+            toast(msgs[res.error] ?? 'Error inesperado.', 'error');
+        } else {
+            const estado = res.newStatus === STATUS.ACTIVE ? 'activado' : 'inactivado';
+            toast(`Usuario "${res.user.name}" ${estado} correctamente`);
+            renderAdminUsuarios();
+        }
+    } else {
+        const res = deleteUserById(_usrConfirmTarget);
+        if (!res.ok) {
+            const msgs = {
+                SELF_ACTION:       'No puedes eliminar tu propia cuenta.',
+                PROTECTED_ACCOUNT: 'La cuenta de administrador principal no puede eliminarse.',
+                USER_NOT_FOUND:    'Usuario no encontrado.',
+                FORBIDDEN:         'No tienes permisos para esta acción.',
+            };
+            toast(msgs[res.error] ?? 'Error inesperado.', 'error');
+        } else {
+            toast('Usuario eliminado permanentemente');
+            renderAdminUsuarios();
+        }
+    }
+
+    _cerrarConfirmUsuario();
+}
+
+// Alias semánticos llamados desde los botones de la tabla
+function pedirConfirmToggleUsuario(userId)  { _abrirConfirmUsuario('toggle', userId); }
+function pedirConfirmEliminarUsuario(userId) { _abrirConfirmUsuario('delete', userId); }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INICIALIZACIÓN PRINCIPAL — punto de entrada
@@ -682,9 +1056,8 @@ export function iniciarDashboard() {
             };
             renders[view]?.();
 
-            if (window.innerWidth < 900) {
-                document.getElementById('db-sidebar')?.classList.remove('db-sidebar--abierto');
-            }
+            // Cerrar sidebar en móvil al seleccionar una vista
+            if (window.innerWidth < 900) cerrarSidebarMovil();
         });
     });
 
@@ -696,13 +1069,12 @@ export function iniciarDashboard() {
     // ── 7. Botón de menú móvil ────────────────────────────────────────────
     document.getElementById('db-menu-btn')?.addEventListener('click', toggleSidebar);
 
-    document.addEventListener('click', (e) => {
-        const sidebar = document.getElementById('db-sidebar');
-        const menuBtn = document.getElementById('db-menu-btn');
-        if (window.innerWidth < 900 && sidebar?.classList.contains('db-sidebar--abierto')) {
-            if (!sidebar.contains(e.target) && !menuBtn?.contains(e.target)) {
-                sidebar.classList.remove('db-sidebar--abierto');
-            }
+    // ── 14. Escape global ─────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            _modalProducto(false);
+            cerrarConfirm();
+            cerrarSidebarMovil();
         }
     });
 
@@ -746,12 +1118,71 @@ export function iniciarDashboard() {
         if (e.target === document.getElementById('db-confirm')) cerrarConfirm();
     });
 
+    // ── 16. Modal editar usuario + confirmar acciones (solo admin) ───────
+    if (isAdminRole) {
+        // ── Confirm acción usuario (toggle/delete) ──────────────────────
+        document.getElementById('db-cusr-no')
+            ?.addEventListener('click', _cerrarConfirmUsuario);
+        document.getElementById('db-cusr-si')
+            ?.addEventListener('click', _ejecutarConfirmUsuario);
+        document.getElementById('db-confirm-usuario')
+            ?.addEventListener('click', e => {
+                if (e.target === document.getElementById('db-confirm-usuario')) {
+                    _cerrarConfirmUsuario();
+                }
+            });
+
+        // ── Modal editar datos ───────────────────────────────────────────
+        // Cerrar modal
+        ['db-usr-modal-cerrar', 'db-usr-modal-cancelar'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', () => _modalEditarUsuario(false));
+        });
+        // Cerrar al clic en backdrop
+        document.getElementById('db-modal-usuario')?.addEventListener('click', e => {
+            if (e.target === document.getElementById('db-modal-usuario')) {
+                _modalEditarUsuario(false);
+            }
+        });
+
+        // Submit del formulario
+        document.getElementById('db-usr-form')
+            ?.addEventListener('submit', guardarUsuarioAdmin);
+
+        // Toggle visibilidad contraseña
+        document.getElementById('db-usr-toggle-pass')?.addEventListener('click', () => {
+            const input = document.getElementById('db-usr-password');
+            const icon  = document.getElementById('db-usr-toggle-pass').querySelector('i');
+            const ver   = input.type === 'password';
+            input.type  = ver ? 'text' : 'password';
+            icon.className = ver ? 'ri-eye-off-line' : 'ri-eye-line';
+        });
+
+        // Hint de fortaleza en tiempo real
+        document.getElementById('db-usr-password')?.addEventListener('input', e => {
+            const val  = e.target.value;
+            const hint = document.getElementById('db-usr-pass-hint');
+            if (!val) { hint.textContent = ''; hint.style.color = ''; return; }
+            if (val.length < 6) {
+                hint.textContent = '⚠ Mínimo 6 caracteres';
+                hint.style.color = '#ef4444';
+            } else if (val.length < 10 || !/[A-Z]/.test(val) || !/[0-9]/.test(val)) {
+                hint.textContent = '✓ Contraseña aceptable';
+                hint.style.color = '#f59e0b';
+            } else {
+                hint.textContent = '✓ Contraseña segura';
+                hint.style.color = 'var(--verde-principal)';
+            }
+        });
+    }
+
     // ── 14. Escape global ─────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             _modalProducto(false);
+            _modalEditarUsuario(false);
             cerrarConfirm();
-            document.getElementById('db-sidebar')?.classList.remove('db-sidebar--abierto');
+            _cerrarConfirmUsuario();
+            cerrarSidebarMovil();
         }
     });
 

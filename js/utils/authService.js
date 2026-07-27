@@ -26,6 +26,16 @@ export const ROLES = Object.freeze({
     CLIENT: 'client',
 });
 
+// ── Estados de cuenta ─────────────────────────────────────────────────────────
+export const STATUS = Object.freeze({
+    ACTIVE:   'active',
+    INACTIVE: 'inactive',
+});
+
+// ── ID protegido del administrador por defecto ────────────────────────────────
+// Este ID no puede eliminarse bajo ninguna circunstancia.
+export const ADMIN_PRINCIPAL_ID = 'admin_001';
+
 // ── Errores tipados ───────────────────────────────────────────────────────────
 export const AUTH_ERRORS = Object.freeze({
     EMAIL_IN_USE:       'EMAIL_IN_USE',
@@ -34,6 +44,7 @@ export const AUTH_ERRORS = Object.freeze({
     WEAK_PASSWORD:      'WEAK_PASSWORD',
     INVALID_EMAIL:      'INVALID_EMAIL',
     EMPTY_FIELDS:       'EMPTY_FIELDS',
+    ACCOUNT_INACTIVE:   'ACCOUNT_INACTIVE',
     UNKNOWN:            'UNKNOWN',
 });
 
@@ -118,6 +129,7 @@ export async function registerClient(data) {
         phone:     phone?.trim() ?? '',
         password:  _hashPassword(password),
         role:      ROLES.CLIENT,
+        status:    STATUS.ACTIVE,
         createdAt: new Date().toISOString(),
     };
 
@@ -151,6 +163,16 @@ export async function login(credentials) {
 
     if (!user || !_verifyPassword(password, user.password)) {
         return { ok: false, error: AUTH_ERRORS.INVALID_CREDENTIALS };
+    }
+
+    // ── Verificar que la cuenta esté activa ───────────────────────────────
+    // Los usuarios sin la propiedad status asumen 'active' (retrocompatibilidad).
+    const userStatus = user.status ?? STATUS.ACTIVE;
+    if (userStatus === STATUS.INACTIVE) {
+        return {
+            ok:    false,
+            error: AUTH_ERRORS.ACCOUNT_INACTIVE,
+        };
     }
 
     const session = _buildSession(user);
@@ -215,6 +237,111 @@ function _buildSession(user) {
     };
 }
 
+// ── Actualización de usuario por el Administrador ────────────────────────────
+
+/**
+ * Permite a un administrador actualizar los datos de cualquier usuario.
+ *
+ * Reglas de seguridad integradas:
+ *   - Valida que el caller sea admin (queda en manos del dashboard, pero el
+ *     servicio también verifica que la sesión activa sea admin).
+ *   - Un admin no puede quitarse a sí mismo el rol 'admin' si es el único admin.
+ *   - El correo nuevo no puede estar ya en uso por otro usuario.
+ *   - Si `nuevaPassword` está vacía, la contraseña existente no se toca.
+ *
+ * @param {string} userId - ID del usuario a editar.
+ * @param {{
+ *   name?: string,
+ *   email?: string,
+ *   phone?: string,
+ *   role?: 'admin'|'client',
+ *   nuevaPassword?: string
+ * }} datos - Campos a actualizar. Solo se aplican los que vienen rellenos.
+ * @returns {{ ok: boolean, user?: object, error?: string }}
+ */
+export function actualizarUsuarioPorAdmin(userId, datos) {
+    // ── 1. Verificar sesión admin activa ──────────────────────────────────
+    const sesionActiva = getSession();
+    if (sesionActiva?.role !== ROLES.ADMIN) {
+        return { ok: false, error: 'FORBIDDEN' };
+    }
+
+    const users = _getUsers();
+    const idx   = users.findIndex(u => u.id === userId);
+
+    if (idx === -1) {
+        return { ok: false, error: 'USER_NOT_FOUND' };
+    }
+
+    const usuarioActual = users[idx];
+
+    // ── 2. Validar nombre ─────────────────────────────────────────────────
+    const name = datos.name?.trim();
+    if (!name) {
+        return { ok: false, error: AUTH_ERRORS.EMPTY_FIELDS };
+    }
+
+    // ── 3. Validar y normalizar correo ────────────────────────────────────
+    const email = datos.email?.trim().toLowerCase();
+    if (!email || !_isValidEmail(email)) {
+        return { ok: false, error: AUTH_ERRORS.INVALID_EMAIL };
+    }
+
+    // Comprobar duplicado de correo en OTRO usuario
+    const emailDuplicado = users.some(u => u.email === email && u.id !== userId);
+    if (emailDuplicado) {
+        return { ok: false, error: AUTH_ERRORS.EMAIL_IN_USE };
+    }
+
+    // ── 4. Validar cambio de rol ──────────────────────────────────────────
+    const nuevoRol = datos.role ?? usuarioActual.role;
+
+    // Protección: si el usuario editado es el admin activo y se intenta
+    // bajar a 'client', verificar que exista al menos otro admin.
+    if (
+        usuarioActual.id === sesionActiva.id &&
+        usuarioActual.role === ROLES.ADMIN &&
+        nuevoRol !== ROLES.ADMIN
+    ) {
+        const otrosAdmins = users.filter(u => u.role === ROLES.ADMIN && u.id !== userId);
+        if (otrosAdmins.length === 0) {
+            return { ok: false, error: 'LAST_ADMIN' };
+        }
+    }
+
+    // ── 5. Validar nueva contraseña (opcional) ────────────────────────────
+    const nuevaPassword = datos.nuevaPassword?.trim();
+    if (nuevaPassword && nuevaPassword.length < 6) {
+        return { ok: false, error: AUTH_ERRORS.WEAK_PASSWORD };
+    }
+
+    // ── 6. Construir objeto actualizado ───────────────────────────────────
+    const usuarioActualizado = {
+        ...usuarioActual,
+        name,
+        email,
+        phone:    datos.phone?.trim() ?? usuarioActual.phone ?? '',
+        role:     nuevoRol,
+        // Solo reemplazar la contraseña si se proporcionó una nueva
+        password: nuevaPassword ? _hashPassword(nuevaPassword) : usuarioActual.password,
+        updatedAt: new Date().toISOString(),
+    };
+
+    users[idx] = usuarioActualizado;
+    _saveUsers(users);
+
+    // ── 7. Actualizar maye_session si el usuario editado tiene sesión activa
+    const sesionGuardada = getSession();
+    if (sesionGuardada?.id === userId) {
+        const sesionActualizada = _buildSession(usuarioActualizado);
+        Storage.guardar(AUTH_KEYS.SESSION, sesionActualizada);
+    }
+
+    // Devolver usuario sin contraseña
+    const { password: _, ...safeUser } = usuarioActualizado;
+    return { ok: true, user: safeUser };
+}
+
 // ── Inicialización automática del Administrador ───────────────────────────────
 
 /**
@@ -259,6 +386,7 @@ export function inicializarAdmin() {
         phone:     ADMIN_DEFAULTS.phone,
         password:  _hashPassword(ADMIN_DEFAULTS.password),  // nunca se guarda en texto plano
         role:      ADMIN_DEFAULTS.role,
+        status:    STATUS.ACTIVE,
         createdAt: new Date().toISOString(),
     };
 
@@ -267,4 +395,102 @@ export function inicializarAdmin() {
     if (typeof console !== 'undefined') {
         console.info('[Maye Auth] Admin inicializado automáticamente en localStorage.');
     }
+}
+
+// ── Conmutar estado activo/inactivo de un usuario ─────────────────────────────
+
+/**
+ * Alterna el estado `active` ↔ `inactive` de un usuario.
+ *
+ * Protecciones:
+ *   - Solo admins pueden ejecutar esta acción.
+ *   - El admin en sesión no puede inactivarse a sí mismo.
+ *   - El administrador principal (admin_001) no puede ser inactivado.
+ *
+ * @param {string} userId
+ * @returns {{ ok: boolean, user?: object, newStatus?: string, error?: string }}
+ */
+export function toggleUserStatus(userId) {
+    const sesion = getSession();
+    if (sesion?.role !== ROLES.ADMIN) {
+        return { ok: false, error: 'FORBIDDEN' };
+    }
+
+    // Autoprotección: el admin no puede inactivarse a sí mismo
+    if (userId === sesion.id) {
+        return { ok: false, error: 'SELF_ACTION' };
+    }
+
+    // Protección cuenta principal
+    if (userId === ADMIN_PRINCIPAL_ID) {
+        return { ok: false, error: 'PROTECTED_ACCOUNT' };
+    }
+
+    const users = _getUsers();
+    const idx   = users.findIndex(u => u.id === userId);
+    if (idx === -1) {
+        return { ok: false, error: 'USER_NOT_FOUND' };
+    }
+
+    // Los usuarios sin status asumen 'active' (retrocompatibilidad)
+    const estadoActual = users[idx].status ?? STATUS.ACTIVE;
+    const nuevoEstado  = estadoActual === STATUS.ACTIVE ? STATUS.INACTIVE : STATUS.ACTIVE;
+
+    users[idx] = { ...users[idx], status: nuevoEstado, updatedAt: new Date().toISOString() };
+    _saveUsers(users);
+
+    const { password: _, ...safeUser } = users[idx];
+    return { ok: true, user: safeUser, newStatus: nuevoEstado };
+}
+
+// ── Eliminación permanente de un usuario ──────────────────────────────────────
+
+/**
+ * Elimina un usuario del sistema de forma permanente.
+ *
+ * Protecciones:
+ *   - Solo admins pueden ejecutar esta acción.
+ *   - El admin en sesión no puede eliminarse a sí mismo.
+ *   - El administrador principal (admin_001) NO puede ser eliminado nunca.
+ *
+ * NOTA: Los pedidos del usuario eliminado se conservan en maye_orders
+ * (integridad histórica). Si se desea también limpiarlos, pasar
+ *  `{ limpiarPedidos: true }` en las opciones.
+ *
+ * @param {string} userId
+ * @param {{ limpiarPedidos?: boolean }} opciones
+ * @returns {{ ok: boolean, error?: string }}
+ */
+export function deleteUserById(userId, opciones = {}) {
+    const sesion = getSession();
+    if (sesion?.role !== ROLES.ADMIN) {
+        return { ok: false, error: 'FORBIDDEN' };
+    }
+
+    // Autoprotección
+    if (userId === sesion.id) {
+        return { ok: false, error: 'SELF_ACTION' };
+    }
+
+    // Cuenta principal protegida permanentemente
+    if (userId === ADMIN_PRINCIPAL_ID) {
+        return { ok: false, error: 'PROTECTED_ACCOUNT' };
+    }
+
+    const users = _getUsers();
+    const existe = users.some(u => u.id === userId);
+    if (!existe) {
+        return { ok: false, error: 'USER_NOT_FOUND' };
+    }
+
+    _saveUsers(users.filter(u => u.id !== userId));
+
+    // Limpieza opcional de pedidos históricos
+    if (opciones.limpiarPedidos) {
+        const ordersKey = 'maye_orders';
+        const orders    = Storage.obtener(ordersKey, []);
+        Storage.guardar(ordersKey, orders.filter(o => o.userId !== userId));
+    }
+
+    return { ok: true };
 }

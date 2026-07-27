@@ -29,6 +29,7 @@ const ERROR_MSGS = {
     [AUTH_ERRORS.WEAK_PASSWORD]:       'La contraseña debe tener al menos 6 caracteres.',
     [AUTH_ERRORS.EMAIL_IN_USE]:        'Este correo ya está registrado. Intenta iniciar sesión.',
     [AUTH_ERRORS.INVALID_CREDENTIALS]: 'Correo o contraseña incorrectos.',
+    [AUTH_ERRORS.ACCOUNT_INACTIVE]:    'Tu cuenta se encuentra inactivada. Comunícate con la administración para reactivarla.',
     [AUTH_ERRORS.UNKNOWN]:             'Ocurrió un error inesperado. Intenta de nuevo.',
 };
 
@@ -590,10 +591,32 @@ export function abrirModal(tabInicial = 'login') {
     const overlay = document.getElementById('auth-overlay');
     if (!overlay) return;
 
+    // ── Cerrar el menú hamburguesa de la tienda si está abierto ──────────
+    // Esto evita que el nav móvil quede apilado encima del modal overlay.
+    const menuPrincipal = document.getElementById('menu-principal');
+    const btnMenu       = document.getElementById('btn-menu');
+    if (menuPrincipal?.classList.contains('abierto')) {
+        menuPrincipal.classList.remove('abierto');
+        btnMenu?.classList.remove('abierto');
+        btnMenu?.setAttribute('aria-expanded', 'false');
+    }
+
+    // ── Cerrar también el dropdown de usuario si estuviera abierto ────────
+    document.getElementById('auth-user-dropdown')
+        ?.classList.remove('auth-user-dropdown--abierto');
+    document.getElementById('auth-header-usuario')
+        ?.setAttribute('aria-expanded', 'false');
+
     setTabActivo(tabInicial);
     overlay.classList.add('auth-overlay--visible');
     overlay.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+
+    // Bloquear scroll del body SIN desplazar el contenido (evita layout shift)
+    const scrollY = window.scrollY;
+    document.body.style.position   = 'fixed';
+    document.body.style.top        = `-${scrollY}px`;
+    document.body.style.width      = '100%';
+    document.body.dataset.scrollY  = scrollY;
 
     // Focus en el primer input del panel activo
     const primerInput = overlay.querySelector(`#panel-${tabInicial} input`);
@@ -606,7 +629,14 @@ export function cerrarModal() {
 
     overlay.classList.remove('auth-overlay--visible');
     overlay.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+
+    // Restaurar scroll del body preservando la posición exacta
+    const scrollY = parseInt(document.body.dataset.scrollY ?? '0', 10);
+    document.body.style.position = '';
+    document.body.style.top      = '';
+    document.body.style.width    = '';
+    delete document.body.dataset.scrollY;
+    window.scrollTo({ top: scrollY, behavior: 'instant' });
 
     // Limpiar formularios y errores al cerrar
     setTimeout(() => {

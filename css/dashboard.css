@@ -536,10 +536,23 @@
 .db-btn--icon { padding: 7px; width: 32px; height: 32px; justify-content: center; }
 
 /* ── 9. TABLA UNIVERSAL ─────────────────────────────────────────────────────── */
-.db-table-wrap { overflow-x: auto; }
+/*
+ * .db-table-wrap garantiza scroll horizontal seguro en cualquier viewport.
+ * La tabla nunca comprime sus columnas: siempre respeta su ancho natural.
+ */
+.db-table-wrap {
+    overflow-x: auto;
+    /* Scroll suave en iOS */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    width: 100%;
+}
 
 .db-table {
     width: 100%;
+    /* Ancho mínimo: evita que las columnas colapsen en pantallas estrechas.
+       El scroll horizontal en .db-table-wrap maneja el desbordamiento. */
+    min-width: 600px;
     border-collapse: collapse;
     font-size: 0.875rem;
 }
@@ -904,28 +917,203 @@
 .db-status-select:focus { border-color: var(--verde-principal); }
 
 /* ── 19. RESPONSIVE ─────────────────────────────────────────────────────────── */
+
+/* ── 768px — tablet/móvil: sidebar off-canvas ── */
 @media (max-width: 900px) {
+
+    /* El sidebar sale del flujo y se oculta a la izquierda */
     .db-sidebar {
         transform: translateX(-100%);
-        box-shadow: var(--sombra-alta);
+        box-shadow: none; /* sin sombra mientras está cerrado */
+        /* z-index mayor que el topbar (100) pero bajo el modal (9000) */
+        z-index: 500;
     }
-    .db-sidebar.db-sidebar--abierto { transform: translateX(0); }
+
+    /* Sidebar abierto: desliza hacia dentro */
+    .db-sidebar.db-sidebar--abierto {
+        transform: translateX(0);
+        box-shadow: 4px 0 32px rgba(0, 0, 0, 0.25);
+    }
+
+    /* El área principal ocupa todo el ancho */
     .db-main { margin-left: 0; }
-    .db-content { padding: 20px 16px; }
-    .db-topbar { padding: 0 16px; }
+
+    /* Topbar: padding reducido y botón hamburguesa visible */
+    .db-topbar {
+        padding: 0 16px;
+        /* Topbar queda encima del backdrop (z:400) pero bajo el sidebar (z:500) */
+        z-index: 110;
+    }
     .db-topbar__menu-btn { display: flex; }
+
+    /* Contenido: padding reducido en tablet */
+    .db-content { padding: 20px 16px; }
+
+    /* Formulario de perfil: una sola columna */
     .db-perfil-grid { grid-template-columns: 1fr; }
 }
-@media (max-width: 600px) {
-    .db-kpis { grid-template-columns: repeat(2, 1fr); }
-    .db-welcome { flex-direction: column; text-align: center; padding: 20px; }
-    .db-favs-grid { grid-template-columns: repeat(2, 1fr); }
-    .db-card__head { flex-direction: column; align-items: flex-start; }
-    .db-toolbar { flex-direction: column; align-items: stretch; }
-    .db-search input { width: 100%; }
+
+/*
+ * BACKDROP del sidebar (off-canvas overlay)
+ * ─────────────────────────────────────────
+ * Cuando el sidebar está abierto, un velo semitransparente cubre el
+ * contenido principal. El elemento .db-sidebar-backdrop se inyecta
+ * en el DOM por JS (ver dashboard.js) y se destruye al cerrar.
+ */
+.db-sidebar-backdrop {
+    display: none;
 }
+
+@media (max-width: 900px) {
+    .db-sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 18, 0.45);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        z-index: 400; /* entre topbar (110) y sidebar (500) */
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .db-sidebar-backdrop--visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+}
+
+/* ── 600px — móvil ── */
+@media (max-width: 600px) {
+
+    /* KPIs: 2 columnas en móvil */
+    .db-kpis {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    /* KPI mini-grids de 4 columnas → 2 */
+    .db-kpis[style*="grid-template-columns:repeat(4"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* KPI: reducir padding y fuente del número */
+    .db-kpi { padding: 16px 14px; gap: 12px; }
+    .db-kpi__num { font-size: 1.45rem; }
+    .db-kpi__icon { width: 40px; height: 40px; font-size: 1.1rem; }
+
+    /* Bienvenida: columna centrada */
+    .db-welcome {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px 16px;
+        gap: 14px;
+    }
+    .db-welcome__texto { width: 100%; }
+
+    /* Favoritos: 2 columnas */
+    .db-favs-grid { grid-template-columns: repeat(2, 1fr); }
+
+    /* Cabecera de tarjeta: columna */
+    .db-card__head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+    }
+
+    /* Toolbar: columna, full width */
+    .db-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+    .db-search { width: 100%; }
+    .db-search input { width: 100%; }
+    .db-btn { justify-content: center; }
+
+    /* Contenido: menos padding lateral */
+    .db-content { padding: 16px 12px; }
+
+    /* Topbar: texto título más pequeño */
+    .db-topbar__titulo { font-size: 0.9rem; }
+
+    /* Ocultar etiquetas de texto en topbar cuando hay poco espacio */
+    .hide-xs { display: none; }
+
+    /* Topbar botones: solo icono */
+    .db-topbar__btn { padding: 7px 10px; }
+
+    /*
+     * TABLAS con scroll horizontal seguro
+     * ─────────────────────────────────────
+     * .db-table-wrap ya tiene overflow-x:auto.
+     * Aquí forzamos un ancho mínimo en la tabla para que las columnas
+     * no colapsen y el scroll horizontal sea utilizable.
+     */
+    .db-table-wrap {
+        /* Permite que el wrapper ocupe todo el ancho disponible */
+        width: 100%;
+        /* Borde indicador de scroll (UX hint) */
+        border-radius: 0 0 var(--radio-xl) var(--radio-xl);
+        /* Scroll suave en iOS */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+    }
+
+    /* Tabla de productos: mínimo para que no colapsen las 8 columnas */
+    #db-prod-tbody ~ * .db-table,
+    .db-table { min-width: 640px; }
+
+    /* Tabla de pedidos (más columnas) */
+    #db-orders-tbody .db-table,
+    #db-orders-tbody ~ .db-table { min-width: 720px; }
+
+    /* Tabla de usuarios */
+    #db-users-tbody .db-table { min-width: 560px; }
+
+    /* Pedido card del cliente: head en columna */
+    .db-pedido-card__head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .db-pedido-card__total { margin-left: 0; }
+
+    /* Modal CRUD: padding reducido */
+    .db-modal__body { padding: 16px; }
+    .db-modal__head { padding: 16px; }
+    .db-modal__footer { padding: 12px 16px; flex-wrap: wrap; }
+    .db-modal__footer .db-btn { flex: 1; justify-content: center; }
+
+    /* Confirm dialog: padding reducido */
+    .db-confirm { padding: 24px 20px; }
+    .db-confirm__btns { flex-direction: column; }
+    .db-confirm__btns .db-btn { width: 100%; justify-content: center; }
+
+    /* Toast: full-width en la parte inferior */
+    .db-toast {
+        bottom: 16px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+        /* Por encima del sidebar backdrop */
+        z-index: 8000;
+    }
+}
+
+/* ── 400px — móvil pequeño ── */
 @media (max-width: 400px) {
     .db-kpis { grid-template-columns: 1fr; }
+    .db-favs-grid { grid-template-columns: 1fr; }
+
+    .db-welcome__saludo { font-size: 1.1rem; }
+
+    /* Tabla: ancho mínimo universal en pantallas muy estrechas */
+    .db-table { min-width: 520px; }
 }
 
 /* ── 20. ANIMACIONES ────────────────────────────────────────────────────────── */
