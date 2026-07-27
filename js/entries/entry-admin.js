@@ -1,26 +1,21 @@
 // js/entries/entry-admin.js
-// Entry point exclusivo del panel de administración.
-// Aplica protección de ruta ANTES de cargar el panel.
+// admin.html ahora es un alias de compatibilidad.
+// Si hay sesión de admin activa → redirige al dashboard unificado.
+// Si no hay sesión → redirige a home con el flag de login.
 
-import '../../css/variables.css';
-import '../../css/admin.css';
-
-import { iniciarAdmin } from '../pages/admin.js';
-import { isAdmin } from '../utils/authService.js';
+import { isAdmin, getSession, inicializarAdmin } from '../utils/authService.js';
 import { RUTAS } from '../utils/constants.js';
 
-// ── Protección de ruta sincrónica (antes del DOMContentLoaded) ───────────────
-// Se ejecuta inmediatamente para evitar que el panel flashee antes de redirigir.
 (function guardRuta() {
-    if (!isAdmin()) {
-        // Guardar la intención de ir al admin para que el modal abra directo
+    inicializarAdmin();
+    const session = getSession();
+
+    if (!session) {
         sessionStorage.setItem('maye_auth_redirect', 'admin');
         window.location.replace(RUTAS.HOME);
+        return;
     }
-})();
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Doble check por si el guard de arriba no alcanzó a redirigir
-    if (!isAdmin()) return;
-    iniciarAdmin();
-});
+    // Cualquier usuario autenticado (admin o cliente) va al dashboard
+    window.location.replace(RUTAS.DASHBOARD);
+})();

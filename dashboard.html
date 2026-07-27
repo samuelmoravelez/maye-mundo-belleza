@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Panel | Maye Mundo Belleza</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="/js/entries/entry-dashboard.js"></script>
+</head>
+<body class="db-body">
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SHELL PRINCIPAL
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="db-shell">
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         SIDEBAR
+    ──────────────────────────────────────────────────────────────────────── -->
+    <aside class="db-sidebar" id="db-sidebar" role="navigation" aria-label="Menú del panel">
+
+        <!-- Logo / Marca -->
+        <a href="/maye-mundo-belleza/index.html" class="db-sidebar__brand" aria-label="Ir a la tienda">
+            <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png"
+                 alt="Maye Mundo Belleza" class="db-sidebar__logo">
+            <div class="db-sidebar__brand-text">
+                <span class="db-sidebar__brand-name">Maye Mundo Belleza</span>
+                <span class="db-sidebar__brand-sub">Panel de usuario</span>
+            </div>
+        </a>
+
+        <!-- Avatar + datos del usuario (inyectado por JS) -->
+        <div class="db-sidebar__user" id="db-sidebar-user" aria-live="polite"></div>
+
+        <!-- ── NAV CLIENTE (oculto para admin via JS) ── -->
+        <nav class="db-nav" id="db-nav-cliente" aria-label="Menú cliente">
+            <div class="db-nav__group-label">Mi cuenta</div>
+            <button class="db-nav__item" data-view="resumen" aria-label="Resumen de mi cuenta">
+                <i class="ri-dashboard-3-line"></i> Resumen
+            </button>
+            <button class="db-nav__item" data-view="perfil" aria-label="Mi perfil">
+                <i class="ri-user-settings-line"></i> Mi Perfil
+            </button>
+            <button class="db-nav__item" data-view="pedidos" aria-label="Mis pedidos">
+                <i class="ri-file-list-3-line"></i> Mis Pedidos
+                <span class="db-nav__badge" id="db-nav-badge-pedidos" style="display:none">0</span>
+            </button>
+            <button class="db-nav__item" data-view="favoritos" aria-label="Lista de deseos">
+                <i class="ri-heart-3-line"></i> Lista de Deseos
+            </button>
+        </nav>
+
+        <!-- ── NAV ADMIN (oculto para cliente via JS) ── -->
+        <nav class="db-nav" id="db-nav-admin" aria-label="Menú administrador">
+            <div class="db-nav__group-label">Administración</div>
+            <button class="db-nav__item" data-view="admin-resumen" aria-label="Resumen general">
+                <i class="ri-bar-chart-2-line"></i> Resumen
+            </button>
+            <button class="db-nav__item" data-view="admin-productos" aria-label="Gestión de productos">
+                <i class="ri-store-2-line"></i> Productos
+            </button>
+            <button class="db-nav__item" data-view="admin-pedidos" aria-label="Gestión de pedidos">
+                <i class="ri-shopping-bag-3-line"></i> Pedidos
+            </button>
+            <button class="db-nav__item" data-view="admin-usuarios" aria-label="Gestión de usuarios">
+                <i class="ri-team-line"></i> Usuarios
+            </button>
+        </nav>
+
+        <!-- Footer del sidebar -->
+        <div class="db-sidebar__footer">
+            <a href="/maye-mundo-belleza/index.html" class="db-btn-tienda">
+                <i class="ri-store-line"></i> Ver tienda
+            </a>
+            <button class="db-btn-logout" data-db-logout aria-label="Cerrar sesión">
+                <i class="ri-logout-box-r-line"></i> Cerrar sesión
+            </button>
+        </div>
+
+    </aside><!-- /.db-sidebar -->
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         ÁREA PRINCIPAL
+    ──────────────────────────────────────────────────────────────────────── -->
+    <div class="db-main" id="db-main">
+
+        <!-- Top bar -->
+        <header class="db-topbar" role="banner">
+            <div class="db-topbar__left">
+                <button class="db-topbar__menu-btn" id="db-menu-btn" aria-label="Abrir menú" aria-expanded="false">
+                    <i class="ri-menu-line"></i>
+                </button>
+                <span class="db-topbar__titulo" id="db-topbar-titulo">Dashboard</span>
+            </div>
+            <div class="db-topbar__right">
+                <a href="/maye-mundo-belleza/paginas/productos.html" class="db-topbar__btn">
+                    <i class="ri-shopping-bag-3-line"></i>
+                    <span class="hide-xs">Ir a la tienda</span>
+                </a>
+                <button class="db-topbar__btn db-topbar__btn--primary" data-db-logout>
+                    <i class="ri-logout-box-r-line"></i>
+                    <span class="hide-xs">Salir</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Contenido principal scrollable -->
+        <main class="db-content" id="db-content" role="main">
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PANEL CLIENTE
+══════════════════════════════════════════════════════════════════════ -->
+<div id="db-panel-cliente">
+
+    <!-- ── Vista: Resumen ── -->
+    <section class="db-view" id="view-resumen">
+        <div class="db-welcome">
+            <div class="db-welcome__avatar" id="db-welcome-avatar">MB</div>
+            <div class="db-welcome__texto">
+                <span class="db-welcome__saludo" id="db-welcome-nombre">¡Hola!</span>
+                <span class="db-welcome__sub" id="db-welcome-sub">Bienvenida a tu panel personal.</span>
+            </div>
+        </div>
+        <div class="db-kpis" id="db-client-kpis"></div>
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon"><i class="ri-file-list-3-line"></i></div>
+                    <div>
+                        <div class="db-card__titulo">Pedidos recientes</div>
+                        <div class="db-card__subtitulo">Últimas 3 compras</div>
+                    </div>
+                </div>
+                <button class="db-btn db-btn--sm" data-view="pedidos">Ver todos</button>
+            </div>
+            <div class="db-card__body">
+                <div id="db-client-pedidos-recientes"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Vista: Mi Perfil ── -->
+    <section class="db-view" id="view-perfil">
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon"><i class="ri-user-settings-line"></i></div>
+                    <div>
+                        <div class="db-card__titulo">Mi Perfil</div>
+                        <div class="db-card__subtitulo">Actualiza tus datos de contacto y envío</div>
+                    </div>
+                </div>
+            </div>
+            <div class="db-card__body">
+                <form id="db-form-perfil" novalidate>
+                    <div class="db-perfil-grid">
+                        <div class="db-form-grupo">
+                            <label for="pf-nombre">Nombre completo</label>
+                            <input type="text" id="pf-nombre" placeholder="Tu nombre" autocomplete="name" required>
+                        </div>
+                        <div class="db-form-grupo">
+                            <label for="pf-email">Correo electrónico</label>
+                            <input type="email" id="pf-email" placeholder="tu@correo.com" readonly
+                                   title="El correo no se puede modificar" autocomplete="email">
+                        </div>
+                        <div class="db-form-grupo">
+                            <label for="pf-telefono">Teléfono / WhatsApp</label>
+                            <input type="tel" id="pf-telefono" placeholder="+57 300 000 0000" autocomplete="tel">
+                        </div>
+                        <div class="db-form-grupo">
+                            <label for="pf-ciudad">Ciudad</label>
+                            <input type="text" id="pf-ciudad" placeholder="Ej: Medellín" autocomplete="address-level2">
+                        </div>
+                        <div class="db-form-grupo db-form-grupo--full">
+                            <label for="pf-direccion">Dirección de envío</label>
+                            <input type="text" id="pf-direccion" placeholder="Calle, número, barrio..." autocomplete="street-address">
+                        </div>
+                    </div>
+                    <div class="db-form-footer">
+                        <button type="submit" class="db-btn db-btn--primary">
+                            <i class="ri-save-line"></i> Guardar cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Vista: Mis Pedidos ── -->
+    <section class="db-view" id="view-pedidos">
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon"><i class="ri-shopping-bag-3-line"></i></div>
+                    <div>
+                        <div class="db-card__titulo">Mis Pedidos</div>
+                        <div class="db-card__subtitulo">Historial completo de compras</div>
+                    </div>
+                </div>
+            </div>
+            <div class="db-card__body">
+                <div id="db-client-orders-list"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Vista: Favoritos ── -->
+    <section class="db-view" id="view-favoritos">
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon" style="background:rgba(184,160,228,0.15);color:var(--lila-oscuro)">
+                        <i class="ri-heart-3-line"></i>
+                    </div>
+                    <div>
+                        <div class="db-card__titulo">Lista de Deseos</div>
+                        <div class="db-card__subtitulo">Productos que marcaste como favoritos</div>
+                    </div>
+                </div>
+                <a href="/maye-mundo-belleza/paginas/productos.html" class="db-btn db-btn--primary db-btn--sm">
+                    <i class="ri-store-2-line"></i> Explorar tienda
+                </a>
+            </div>
+            <div class="db-card__body">
+                <div class="db-favs-grid" id="db-client-favs-grid"></div>
+            </div>
+        </div>
+    </section>
+
+</div><!-- /#db-panel-cliente -->
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PANEL ADMIN
+══════════════════════════════════════════════════════════════════════ -->
+<div id="db-panel-admin">
+
+    <!-- ── Vista: Resumen Admin ── -->
+    <section class="db-view" id="view-admin-resumen">
+        <div class="db-welcome">
+            <div class="db-welcome__avatar" id="db-welcome-avatar-admin">AD</div>
+            <div class="db-welcome__texto">
+                <span class="db-welcome__saludo" id="db-welcome-nombre-admin">¡Hola!</span>
+                <span class="db-welcome__sub" id="db-welcome-sub-admin">Gestiona la tienda desde aquí.</span>
+            </div>
+            <a href="/maye-mundo-belleza/index.html" target="_blank"
+               class="db-btn" style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.25);flex-shrink:0">
+                <i class="ri-external-link-line"></i> Ver tienda
+            </a>
+        </div>
+
+        <div class="db-kpis" id="db-admin-kpis"></div>
+
+        <!-- Últimos pedidos -->
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon"><i class="ri-file-list-3-line"></i></div>
+                    <div>
+                        <div class="db-card__titulo">Pedidos recientes</div>
+                        <div class="db-card__subtitulo">Últimos 5 pedidos registrados</div>
+                    </div>
+                </div>
+                <button class="db-btn db-btn--sm" data-view="admin-pedidos">Ver todos</button>
+            </div>
+            <div class="db-card__body--no-padding db-table-wrap">
+                <table class="db-table" aria-label="Pedidos recientes">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Cliente</th><th>Fecha</th>
+                            <th>Total</th><th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="db-admin-recent-orders"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Vista: Gestión de Productos ── -->
+    <section class="db-view" id="view-admin-productos">
+
+        <!-- Mini KPIs de productos -->
+        <div class="db-kpis" style="margin-bottom:20px;grid-template-columns:repeat(4,1fr)">
+            <div class="db-kpi">
+                <div class="db-kpi__icon db-kpi__icon--verde"><i class="ri-store-2-line"></i></div>
+                <div class="db-kpi__body">
+                    <span class="db-kpi__num" id="db-prod-total">0</span>
+                    <span class="db-kpi__label">Total</span>
+                </div>
+            </div>
+            <div class="db-kpi">
+                <div class="db-kpi__icon db-kpi__icon--azul"><i class="ri-eye-line"></i></div>
+                <div class="db-kpi__body">
+                    <span class="db-kpi__num" id="db-prod-visibles">0</span>
+                    <span class="db-kpi__label">Visibles</span>
+                </div>
+            </div>
+            <div class="db-kpi">
+                <div class="db-kpi__icon db-kpi__icon--rojo"><i class="ri-archive-line"></i></div>
+                <div class="db-kpi__body">
+                    <span class="db-kpi__num" id="db-prod-agotados">0</span>
+                    <span class="db-kpi__label">Agotados</span>
+                </div>
+            </div>
+            <div class="db-kpi">
+                <div class="db-kpi__icon db-kpi__icon--amarillo"><i class="ri-eye-off-line"></i></div>
+                <div class="db-kpi__body">
+                    <span class="db-kpi__num" id="db-prod-ocultos">0</span>
+                    <span class="db-kpi__label">Ocultos</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon"><i class="ri-store-2-line"></i></div>
+                    <div>
+                        <div class="db-card__titulo">Catálogo de Productos</div>
+                        <div class="db-card__subtitulo">Agrega, edita o elimina productos</div>
+                    </div>
+                </div>
+                <div class="db-toolbar">
+                    <div class="db-search">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="db-prod-buscar" placeholder="Buscar producto..." aria-label="Buscar producto">
+                    </div>
+                    <button class="db-btn db-btn--primary" id="db-prod-nuevo">
+                        <i class="ri-add-line"></i> Nuevo producto
+                    </button>
+                </div>
+            </div>
+            <div class="db-card__body--no-padding db-table-wrap">
+                <table class="db-table" aria-label="Catálogo de productos">
+                    <thead>
+                        <tr>
+                            <th>Imagen</th><th>Nombre</th><th>Categoría</th>
+                            <th>Precio</th><th>Stock</th><th>Etiqueta</th>
+                            <th>Estado</th><th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="db-prod-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Vista: Gestión de Pedidos ── -->
+    <section class="db-view" id="view-admin-pedidos">
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon"><i class="ri-shopping-bag-3-line"></i></div>
+                    <div>
+                        <div class="db-card__titulo">Gestión de Pedidos</div>
+                        <div class="db-card__subtitulo">Cambia el estado de cada pedido</div>
+                    </div>
+                </div>
+            </div>
+            <div class="db-card__body--no-padding db-table-wrap">
+                <table class="db-table" aria-label="Gestión de pedidos">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Cliente</th><th>Fecha</th>
+                            <th>Total</th><th>Ítems</th><th>Estado</th><th>Cambiar estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="db-orders-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Vista: Gestión de Usuarios ── -->
+    <section class="db-view" id="view-admin-usuarios">
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon" style="background:rgba(184,160,228,0.15);color:var(--lila-oscuro)">
+                        <i class="ri-team-line"></i>
+                    </div>
+                    <div>
+                        <div class="db-card__titulo">Clientes Registrados</div>
+                        <div class="db-card__subtitulo">Usuarios con rol cliente</div>
+                    </div>
+                </div>
+            </div>
+            <div class="db-card__body--no-padding db-table-wrap">
+                <table class="db-table" aria-label="Clientes registrados">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th><th>Teléfono</th><th>Registro</th>
+                            <th>Pedidos</th><th>Total compras</th><th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="db-users-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</div><!-- /#db-panel-admin -->
+
+        </main><!-- /.db-content -->
+    </div><!-- /.db-main -->
+</div><!-- /.db-shell -->
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     MODAL — CRUD PRODUCTO
+══════════════════════════════════════════════════════════════════════ -->
+<div class="db-modal-overlay" id="db-modal-producto"
+     role="dialog" aria-modal="true" aria-labelledby="db-prod-modal-titulo">
+    <div class="db-modal">
+        <div class="db-modal__head">
+            <h2 class="db-modal__titulo" id="db-prod-modal-titulo">Nuevo producto</h2>
+            <button class="db-modal__cerrar" id="db-prod-modal-cerrar" aria-label="Cerrar modal">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="db-modal__body">
+            <form id="db-prod-form" novalidate>
+                <input type="hidden" id="db-prod-id">
+
+                <div class="db-perfil-grid">
+                    <div class="db-form-grupo">
+                        <label for="db-p-nombre">Nombre *</label>
+                        <input type="text" id="db-p-nombre" placeholder="Ej: Sérum Vitamina C" required>
+                    </div>
+                    <div class="db-form-grupo">
+                        <label for="db-p-categoria">Categoría *</label>
+                        <select id="db-p-categoria" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="capilar">Cuidado Capilar</option>
+                            <option value="maquillaje">Maquillaje</option>
+                            <option value="unas">Uñas</option>
+                            <option value="skincare">Skincare</option>
+                        </select>
+                    </div>
+                    <div class="db-form-grupo">
+                        <label for="db-p-precio">Precio (COP) *</label>
+                        <input type="number" id="db-p-precio" placeholder="45000" min="0" required>
+                    </div>
+                    <div class="db-form-grupo">
+                        <label for="db-p-precio-ant">Precio anterior</label>
+                        <input type="number" id="db-p-precio-ant" placeholder="60000" min="0">
+                    </div>
+                    <div class="db-form-grupo">
+                        <label for="db-p-stock">Stock</label>
+                        <input type="number" id="db-p-stock" placeholder="10" min="0">
+                    </div>
+                    <div class="db-form-grupo">
+                        <label for="db-p-etiqueta">Etiqueta</label>
+                        <select id="db-p-etiqueta">
+                            <option value="">Sin etiqueta</option>
+                            <option value="nuevo">Nuevo</option>
+                            <option value="popular">Más vendido</option>
+                            <option value="oferta">Oferta</option>
+                            <option value="agotado">Agotado</option>
+                        </select>
+                    </div>
+                    <div class="db-form-grupo db-form-grupo--full">
+                        <label for="db-p-imagen">URL de imagen *</label>
+                        <input type="url" id="db-p-imagen" placeholder="https://res.cloudinary.com/..." required>
+                    </div>
+                    <div class="db-form-grupo db-form-grupo--full">
+                        <label for="db-p-descripcion">Descripción</label>
+                        <textarea id="db-p-descripcion" placeholder="Describe brevemente el producto..."></textarea>
+                    </div>
+                    <div class="db-form-grupo db-form-grupo--full">
+                        <label for="db-p-whatsapp">Texto WhatsApp (URL encoded)</label>
+                        <input type="text" id="db-p-whatsapp" placeholder="Hola!%20Me%20interesa%20el%20producto">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="db-modal__footer">
+            <button type="button" class="db-btn" id="db-prod-modal-cancelar">Cancelar</button>
+            <button type="submit" form="db-prod-form" class="db-btn db-btn--primary">
+                <i class="ri-save-line"></i> Guardar producto
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     CONFIRM — ELIMINAR PRODUCTO
+══════════════════════════════════════════════════════════════════════ -->
+<div class="db-confirm-overlay" id="db-confirm"
+     role="alertdialog" aria-modal="true" aria-labelledby="db-confirm-titulo">
+    <div class="db-confirm">
+        <div class="db-confirm__icon"><i class="ri-delete-bin-5-line"></i></div>
+        <h3 class="db-confirm__titulo" id="db-confirm-titulo">Eliminar producto</h3>
+        <p class="db-confirm__texto">Esta acción no se puede deshacer. El producto será eliminado del catálogo permanentemente.</p>
+        <div class="db-confirm__btns">
+            <button class="db-btn" id="db-confirm-no">Cancelar</button>
+            <button class="db-btn db-btn--danger" id="db-confirm-si"
+                    style="background:#ef4444;color:#fff;border-color:#ef4444">
+                <i class="ri-delete-bin-line"></i> Sí, eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     TOAST
+══════════════════════════════════════════════════════════════════════ -->
+<div class="db-toast" id="db-toast" role="status" aria-live="polite">
+    <i class="ri-checkbox-circle-fill" id="db-toast-icono"></i>
+    <span id="db-toast-texto"></span>
+</div>
+
+</body>
+</html>

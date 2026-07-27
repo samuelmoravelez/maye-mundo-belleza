@@ -16,6 +16,9 @@ export const STORAGE_KEYS = Object.freeze({
     // ── Auth (módulo unificado) ──────────────────────────
     USERS:         'maye_users',
     SESSION:       'maye_session',
+    // ── Dashboard ────────────────────────────────────────
+    ORDERS:        'maye_orders',
+    FAVORITES:     'maye_favorites',
 });
 
 export const SCHEMA_VERSION = 1;
@@ -27,6 +30,7 @@ export const RUTAS = Object.freeze({
     LEGAL:     '/maye-mundo-belleza/paginas/legales.html',
     PRODUCTO:  '/maye-mundo-belleza/paginas/producto.html',
     ADMIN:     '/maye-mundo-belleza/admin.html',
+    DASHBOARD: '/maye-mundo-belleza/dashboard.html',
 });
 
 export const EMPRESA = Object.freeze({

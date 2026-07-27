@@ -258,10 +258,12 @@ function crearHTMLHeaderAuth(session) {
     const rolIcon  = session.role === ROLES.ADMIN ? 'ri-shield-star-line' : 'ri-user-heart-line';
 
     const adminLink = session.role === ROLES.ADMIN
-        ? `<a href="${RUTAS.ADMIN}" class="auth-dropdown__item">
+        ? `<a href="${RUTAS.DASHBOARD}" class="auth-dropdown__item">
              <i class="ri-settings-4-line"></i> Panel Admin
            </a>`
-        : '';
+        : `<a href="${RUTAS.DASHBOARD}" class="auth-dropdown__item">
+             <i class="ri-dashboard-3-line"></i> Mi Panel
+           </a>`;
 
     return `
     <div class="auth-header-usuario" id="auth-header-usuario" tabindex="0"
@@ -498,13 +500,17 @@ async function manejarLogin(e) {
             return;
         }
 
-        // ── Éxito: actualizar header y redirigir si es admin ──
+        // ── Éxito ──────────────────────────────────────────────────────────
+        // ADMIN  → redirige al dashboard de gestión inmediatamente.
+        // CLIENTE → permanece en la página actual; solo se actualiza el header.
         actualizarHeader();
         cerrarModal();
 
         if (resultado.user.role === ROLES.ADMIN) {
-            window.location.href = RUTAS.ADMIN;
+            window.location.href = RUTAS.DASHBOARD;
         } else {
+            // Cliente: actualizar header con "Hola, [Nombre]" y disparar evento
+            // para que cualquier componente de la página reaccione si lo necesita.
             window.dispatchEvent(new CustomEvent('auth:login', { detail: resultado.user }));
         }
 
