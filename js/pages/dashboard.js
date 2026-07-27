@@ -20,6 +20,7 @@ import {
     obtenerProductos, guardarProductos,
     generarId, formatearPrecio, CATEGORIAS, ETIQUETAS,
 } from '../data/productos.data.js';
+import { descargarFacturaPDF, imprimirFactura } from '../utils/invoiceService.js';
 
 // ── Storage keys adicionales ───────────────────────────────────────────────
 const KEYS = {
@@ -178,7 +179,7 @@ function renderClienteResumen() {
         </div>`).join('');
 
     // Últimos 3 pedidos
-    const recientes = [...orders].sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 3);
+    const recientes = [...orders].sort((a,b) => new Date(b.createdAt ?? b.fecha) - new Date(a.createdAt ?? a.fecha)).slice(0, 3);
     const listEl = document.getElementById('db-client-pedidos-recientes');
     if (!listEl) return;
     if (recientes.length === 0) {
@@ -186,6 +187,7 @@ function renderClienteResumen() {
         return;
     }
     listEl.innerHTML = recientes.map(o => pedidoCardHTML(o)).join('');
+    _vincularBotonesFactura(listEl, recientes);
 }
 
 // ── Vista: Perfil del cliente ──────────────────────────────────────────────
@@ -227,34 +229,72 @@ function guardarPerfil(e) {
 function renderClientePedidos() {
     const orders = getOrders()
         .filter(o => o.userId === session.id)
-        .sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+        .sort((a,b) => new Date(b.createdAt ?? b.fecha) - new Date(a.createdAt ?? a.fecha));
 
     const el = document.getElementById('db-client-orders-list');
     if (!el) return;
     el.innerHTML = orders.length === 0
         ? `<div class="db-empty"><i class="ri-inbox-line"></i><p>Aún no tienes pedidos. <a href="${RUTAS.PRODUCTOS}" style="color:var(--verde-principal)">¡Explora la tienda!</a></p></div>`
         : orders.map(o => pedidoCardHTML(o)).join('');
+
+    _vincularBotonesFactura(el, orders);
 }
 
 function pedidoCardHTML(o) {
-    const estadoCls = { pendiente:'db-badge--amarillo', enviado:'db-badge--azul', completado:'db-badge--verde', cancelado:'db-badge--rojo' };
-    const estadoLabel = { pendiente:'Pendiente', enviado:'Enviado', completado:'Completado', cancelado:'Cancelado' };
-    const items = (o.items ?? []).map(it => `
+    const estadoCls   = { pending:'db-badge--amarillo', pendiente:'db-badge--amarillo', enviado:'db-badge--azul', completado:'db-badge--verde', cancelado:'db-badge--rojo' };
+    const estadoLabel = { pending:'Pendiente', pendiente:'Pendiente', enviado:'Enviado', completado:'Completado', cancelado:'Cancelado' };
+
+    // Normalizar campos: las órdenes del orderService usan 'items[].title',
+    // las antiguas usaban 'items[].nombre'. Soportar ambas.
+    const items = (o.items ?? []).map(it => {
+        const nombre  = it.title  ?? it.nombre  ?? '—';
+        const qty     = it.quantity ?? it.cantidad ?? 0;
+        const precio  = it.price  ?? it.precio  ?? 0;
+        const img     = it.imagen ?? '';
+        return `
         <div class="db-pedido-item">
-            <img src="${it.imagen}" alt="${it.nombre}"
+            <img src="${img || 'https://placehold.co/40x40/FAF7F2/2A8C64?text=?'}"
+                 alt="${nombre}"
                  onerror="this.src='https://placehold.co/40x40/FAF7F2/2A8C64?text=?'">
-            <span class="db-pedido-item__nombre">${it.nombre}</span>
-            <span class="db-pedido-item__qty">× ${it.cantidad}</span>
-            <span class="db-pedido-item__precio">${formatearPrecio(it.precio * it.cantidad)}</span>
-        </div>`).join('');
+            <span class="db-pedido-item__nombre">${nombre}</span>
+            <span class="db-pedido-item__qty">× ${qty}</span>
+            <span class="db-pedido-item__precio">${formatearPrecio(precio * qty)}</span>
+        </div>`;
+    }).join('');
+
+    // Normalizar total: puede venir en pricing.total o en o.total
+    const total  = o.pricing?.total ?? o.total ?? 0;
+    const estado = o.status ?? o.estado ?? 'pending';
+    const fecha  = o.createdAt ?? o.fecha;
 
     return `
-    <div class="db-pedido-card">
+    <div class="db-pedido-card" data-order-id="${o.id}">
         <div class="db-pedido-card__head">
-            <span class="db-pedido-card__id"><i class="ri-file-list-3-line"></i> Pedido #${o.id}</span>
-            <span class="db-pedido-card__fecha">${fmtFecha(o.fecha)}</span>
-            <span class="db-badge ${estadoCls[o.estado] ?? 'db-badge--gris'}">${estadoLabel[o.estado] ?? o.estado}</span>
-            <span class="db-pedido-card__total">${formatearPrecio(o.total ?? 0)}</span>
+            <span class="db-pedido-card__id">
+                <i class="ri-file-list-3-line"></i> ${o.id}
+            </span>
+            <span class="db-pedido-card__fecha">${fmtFecha(fecha)}</span>
+            <span class="db-badge ${estadoCls[estado] ?? 'db-badge--gris'}">
+                ${estadoLabel[estado] ?? estado}
+            </span>
+            <span class="db-pedido-card__total">${formatearPrecio(total)}</span>
+            <!-- Acciones de factura -->
+            <div style="display:flex;gap:5px;margin-left:auto;flex-shrink:0">
+                <button class="db-btn db-btn--sm"
+                        data-factura-pdf="${o.id}"
+                        title="Descargar factura PDF"
+                        aria-label="Descargar factura PDF del pedido ${o.id}"
+                        style="gap:5px">
+                    <i class="ri-file-download-line"></i>
+                    <span class="hide-xs">PDF</span>
+                </button>
+                <button class="db-btn db-btn--sm"
+                        data-factura-print="${o.id}"
+                        title="Imprimir comprobante"
+                        aria-label="Imprimir comprobante del pedido ${o.id}">
+                    <i class="ri-printer-line"></i>
+                </button>
+            </div>
         </div>
         ${items ? `<div class="db-pedido-card__body">${items}</div>` : ''}
     </div>`;
@@ -346,14 +386,26 @@ function renderAdminResumen() {
         const l = { pendiente:'Pendiente', enviado:'Enviado', completado:'Completado', cancelado:'Cancelado' };
         return `<span class="db-badge ${m[o.estado]??'db-badge--gris'}">${l[o.estado]??o.estado}</span>`;
     };
-    tBody.innerHTML = recientes.map(o => `
+    tBody.innerHTML = recientes.map(o => {
+        const estado = o.status ?? o.estado ?? 'pending';
+        const total  = o.pricing?.total ?? o.total ?? 0;
+        const fecha  = o.createdAt ?? o.fecha;
+        const cliente = o.customerInfo?.name ?? o.clienteName ?? '—';
+        const badge = o => {
+            const m = { pending:'db-badge--amarillo', pendiente:'db-badge--amarillo', enviado:'db-badge--azul', completado:'db-badge--verde', cancelado:'db-badge--rojo' };
+            const l = { pending:'Pendiente', pendiente:'Pendiente', enviado:'Enviado', completado:'Completado', cancelado:'Cancelado' };
+            return `<span class="db-badge ${m[estado]??'db-badge--gris'}">${l[estado]??estado}</span>`;
+        };
+        return `
     <tr>
-        <td class="db-table__bold">#${o.id}</td>
-        <td>${o.clienteName ?? '—'}</td>
-        <td>${fmtFecha(o.fecha)}</td>
-        <td class="db-table__price">${formatearPrecio(o.total??0)}</td>
+        <td class="db-table__bold">${o.id}</td>
+        <td>${cliente}</td>
+        <td>${fmtFecha(fecha)}</td>
+        <td class="db-table__price">${formatearPrecio(total)}</td>
         <td>${badge(o)}</td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
+    _vincularBotonesFactura(tBody, recientes);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -535,57 +587,101 @@ function confirmarEliminar() {
 // ─────────────────────────────────────────────────────────────────────────────
 // PANEL ADMIN — Pedidos (gestión de estados)
 // ─────────────────────────────────────────────────────────────────────────────
+// PANEL ADMIN — Pedidos (gestión de estados)
+// ─────────────────────────────────────────────────────────────────────────────
 function renderAdminPedidos() {
-    const orders = [...getOrders()].sort((a,b) => new Date(b.fecha)-new Date(a.fecha));
+    // Soportar tanto órdenes del orderService (status/createdAt/pricing)
+    // como órdenes del formato legacy (estado/fecha/total).
+    const orders = [...getOrders()].sort((a,b) =>
+        new Date(b.createdAt ?? b.fecha) - new Date(a.createdAt ?? a.fecha)
+    );
     const tbody  = document.getElementById('db-orders-tbody');
     if (!tbody) return;
 
     if (orders.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7"><div class="db-empty"><i class="ri-inbox-line"></i><p>No hay pedidos registrados</p></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8"><div class="db-empty"><i class="ri-inbox-line"></i><p>No hay pedidos registrados</p></div></td></tr>`;
         return;
     }
 
-    const estadoOpts = ['pendiente','enviado','completado','cancelado']
-        .map(s => `<option value="${s}">${{pendiente:'Pendiente',enviado:'Enviado',completado:'Completado',cancelado:'Cancelado'}[s]}</option>`)
+    const estadoOpts = ['pending','pendiente','enviado','completado','cancelado']
+        .filter((v,i,a) => a.indexOf(v) === i) // deduplicar
+        .map(s => `<option value="${s}">${{pending:'Pendiente',pendiente:'Pendiente',enviado:'Enviado',completado:'Completado',cancelado:'Cancelado'}[s] ?? s}</option>`)
         .join('');
 
     tbody.innerHTML = orders.map(o => {
-        const badge = { pendiente:'db-badge--amarillo', enviado:'db-badge--azul', completado:'db-badge--verde', cancelado:'db-badge--rojo' };
+        const estado  = o.status ?? o.estado ?? 'pending';
+        const fecha   = o.createdAt ?? o.fecha;
+        const total   = o.pricing?.total ?? o.total ?? 0;
+        const cliente = o.customerInfo?.name ?? o.clienteName ?? '—';
+        const email   = o.customerInfo
+            ? `${o.customerInfo.phone ?? ''}` : (o.clienteEmail ?? '');
+        const nItems  = (o.items ?? []).length;
+        const badge   = { pending:'db-badge--amarillo', pendiente:'db-badge--amarillo',
+                          enviado:'db-badge--azul', completado:'db-badge--verde',
+                          cancelado:'db-badge--rojo' };
+
         return `
         <tr>
-            <td class="db-table__bold">#${o.id}</td>
-            <td>${o.clienteName ?? '—'}<br><span class="db-table__muted">${o.clienteEmail ?? ''}</span></td>
-            <td>${fmtFecha(o.fecha)}</td>
-            <td class="db-table__price">${formatearPrecio(o.total??0)}</td>
-            <td>${(o.items??[]).length} ítem(s)</td>
-            <td><span class="db-badge ${badge[o.estado]??'db-badge--gris'}">${o.estado}</span></td>
+            <td class="db-table__bold">${o.id}</td>
+            <td>${cliente}<br><span class="db-table__muted">${email}</span></td>
+            <td>${fmtFecha(fecha)}</td>
+            <td class="db-table__price">${formatearPrecio(total)}</td>
+            <td>${nItems} ítem(s)</td>
+            <td><span class="db-badge ${badge[estado]??'db-badge--gris'}">${estado}</span></td>
             <td>
                 <select class="db-status-select" data-order-id="${o.id}">
-                    ${estadoOpts.replace(`value="${o.estado}"`,`value="${o.estado}" selected`)}
+                    ${estadoOpts.replace(`value="${estado}"`,`value="${estado}" selected`)}
                 </select>
+            </td>
+            <td>
+                <div class="db-table__actions">
+                    <button class="db-btn db-btn--sm db-btn--icon"
+                            data-factura-pdf="${o.id}"
+                            title="Descargar PDF"
+                            aria-label="Descargar factura PDF del pedido ${o.id}">
+                        <i class="ri-file-download-line"></i>
+                    </button>
+                    <button class="db-btn db-btn--sm db-btn--icon"
+                            data-factura-print="${o.id}"
+                            title="Imprimir"
+                            aria-label="Imprimir comprobante del pedido ${o.id}">
+                        <i class="ri-printer-line"></i>
+                    </button>
+                </div>
             </td>
         </tr>`;
     }).join('');
 
+    // ── Estado: change listener ───────────────────────────────────────────
     tbody.querySelectorAll('[data-order-id]').forEach(sel => {
         sel.addEventListener('change', () => {
             const all = getOrders();
             const idx = all.findIndex(o => String(o.id) === String(sel.dataset.orderId));
             if (idx !== -1) {
-                all[idx].estado = sel.value;
+                // Actualizar el campo correcto según el formato de la orden
+                if ('status' in all[idx]) {
+                    all[idx].status = sel.value;
+                } else {
+                    all[idx].estado = sel.value;
+                }
+                all[idx].updatedAt = new Date().toISOString();
                 saveOrders(all);
-                toast(`Pedido #${sel.dataset.orderId} → ${sel.value}`, 'info');
-                // re-render badge inline
-                const row = sel.closest('tr');
-                const badgeCls = { pendiente:'db-badge--amarillo', enviado:'db-badge--azul', completado:'db-badge--verde', cancelado:'db-badge--rojo' };
+                toast(`Pedido ${sel.dataset.orderId} → ${sel.value}`, 'info');
+                const row     = sel.closest('tr');
+                const badgeCls = { pending:'db-badge--amarillo', pendiente:'db-badge--amarillo',
+                                    enviado:'db-badge--azul', completado:'db-badge--verde',
+                                    cancelado:'db-badge--rojo' };
                 const badgeEl = row?.querySelector('.db-badge');
                 if (badgeEl) {
-                    badgeEl.className = `db-badge ${badgeCls[sel.value]??'db-badge--gris'}`;
+                    badgeEl.className   = `db-badge ${badgeCls[sel.value]??'db-badge--gris'}`;
                     badgeEl.textContent = sel.value;
                 }
             }
         });
     });
+
+    // ── Botones de factura ────────────────────────────────────────────────
+    _vincularBotonesFactura(tbody, orders);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -704,6 +800,49 @@ function renderAdminUsuarios() {
     });
     tbody.querySelectorAll('[data-usr-del]:not([disabled])').forEach(btn => {
         btn.addEventListener('click', () => pedirConfirmEliminarUsuario(btn.dataset.usrDel));
+    });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FACTURA — vincular botones PDF/Imprimir en cualquier contenedor
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Vincula los botones [data-factura-pdf] y [data-factura-print]
+ * dentro del contenedor dado, usando el array de órdenes para buscar por ID.
+ *
+ * @param {Element}  container  El nodo padre que contiene los botones.
+ * @param {object[]} orders     Lista de órdenes donde buscar el ID.
+ */
+function _vincularBotonesFactura(container, orders) {
+    // PDF
+    container.querySelectorAll('[data-factura-pdf]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const order = orders.find(o => String(o.id) === String(btn.dataset.facturaPdf));
+            if (!order) { toast('Orden no encontrada', 'error'); return; }
+
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="ri-loader-4-line" style="animation:spin 0.8s linear infinite"></i>';
+            btn.disabled  = true;
+            try {
+                await descargarFacturaPDF(order);
+                toast('Factura descargada correctamente');
+            } catch (err) {
+                console.error('[Dashboard] Error PDF:', err);
+                toast('No se pudo generar el PDF', 'error');
+            } finally {
+                btn.innerHTML = textoOriginal;
+                btn.disabled  = false;
+            }
+        });
+    });
+
+    // Imprimir
+    container.querySelectorAll('[data-factura-print]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const order = orders.find(o => String(o.id) === String(btn.dataset.facturaPrint));
+            if (!order) { toast('Orden no encontrada', 'error'); return; }
+            imprimirFactura(order);
+        });
     });
 }
 

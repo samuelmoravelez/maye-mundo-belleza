@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Pedido Confirmado! | Maye Mundo Belleza</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="/js/entries/entry-pedido-exitoso.js"></script>
+</head>
+<body class="exito-page">
+
+    <div class="exito-card">
+
+        <!-- ── Cabecera ── -->
+        <div class="exito-card__header">
+            <div class="exito-card__check">
+                <i class="ri-checkbox-circle-fill"></i>
+            </div>
+            <h1 class="exito-card__titulo">¡Pedido confirmado!</h1>
+            <p class="exito-card__sub">
+                Gracias por tu compra. Hemos recibido tu pedido y
+                lo estamos procesando con todo el amor de Maye Mundo Belleza.
+            </p>
+        </div>
+
+        <!-- ── Cuerpo ── -->
+        <div class="exito-card__body">
+
+            <!-- ID de la orden -->
+            <div class="exito-orden-id">
+                <div>
+                    <span class="exito-orden-id__label">Número de pedido</span>
+                    <span class="exito-orden-id__valor" id="exito-orden-id">—</span>
+                </div>
+                <i class="ri-file-list-3-line"
+                   style="font-size:1.4rem;color:var(--verde-principal);opacity:.6"></i>
+            </div>
+
+            <!-- Info de pago (renderizada por JS) -->
+            <div class="exito-info-pago" id="exito-info-pago"></div>
+
+            <!-- Botones de acción -->
+            <div class="exito-acciones">
+
+                <!-- Descargar PDF -->
+                <button class="exito-btn exito-btn--primary"
+                        id="btn-descargar-pdf"
+                        aria-label="Descargar factura en PDF">
+                    <i class="ri-file-download-line"></i>
+                    Descargar Factura PDF
+                </button>
+
+                <!-- Imprimir -->
+                <button class="exito-btn exito-btn--outline"
+                        id="btn-imprimir"
+                        aria-label="Imprimir comprobante">
+                    <i class="ri-printer-line"></i>
+                    Imprimir comprobante
+                </button>
+
+                <!-- WhatsApp soporte -->
+                <a class="exito-btn exito-btn--whatsapp"
+                   id="btn-soporte-whatsapp"
+                   href="#"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="Enviar soporte por WhatsApp">
+                    <i class="ri-whatsapp-line"></i>
+                    Enviar soporte por WhatsApp
+                </a>
+
+                <div class="exito-divider">─ ─ ─</div>
+
+                <!-- Ir al dashboard -->
+                <a class="exito-btn exito-btn--muted"
+                   id="btn-ver-pedidos"
+                   href="/maye-mundo-belleza/dashboard.html"
+                   aria-label="Ver mis pedidos en el dashboard">
+                    <i class="ri-dashboard-3-line"></i>
+                    Ver mis pedidos
+                </a>
+
+                <!-- Seguir comprando -->
+                <a class="exito-btn exito-btn--muted"
+                   href="/maye-mundo-belleza/paginas/productos.html"
+                   aria-label="Volver a la tienda">
+                    <i class="ri-store-2-line"></i>
+                    Seguir comprando
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

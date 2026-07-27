@@ -12,8 +12,11 @@ import {
     calcularTotal,
     generarMensajeWhatsApp,
 } from '../utils/carrito.js';
-import { formatearPrecio } from '../data/productos.data.js';
-import { waLink } from '../utils/constants.js';
+import { formatearPrecio }       from '../data/productos.data.js';
+import { waLink, RUTAS,
+         SHIPPING_COST }         from '../utils/constants.js';
+import { getSession }            from '../utils/authService.js';
+import { guardarSnapshotCheckout } from '../utils/orderService.js';
 
 // ── REFERENCIAS DOM (se resuelven en iniciar) ──────────────────────────────
 let overlay, drawer, cuerpo, badgeHeader, btnCerrar, btnVaciar, btnWhatsApp;
@@ -67,6 +70,16 @@ function inyectarHTML() {
             <div class="carrito-drawer__pie" id="carrito-pie" style="display:none">
                 <div class="carrito-totales" id="carrito-totales"></div>
                 <div class="carrito-drawer__acciones">
+                    <!-- Botón principal: Finalizar Compra Web -->
+                    <button class="btn-checkout-web" id="btn-checkout-web">
+                        <i class="ri-secure-payment-line"></i>
+                        Finalizar Compra Web
+                    </button>
+                    <!-- Separador -->
+                    <div class="carrito-separador-acciones">
+                        <span>o continúa por</span>
+                    </div>
+                    <!-- WhatsApp -->
                     <button class="btn-pedir-whatsapp" id="btn-pedir-whatsapp">
                         <i class="ri-whatsapp-line"></i>
                         Realizar pedido por WhatsApp
@@ -83,15 +96,15 @@ function inyectarHTML() {
 
 // ── RESOLVER REFERENCIAS ───────────────────────────────────────────────────
 function resolverRefs() {
-    overlay      = document.getElementById('carrito-overlay');
-    drawer       = document.getElementById('carrito-drawer');
-    cuerpo       = document.getElementById('carrito-cuerpo');
-    badgeHeader  = document.getElementById('carrito-badge-drawer');
-    btnCerrar    = document.getElementById('carrito-cerrar');
-    btnVaciar    = document.getElementById('btn-vaciar-carrito');
-    btnWhatsApp  = document.getElementById('btn-pedir-whatsapp');
-    pieTotales   = document.getElementById('carrito-pie');
-    contadores   = document.querySelectorAll('.contador-carrito');
+    overlay         = document.getElementById('carrito-overlay');
+    drawer          = document.getElementById('carrito-drawer');
+    cuerpo          = document.getElementById('carrito-cuerpo');
+    badgeHeader     = document.getElementById('carrito-badge-drawer');
+    btnCerrar       = document.getElementById('carrito-cerrar');
+    btnVaciar       = document.getElementById('btn-vaciar-carrito');
+    btnWhatsApp     = document.getElementById('btn-pedir-whatsapp');
+    pieTotales      = document.getElementById('carrito-pie');
+    contadores      = document.querySelectorAll('.contador-carrito');
 }
 
 // ── EVENTOS ────────────────────────────────────────────────────────────────
@@ -125,6 +138,10 @@ function adjuntarEventos() {
         if (!msg) return;
         window.open(waLink(msg), '_blank', 'noopener,noreferrer');
     });
+
+    // ── Finalizar Compra Web ───────────────────────────────────────────────
+    document.getElementById('btn-checkout-web')
+        ?.addEventListener('click', _manejarCheckoutWeb);
 }
 
 // ── ABRIR / CERRAR ─────────────────────────────────────────────────────────
@@ -226,7 +243,8 @@ function itemHTML(item) {
 
 function renderizarTotales(items) {
     const subtotal = calcularTotal();
-    const total    = subtotal; // sin envío por ahora
+    const shipping = SHIPPING_COST;
+    const total    = subtotal + shipping;
 
     document.getElementById('carrito-totales').innerHTML = `
         <div class="carrito-totales__fila">
@@ -234,13 +252,67 @@ function renderizarTotales(items) {
             <span>${formatearPrecio(subtotal)}</span>
         </div>
         <div class="carrito-totales__fila">
-            <span>Envío</span>
-            <span style="color:var(--verde-principal);font-weight:600">A coordinar</span>
+            <span>Envío estimado</span>
+            <span style="color:var(--verde-principal);font-weight:600">
+                ${formatearPrecio(shipping)}
+            </span>
         </div>
         <div class="carrito-totales__fila carrito-totales__fila--total">
             <span>Total estimado</span>
             <span>${formatearPrecio(total)}</span>
         </div>`;
+}
+
+// ── CHECKOUT WEB ───────────────────────────────────────────────────────────
+/**
+ * Maneja el clic en "Finalizar Compra Web".
+ *
+ * - Si hay sesión activa → guarda snapshot del carrito y navega a checkout.html
+ * - Si no hay sesión      → cierra el drawer y abre el modal de autenticación
+ *   con una invitación a iniciar sesión para continuar la compra.
+ */
+function _manejarCheckoutWeb() {
+    const items   = obtenerItems();
+    const session = getSession();
+
+    if (items.length === 0) return;
+
+    if (!session) {
+        // Sin sesión: cerrar drawer y abrir modal de login
+        cerrarDrawer();
+
+        // Marcar flag para que entry-index.js abra el modal al volver
+        sessionStorage.setItem('maye_auth_redirect', 'checkout');
+
+        // Intentar abrir el modal si el componente auth está en la página actual
+        const evento = new CustomEvent('auth:solicitar-login', {
+            detail: { motivo: 'checkout' },
+        });
+        window.dispatchEvent(evento);
+
+        // Si no hay listener registrado (página sin authModal cargado),
+        // redirigir a inicio donde sí existe el modal
+        setTimeout(() => {
+            const overlay = document.getElementById('auth-overlay');
+            if (!overlay?.classList.contains('auth-overlay--visible')) {
+                window.location.href = RUTAS.HOME;
+            }
+        }, 150);
+
+        return;
+    }
+
+    // Con sesión: guardar snapshot y navegar al checkout
+    guardarSnapshotCheckout(items.map(i => ({
+        id:       i.id,
+        nombre:   i.nombre,
+        precio:   i.precio,
+        imagen:   i.imagen,
+        cantidad: i.cantidad,
+    })));
+
+    cerrarDrawer();
+    window.location.href = RUTAS.CHECKOUT;
 }
 
 // ── SINCRONIZAR TODOS LOS CONTADORES DEL HEADER ────────────────────────────

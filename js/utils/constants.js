@@ -13,25 +13,29 @@ export const STORAGE_KEYS = Object.freeze({
     PRODUCTOS:     'maye_productos',
     CARRITO:       'maye_carrito',
     ADMIN_SESSION: 'maye_admin_session',
-    // ── Auth (módulo unificado) ──────────────────────────
     USERS:         'maye_users',
     SESSION:       'maye_session',
-    // ── Dashboard ────────────────────────────────────────
     ORDERS:        'maye_orders',
     FAVORITES:     'maye_favorites',
+    CHECKOUT:      'maye_checkout_pendiente', // carrito snapshot al ir al checkout
 });
 
 export const SCHEMA_VERSION = 1;
 
 export const RUTAS = Object.freeze({
-    HOME:      '/maye-mundo-belleza/index.html',
-    PRODUCTOS: '/maye-mundo-belleza/paginas/productos.html',
-    CONTACTO:  '/maye-mundo-belleza/paginas/contacto.html',
-    LEGAL:     '/maye-mundo-belleza/paginas/legales.html',
-    PRODUCTO:  '/maye-mundo-belleza/paginas/producto.html',
-    ADMIN:     '/maye-mundo-belleza/admin.html',
-    DASHBOARD: '/maye-mundo-belleza/dashboard.html',
+    HOME:           '/maye-mundo-belleza/index.html',
+    PRODUCTOS:      '/maye-mundo-belleza/paginas/productos.html',
+    CONTACTO:       '/maye-mundo-belleza/paginas/contacto.html',
+    LEGAL:          '/maye-mundo-belleza/paginas/legales.html',
+    PRODUCTO:       '/maye-mundo-belleza/paginas/producto.html',
+    ADMIN:          '/maye-mundo-belleza/admin.html',
+    DASHBOARD:      '/maye-mundo-belleza/dashboard.html',
+    CHECKOUT:       '/maye-mundo-belleza/checkout.html',
+    PEDIDO_EXITOSO: '/maye-mundo-belleza/pedido-exitoso.html',
 });
+
+// Costo de envío estándar (COP). Cambiar aquí para todo el sistema.
+export const SHIPPING_COST = 8000;
 
 export const EMPRESA = Object.freeze({
     NOMBRE:      'Maye Mundo Belleza',

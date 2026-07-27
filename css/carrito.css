@@ -377,3 +377,53 @@
     }
     .carrito-item__imagen { width: 60px; height: 60px; }
 }
+
+/* ── BOTÓN FINALIZAR COMPRA WEB ── */
+.btn-checkout-web {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--verde-principal), var(--verde-claro));
+    color: var(--blanco-puro);
+    border: none;
+    border-radius: var(--radio-md);
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transicion);
+    box-shadow: var(--sombra-verde);
+    letter-spacing: 0.02em;
+}
+
+.btn-checkout-web:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(42, 140, 100, 0.42);
+}
+
+.btn-checkout-web:active { transform: translateY(0); }
+
+.btn-checkout-web i { font-size: 1.1rem; }
+
+/* ── SEPARADOR entre Checkout Web y WhatsApp ── */
+.carrito-separador-acciones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.72rem;
+    color: var(--texto-mutado);
+    font-family: var(--fuente-cuerpo);
+    text-align: center;
+    margin: 2px 0;
+}
+
+.carrito-separador-acciones::before,
+.carrito-separador-acciones::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--borde-suave);
+}

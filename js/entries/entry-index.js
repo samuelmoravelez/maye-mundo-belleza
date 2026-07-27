@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Si viene redirigido desde admin.html (sin sesión), abrir modal de login
     const authRedirect = sessionStorage.getItem('maye_auth_redirect');
-    if (authRedirect === 'admin' || authRedirect === 'dashboard') {
+    if (authRedirect === 'admin' || authRedirect === 'dashboard' || authRedirect === 'checkout') {
         sessionStorage.removeItem('maye_auth_redirect');
         setTimeout(() => abrirModal('login'), 120);
     }

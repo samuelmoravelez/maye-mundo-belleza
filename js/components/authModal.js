@@ -741,4 +741,10 @@ export function iniciarAuthModal() {
             setCampoValido('reg-email');
         }
     });
+
+    // 14. Evento global: carritoDrawer pide abrir el modal de login
+    window.addEventListener('auth:solicitar-login', (e) => {
+        const tab = e.detail?.tab ?? 'login';
+        abrirModal(tab);
+    });
 }

@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Compra | Maye Mundo Belleza</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!--
+        NOTA VITE:
+        En desarrollo (vite dev), los estilos se inyectan via JS module.
+        El src usa ruta relativa para que funcione en DEV y en PROD.
+    -->
+    <script type="module" src="./js/entries/entry-checkout.js"></script>
+</head>
+<body class="checkout-page">
+
+<!-- HEADER STICKY -->
+<header class="checkout-header">
+    <div class="checkout-header__inner">
+        <a href="./index.html" class="checkout-header__logo" aria-label="Ir al inicio">
+            <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png"
+                 alt="Maye Mundo Belleza" width="36" height="36">
+            <span class="checkout-header__logo-nombre">Maye Mundo Belleza</span>
+        </a>
+        <nav class="checkout-header__steps" aria-label="Pasos de compra">
+            <span class="checkout-header__step">Carrito</span>
+            <i class="ri-arrow-right-s-line checkout-header__step-sep" aria-hidden="true"></i>
+            <span class="checkout-header__step checkout-header__step--activo">
+                <i class="ri-secure-payment-line" aria-hidden="true"></i> Checkout
+            </span>
+            <i class="ri-arrow-right-s-line checkout-header__step-sep" aria-hidden="true"></i>
+            <span class="checkout-header__step">Confirmación</span>
+        </nav>
+        <button class="checkout-header__volver" id="btn-volver-carrito" type="button">
+            <i class="ri-arrow-left-line" aria-hidden="true"></i>
+            <span>Volver</span>
+        </button>
+    </div>
+</header>
+
+<!-- CARRITO VACÍO (visible sólo si no hay ítems) -->
+<div class="co-carrito-vacio" id="co-carrito-vacio" hidden>
+    <div class="co-carrito-vacio__inner">
+        <div class="co-carrito-vacio__icono"><i class="ri-shopping-cart-2-line"></i></div>
+        <h2 class="co-carrito-vacio__titulo">Tu carrito está vacío</h2>
+        <p class="co-carrito-vacio__sub">Agrega productos antes de continuar con el pago.</p>
+        <a href="./paginas/productos.html" class="co-btn-volver-tienda">
+            <i class="ri-store-2-line"></i> Explorar productos
+        </a>
+    </div>
+</div>
+
+<!-- GRID PRINCIPAL -->
+<main class="checkout-grid" id="checkout-grid" role="main">
+
+    <!-- COLUMNA IZQUIERDA: formulario -->
+    <div class="checkout-col-form">
+
+        <!-- Alerta global -->
+        <div class="co-alerta" id="co-alerta" role="alert" aria-live="assertive" hidden>
+            <i class="ri-error-warning-fill co-alerta__icono" aria-hidden="true"></i>
+            <span id="co-alerta-texto"></span>
+        </div>
+
+        <!-- SECCIÓN 1: Datos de envío -->
+        <section class="checkout-card" aria-labelledby="titulo-envio">
+            <div class="checkout-card__head">
+                <span class="checkout-card__num" aria-hidden="true">1</span>
+                <h2 class="checkout-card__titulo" id="titulo-envio">
+                    <i class="ri-map-pin-line" aria-hidden="true"></i> Datos de envío
+                </h2>
+            </div>
+            <div class="checkout-card__body">
+                <div class="co-form-grid">
+
+                    <div class="co-campo" id="campo-co-nombre">
+                        <label class="co-campo__label" for="co-nombre">Nombre completo <span class="co-campo__req">*</span></label>
+                        <div class="co-campo__input-wrap">
+                            <i class="ri-user-line co-campo__ico" aria-hidden="true"></i>
+                            <input class="co-campo__input" type="text" id="co-nombre" placeholder="Ej: María Gómez" autocomplete="name" required>
+                        </div>
+                        <span class="co-campo__error" role="alert">Campo obligatorio</span>
+                    </div>
+
+                    <div class="co-campo" id="campo-co-telefono">
+                        <label class="co-campo__label" for="co-telefono">Teléfono / WhatsApp <span class="co-campo__req">*</span></label>
+                        <div class="co-campo__input-wrap">
+                            <i class="ri-phone-line co-campo__ico" aria-hidden="true"></i>
+                            <input class="co-campo__input" type="tel" id="co-telefono" placeholder="+57 300 000 0000" autocomplete="tel" required>
+                        </div>
+                        <span class="co-campo__error" role="alert">Campo obligatorio</span>
+                    </div>
+
+                    <div class="co-campo co-campo--full" id="campo-co-direccion">
+                        <label class="co-campo__label" for="co-direccion">Dirección completa <span class="co-campo__req">*</span></label>
+                        <div class="co-campo__input-wrap">
+                            <i class="ri-home-4-line co-campo__ico" aria-hidden="true"></i>
+                            <input class="co-campo__input" type="text" id="co-direccion" placeholder="Calle 10 # 20-30, Apto 401, Barrio El Prado" autocomplete="street-address" required>
+                        </div>
+                        <span class="co-campo__error" role="alert">Campo obligatorio</span>
+                    </div>
+
+                    <div class="co-campo" id="campo-co-ciudad">
+                        <label class="co-campo__label" for="co-ciudad">Ciudad <span class="co-campo__req">*</span></label>
+                        <div class="co-campo__input-wrap">
+                            <i class="ri-building-2-line co-campo__ico" aria-hidden="true"></i>
+                            <input class="co-campo__input" type="text" id="co-ciudad" placeholder="Ej: Medellín" autocomplete="address-level2" required>
+                        </div>
+                        <span class="co-campo__error" role="alert">Campo obligatorio</span>
+                    </div>
+
+                    <div class="co-campo" id="campo-co-notas">
+                        <label class="co-campo__label" for="co-notas">
+                            Instrucciones <span style="font-weight:400;font-size:0.68rem;opacity:.65">(opcional)</span>
+                        </label>
+                        <div class="co-campo__input-wrap">
+                            <i class="ri-file-text-line co-campo__ico" aria-hidden="true"></i>
+                            <input class="co-campo__input" type="text" id="co-notas" placeholder="Ej: Llamar antes de entregar">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: Método de pago -->
+        <section class="checkout-card" aria-labelledby="titulo-pago">
+            <div class="checkout-card__head">
+                <span class="checkout-card__num" aria-hidden="true">2</span>
+                <h2 class="checkout-card__titulo" id="titulo-pago">
+                    <i class="ri-bank-card-line" aria-hidden="true"></i> Método de pago
+                </h2>
+            </div>
+            <div class="checkout-card__body">
+                <div class="co-metodos" id="co-metodos" role="radiogroup" aria-labelledby="titulo-pago">
+
+                    <!-- Nequi -->
+                    <label class="co-metodo co-metodo--seleccionado" id="co-metodo-nequi">
+                        <input type="radio" name="metodoPago" value="nequi" checked>
+                        <div class="co-metodo__icono co-metodo__icono--nequi" aria-hidden="true"><i class="ri-smartphone-line"></i></div>
+                        <div class="co-metodo__info">
+                            <div class="co-metodo__nombre">Nequi</div>
+                            <div class="co-metodo__desc">Transfiere desde tu app Nequi al número registrado.</div>
+                            <div class="co-metodo__detalle">
+                                Número Nequi: <strong>+57 300 309 1641</strong><br>
+                                Titular: <strong>Maye Mundo Belleza</strong><br>
+                                Envía el comprobante de pago por WhatsApp para confirmar tu despacho.
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Bancolombia -->
+                    <label class="co-metodo" id="co-metodo-bancolombia">
+                        <input type="radio" name="metodoPago" value="bancolombia">
+                        <div class="co-metodo__icono co-metodo__icono--bancolombia" aria-hidden="true"><i class="ri-bank-line"></i></div>
+                        <div class="co-metodo__info">
+                            <div class="co-metodo__nombre">Bancolombia / Transferencia</div>
+                            <div class="co-metodo__desc">Transferencia bancaria o PSE a cuenta Bancolombia.</div>
+                            <div class="co-metodo__detalle">
+                                Cuenta de Ahorros: <strong>123-456789-00</strong><br>
+                                Titular: <strong>Maye Mundo Belleza</strong> &nbsp;·&nbsp; Cédula: <strong>1.234.567.890</strong><br>
+                                Envía el comprobante por WhatsApp al confirmar.
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Contraentrega -->
+                    <label class="co-metodo" id="co-metodo-contraentrega">
+                        <input type="radio" name="metodoPago" value="contraentrega">
+                        <div class="co-metodo__icono co-metodo__icono--contraentrega" aria-hidden="true"><i class="ri-money-dollar-circle-line"></i></div>
+                        <div class="co-metodo__info">
+                            <div class="co-metodo__nombre">Pago Contraentrega</div>
+                            <div class="co-metodo__desc">Paga en efectivo al momento de recibir tu pedido.</div>
+                            <div class="co-metodo__detalle">
+                                Ten listo el valor <strong>exacto</strong> al recibir.<br>
+                                Solo para envíos dentro del área metropolitana.<br>
+                                Tiempo de entrega: <strong>1 a 3 días hábiles</strong>.
+                            </div>
+                        </div>
+                    </label>
+
+                </div>
+            </div>
+        </section>
+
+    </div><!-- /.checkout-col-form -->
+
+    <!-- COLUMNA DERECHA: resumen -->
+    <aside class="co-resumen" aria-label="Resumen del pedido">
+        <div class="checkout-card co-resumen__card">
+            <div class="checkout-card__head">
+                <span class="checkout-card__num checkout-card__num--bag" aria-hidden="true">
+                    <i class="ri-shopping-bag-3-line" style="font-size:0.82rem"></i>
+                </span>
+                <h2 class="checkout-card__titulo">Resumen del pedido</h2>
+            </div>
+            <div class="checkout-card__body">
+                <!-- Ítems: renderizados por JS -->
+                <div id="co-items-lista" aria-live="polite"></div>
+                <hr class="co-resumen__sep">
+                <!-- Totales: renderizados por JS -->
+                <div class="co-totales" id="co-totales" aria-live="polite"></div>
+                <!-- Botón confirmar -->
+                <button class="co-btn-confirmar" id="co-btn-confirmar" type="button"
+                        aria-label="Confirmar pedido y procesar pago">
+                    <span class="co-spinner" aria-hidden="true"></span>
+                    <span class="co-btn-texto">
+                        <i class="ri-lock-line" aria-hidden="true"></i>
+                        Confirmar pedido
+                    </span>
+                </button>
+                <!-- Garantía -->
+                <p class="co-garantia">
+                    <i class="ri-shield-check-line" aria-hidden="true"></i>
+                    Compra 100% segura &nbsp;·&nbsp; Datos protegidos
+                </p>
+                <!-- Enlace de vuelta -->
+                <a href="./paginas/productos.html" class="co-link-volver-tienda">
+                    <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
+                    Seguir comprando
+                </a>
+            </div>
+        </div>
+    </aside>
+
+</main><!-- /.checkout-grid -->
+</body>
+</html>
