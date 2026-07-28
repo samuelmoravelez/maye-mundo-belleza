@@ -1,16 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Información Legal | Maye Mundo Belleza</title>
-    <meta name="description" content="Política de Privacidad, Términos y Condiciones, Política de Envíos y Cambios y Devoluciones de Maye Mundo Belleza.">
+    <meta name="description" content="Política de Privacidad, Términos y Condiciones, Envíos, Devoluciones y Preguntas Frecuentes de Maye Mundo Belleza.">
     <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-    <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script type="module" src="/js/entries/entry-legales.js"></script>
 </head>
@@ -19,7 +17,7 @@
     {{> barra-anuncio }}
     {{> header }}
 
-    <!-- BREADCRUMB -->
+    <!-- ── BREADCRUMB ─────────────────────────────────────────────────────── -->
     <nav class="breadcrumb" aria-label="Migas de pan">
         <div class="contenedor">
             <ol class="breadcrumb__lista">
@@ -32,314 +30,646 @@
         </div>
     </nav>
 
-    <!-- HERO -->
-    <section class="hero-seccion legales-hero">
-        <div class="contenedor hero-seccion__contenido">
-            <span class="hero-seccion__etiqueta"><i class="ri-shield-check-line"></i> Transparencia y confianza</span>
-            <h1 class="hero-seccion__titulo">Información Legal</h1>
-            <p class="hero-seccion__descripcion">
+    <!-- ── HERO ───────────────────────────────────────────────────────────── -->
+    <section class="legales-hero" aria-labelledby="legales-hero-titulo">
+        <div class="contenedor legales-hero__contenido">
+            <div class="legales-hero__badge">
+                <i class="ri-shield-check-line" aria-hidden="true"></i> Transparencia y confianza
+            </div>
+            <h1 class="legales-hero__titulo" id="legales-hero-titulo">Información Legal</h1>
+            <p class="legales-hero__sub">
                 En Maye Mundo Belleza nos tomamos en serio tus derechos y tu privacidad.
-                Aquí encontrarás toda la información sobre nuestras políticas.
+                Aquí encontrarás todo lo que necesitas saber sobre nuestras políticas.
             </p>
         </div>
     </section>
 
-    <main class="legales-principal">
-        <div class="contenedor legales-grid">
+    <!-- ── SELECTOR MÓVIL (< 768px reemplaza las pestañas) ────────────────── -->
+    <div class="legales-select-wrap" role="navigation" aria-label="Seleccionar sección legal">
+        <label class="legales-select-wrap__label" for="legales-select-movil">
+            <i class="ri-menu-2-line" aria-hidden="true"></i> Ver sección:
+        </label>
+        <select class="legales-select-movil" id="legales-select-movil" aria-label="Navegar a sección legal">
+            <option value="terminos">Términos y Condiciones</option>
+            <option value="privacidad">Privacidad y Datos</option>
+            <option value="envios">Envíos y Entregas</option>
+            <option value="devoluciones">Cambios y Devoluciones</option>
+            <option value="faq">Preguntas Frecuentes</option>
+        </select>
+    </div>
 
-            <!-- SIDEBAR DE NAVEGACIÓN (sticky) -->
-            <aside class="legales-sidebar" aria-label="Secciones legales">
-                <div class="legales-sidebar__sticky">
-                    <h3 class="legales-sidebar__titulo"><i class="ri-file-list-3-line"></i> Secciones</h3>
-                    <nav class="legales-sidebar__nav">
-                        <a href="#privacidad" class="legales-sidebar__link" data-legal-link="privacidad">
-                            <i class="ri-lock-password-line"></i> Política de Privacidad
-                        </a>
-                        <a href="#terminos" class="legales-sidebar__link" data-legal-link="terminos">
-                            <i class="ri-file-text-line"></i> Términos y Condiciones
-                        </a>
-                        <a href="#envios" class="legales-sidebar__link" data-legal-link="envios">
-                            <i class="ri-truck-line"></i> Política de Envíos
-                        </a>
-                        <a href="#devoluciones" class="legales-sidebar__link" data-legal-link="devoluciones">
-                            <i class="ri-refresh-line"></i> Cambios y Devoluciones
-                        </a>
-                    </nav>
-                    <div class="legales-sidebar__actualizacion">
-                        <i class="ri-calendar-line"></i>
-                        <span>Última actualización: Enero 6</span>
+    <!-- ── MAIN ───────────────────────────────────────────────────────────── -->
+    <main class="legales-main" id="legales-main">
+        <div class="contenedor legales-layout">
+
+            <!-- ── BARRA DE PESTAÑAS (desktop) ── -->
+            <div class="legales-tabs-wrap" role="tablist" aria-label="Secciones de información legal">
+
+                <button class="legales-tab legales-tab--activo"
+                        id="tab-terminos" role="tab"
+                        aria-selected="true" aria-controls="panel-terminos"
+                        data-tab="terminos">
+                    <i class="ri-file-text-line" aria-hidden="true"></i>
+                    <span class="legales-tab__label">Términos</span>
+                    <span class="legales-tab__tiempo" id="tiempo-terminos" aria-label="Tiempo de lectura"></span>
+                </button>
+
+                <button class="legales-tab"
+                        id="tab-privacidad" role="tab"
+                        aria-selected="false" aria-controls="panel-privacidad"
+                        data-tab="privacidad">
+                    <i class="ri-lock-password-line" aria-hidden="true"></i>
+                    <span class="legales-tab__label">Privacidad</span>
+                    <span class="legales-tab__tiempo" id="tiempo-privacidad" aria-label="Tiempo de lectura"></span>
+                </button>
+
+                <button class="legales-tab"
+                        id="tab-envios" role="tab"
+                        aria-selected="false" aria-controls="panel-envios"
+                        data-tab="envios">
+                    <i class="ri-truck-line" aria-hidden="true"></i>
+                    <span class="legales-tab__label">Envíos</span>
+                    <span class="legales-tab__tiempo" id="tiempo-envios" aria-label="Tiempo de lectura"></span>
+                </button>
+
+                <button class="legales-tab"
+                        id="tab-devoluciones" role="tab"
+                        aria-selected="false" aria-controls="panel-devoluciones"
+                        data-tab="devoluciones">
+                    <i class="ri-refresh-line" aria-hidden="true"></i>
+                    <span class="legales-tab__label">Devoluciones</span>
+                    <span class="legales-tab__tiempo" id="tiempo-devoluciones" aria-label="Tiempo de lectura"></span>
+                </button>
+
+                <button class="legales-tab"
+                        id="tab-faq" role="tab"
+                        aria-selected="false" aria-controls="panel-faq"
+                        data-tab="faq">
+                    <i class="ri-question-answer-line" aria-hidden="true"></i>
+                    <span class="legales-tab__label">FAQ</span>
+                    <span class="legales-tab__tiempo" id="tiempo-faq" aria-label="Tiempo de lectura"></span>
+                </button>
+
+            </div><!-- /.legales-tabs-wrap -->
+
+            <!-- ══════════════════════════════════════════════════════════
+                 PANEL 1 — TÉRMINOS Y CONDICIONES
+            ══════════════════════════════════════════════════════════ -->
+            <article class="legales-panel legales-panel--activo"
+                     id="panel-terminos" role="tabpanel"
+                     aria-labelledby="tab-terminos" tabindex="0">
+
+                <!-- Callout resumen -->
+                <div class="legales-callout legales-callout--verde">
+                    <div class="legales-callout__icon" aria-hidden="true">
+                        <i class="ri-lightbulb-flash-line"></i>
+                    </div>
+                    <div class="legales-callout__cuerpo">
+                        <strong>En resumen:</strong> Al usar nuestro sitio o comprar aceptas estas reglas.
+                        Los precios son finales en COP, los productos son 100% originales
+                        y los pedidos se confirman vía WhatsApp con pago previo.
                     </div>
                 </div>
-            </aside>
 
-            <!-- CONTENIDO PRINCIPAL -->
-            <div class="legales-contenido">
-
-                <!-- 1. PRIVACIDAD -->
-                <article class="legal-seccion" id="privacidad">
-                    <header class="legal-seccion__header">
-                        <span class="legal-seccion__icono"><i class="ri-lock-password-line"></i></span>
-                        <div>
-                            <h2 class="legal-seccion__titulo">Política de Privacidad</h2>
-                            <p class="legal-seccion__subtitulo">Cómo protegemos y tratamos tus datos personales</p>
-                        </div>
-                    </header>
-
-                    <div class="legal-seccion__cuerpo">
-                        <h3><i class="ri-checkbox-circle-line"></i> 1. Responsable del tratamiento</h3>
-                        <p>
-                            El responsable del tratamiento de tus datos personales es
-                            <strong>Maye Mundo Belleza</strong>, establecida en Medellín, Antioquia, Colombia.
-                            Puedes contactarnos en <a href="mailto:mayemundobelleza@gmail.com">mayemundobelleza@gmail.com</a>
-                            o al WhatsApp <a href="#" data-cta-whatsapp data-wa-mensaje="Hola!%20Tengo%20una%20consulta%20sobre%20privacidad.">+57 300 309 1641</a>.
-                        </p>
-
-                        <h3><i class="ri-checkbox-circle-line"></i> 2. Datos que recolectamos</h3>
-                        <ul>
-                            <li><strong>Datos de contacto:</strong> nombre, apellido, correo electrónico, teléfono.</li>
-                            <li><strong>Datos de ubicación:</strong> ciudad y dirección de envío, cuando realizas un pedido.</li>
-                            <li><strong>Datos de navegación:</strong> información anónima sobre tu visita al sitio.</li>
-                            <li><strong>Historial de consultas:</strong> mensajes enviados por WhatsApp o formulario de contacto.</li>
-                        </ul>
-
-                        <h3><i class="ri-checkbox-circle-line"></i> 3. Finalidad del tratamiento</h3>
-                        <p>Utilizamos tus datos para:</p>
-                        <ul>
-                            <li>Gestionar, procesar y hacer seguimiento a tus pedidos.</li>
-                            <li>Responder tus consultas, asesorías y solicitudes de información.</li>
-                            <li>Enviarte promociones, novedades y ofertas (solo si autorizas expresamente).</li>
-                            <li>Cumplir con obligaciones legales y tributarias aplicables.</li>
-                            <li>Mejorar tu experiencia en nuestro sitio web y tienda física.</li>
-                        </ul>
-
-                        <h3><i class="ri-checkbox-circle-line"></i> 4. Seguridad y confidencialidad</h3>
-                        <p>
-                            Aplicamos medidas técnicas y organizativas para proteger tu información personal
-                            contra acceso no autorizado, alteración, divulgación o destrucción. Tus datos
-                            se almacenan de forma segura y solo son accedidos por personal autorizado.
-                        </p>
-
-                        <h3><i class="ri-checkbox-circle-line"></i> 5. Tus derechos</h3>
-                        <p>
-                            Como titular de los datos, puedes ejercer en cualquier momento los derechos de
-                            <strong>acceso, corrección, actualización, supresión y revocación</strong>
-                            de tu consentimiento. Para ello, envíanos un mensaje a
-                            <a href="mailto:mayemundobelleza@gmail.com">mayemundobelleza@gmail.com</a>
-                            incluyendo tu nombre completo y la solicitud a realizar. Responderemos en
-                            un plazo máximo de 15 días hábiles.
-                        </p>
-
-                        <h3><i class="ri-checkbox-circle-line"></i> 6. Cookies</h3>
-                        <p>
-                            Nuestro sitio web utiliza cookies técnicas esenciales para el correcto funcionamiento
-                            y preferencias del usuario. No utilizamos cookies publicitarias de terceros.
-                            Al navegar por nuestro sitio aceptas el uso de estas cookies mínimas.
-                        </p>
+                <!-- Índice interno -->
+                <nav class="legales-indice" aria-label="Índice de términos y condiciones">
+                    <div class="legales-indice__titulo">
+                        <i class="ri-list-ordered" aria-hidden="true"></i> En esta sección
                     </div>
-                </article>
+                    <ol class="legales-indice__lista">
+                        <li><a href="#tc-objeto">Objeto y aceptación</a></li>
+                        <li><a href="#tc-productos">Información de los productos</a></li>
+                        <li><a href="#tc-compra">Proceso de compra</a></li>
+                        <li><a href="#tc-pago">Métodos de pago</a></li>
+                        <li><a href="#tc-propiedad">Propiedad intelectual</a></li>
+                        <li><a href="#tc-responsabilidad">Limitación de responsabilidad</a></li>
+                        <li><a href="#tc-modificaciones">Modificaciones</a></li>
+                    </ol>
+                </nav>
 
-                <!-- 2. TÉRMINOS Y CONDICIONES -->
-                <article class="legal-seccion" id="terminos">
-                    <header class="legal-seccion__header">
-                        <span class="legal-seccion__icono"><i class="ri-file-text-line"></i></span>
-                        <div>
-                            <h2 class="legal-seccion__titulo">Términos y Condiciones</h2>
-                            <p class="legal-seccion__subtitulo">Reglas de uso de nuestro sitio y relación comercial</p>
-                        </div>
-                    </header>
+                <div class="legales-cuerpo">
+                    <h2 class="legales-seccion-titulo">
+                        <i class="ri-file-text-line" aria-hidden="true"></i> Términos y Condiciones
+                    </h2>
 
-                    <div class="legal-seccion__cuerpo">
-                        <h3><i class="ri-checkbox-circle-line"></i> 1. Objeto y aceptación</h3>
-                        <p>
-                            Estos Términos y Condiciones regulan el acceso y uso del sitio web
-                            <strong>Maye Mundo Belleza</strong>, así como la relación comercial entre
-                            el usuario y la tienda. Al usar este sitio o realizar una compra, aceptas
-                            íntegramente las disposiciones aquí descritas.
-                        </p>
+                    <section id="tc-objeto">
+                        <h3>1. Objeto y aceptación</h3>
+                        <p>Estos Términos y Condiciones regulan el acceso y uso del sitio web <strong>Maye Mundo Belleza</strong>, así como la relación comercial entre el usuario y la tienda. Al usar este sitio o realizar una compra, aceptas íntegramente las disposiciones aquí descritas.</p>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 2. Información de los productos</h3>
+                    <section id="tc-productos">
+                        <h3>2. Información de los productos</h3>
                         <ul>
-                            <li>Todos los productos son 100% originales y cuentan con garantía de fabricante.</li>
+                            <li>Todos los productos son <strong>100% originales</strong> y cuentan con garantía de fabricante.</li>
                             <li>Las imágenes son referenciales; el producto real puede variar levemente en presentación.</li>
-                            <li>Descripciones, precios y disponibilidad son actualizados periódicamente.</li>
+                            <li>Descripciones, precios y disponibilidad se actualizan periódicamente.</li>
                             <li>El precio publicado en el sitio es el precio final (COP) e incluye IVA cuando aplica.</li>
                         </ul>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 3. Proceso de compra</h3>
-                        <p>
-                            Los pedidos se gestionan directamente por <strong>WhatsApp</strong>.
-                            Una vez expreses tu interés, una asesora te contactará para confirmar
-                            producto, disponibilidad, valor del envío, forma de pago y coordinar la entrega.
-                            El contrato de compra-venta se perfecciona únicamente cuando la asesora
-                            confirma el pedido por escrito y el pago es realizado o acordado.
-                        </p>
+                    <section id="tc-compra">
+                        <h3>3. Proceso de compra</h3>
+                        <p>Los pedidos se gestionan directamente por <strong>WhatsApp</strong>. Una vez expreses tu interés, una asesora te contactará para confirmar producto, disponibilidad, valor del envío, forma de pago y coordinar la entrega. El contrato se perfecciona únicamente cuando la asesora confirma el pedido por escrito y el pago es realizado o acordado.</p>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 4. Métodos de pago aceptados</h3>
+                    <section id="tc-pago">
+                        <h3>4. Métodos de pago aceptados</h3>
                         <ul>
                             <li>Nequi, Daviplata y otras billeteras digitales colombianas.</li>
                             <li>Transferencia bancaria a cuenta de la empresa.</li>
                             <li>Efectivo contra entrega (solo en ciudades y zonas habilitadas).</li>
                             <li>Efectivo en tienda física (Medellín).</li>
                         </ul>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 5. Propiedad intelectual</h3>
-                        <p>
-                            Todo el contenido de este sitio (imágenes, textos, logos, branding, fotografías
-                            de productos) es propiedad exclusiva de Maye Mundo Belleza o de sus licenciantes.
-                            Queda estrictamente prohibida su reproducción total o parcial sin autorización
-                            escrita previa.
-                        </p>
+                    <section id="tc-propiedad">
+                        <h3>5. Propiedad intelectual</h3>
+                        <p>Todo el contenido de este sitio (imágenes, textos, logos, branding, fotografías de productos) es propiedad exclusiva de <strong>Maye Mundo Belleza</strong> o de sus licenciantes. Queda estrictamente prohibida su reproducción sin autorización escrita previa.</p>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 6. Limitación de responsabilidad</h3>
-                        <p>
-                            El uso del sitio es bajo tu propio riesgo. No seremos responsables por
-                            interrupciones temporales del servicio, errores tipográficos en listados
-                            o variaciones de precio debidas a errores involuntarios. En todo caso,
-                            siempre corregiremos cualquier inconsistencia antes de confirmar un pedido.
-                        </p>
+                    <section id="tc-responsabilidad">
+                        <h3>6. Limitación de responsabilidad</h3>
+                        <p>El uso del sitio es bajo tu propio riesgo. No seremos responsables por interrupciones temporales del servicio, errores tipográficos en listados o variaciones de precio debidas a errores involuntarios. Siempre corregiremos cualquier inconsistencia antes de confirmar un pedido.</p>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 7. Modificaciones</h3>
-                        <p>
-                            Nos reservamos el derecho de actualizar estas condiciones en cualquier momento.
-                            La versión vigente será siempre la publicada en esta página, con fecha de
-                            última actualización visible.
-                        </p>
+                    <section id="tc-modificaciones">
+                        <h3>7. Modificaciones</h3>
+                        <p>Nos reservamos el derecho de actualizar estas condiciones en cualquier momento. La versión vigente será siempre la publicada en esta página con fecha de última actualización visible.</p>
+                    </section>
+                </div><!-- /.legales-cuerpo -->
+            </article><!-- /#panel-terminos -->
+
+            <!-- ══════════════════════════════════════════════════════════
+                 PANEL 2 — PRIVACIDAD Y HABEAS DATA
+            ══════════════════════════════════════════════════════════ -->
+            <article class="legales-panel"
+                     id="panel-privacidad" role="tabpanel"
+                     aria-labelledby="tab-privacidad" tabindex="0" hidden>
+
+                <div class="legales-callout legales-callout--lila">
+                    <div class="legales-callout__icon" aria-hidden="true">
+                        <i class="ri-shield-user-line"></i>
                     </div>
-                </article>
-
-                <!-- 3. POLÍTICA DE ENVÍOS -->
-                <article class="legal-seccion" id="envios">
-                    <header class="legal-seccion__header">
-                        <span class="legal-seccion__icono"><i class="ri-truck-line"></i></span>
-                        <div>
-                            <h2 class="legal-seccion__titulo">Política de Envíos</h2>
-                            <p class="legal-seccion__subtitulo">Información sobre tiempos, costos y cobertura nacional</p>
-                        </div>
-                    </header>
-
-                    <div class="legal-seccion__cuerpo">
-                        <h3><i class="ri-checkbox-circle-line"></i> 1. Cobertura geográfica</h3>
-                        <p>
-                            Realizamos envíos a <strong>toda Colombia</strong> a través de nuestras
-                            transportadoras aliadas (Interrapidísimo, Servientrega, Coordinadora, entre otras).
-                            También contamos con entrega en tienda física sin costo en Medellín.
-                        </p>
-
-                        <h3><i class="ri-checkbox-circle-line"></i> 2. Tiempos de entrega estimados</h3>
-                        <ul>
-                            <li><strong>Medellín y área metropolitana:</strong> de 1 a 2 días hábiles.</li>
-                            <li><strong>Ciudades principales (Bogotá, Cali, Barranquilla, etc.):</strong> de 2 a 4 días hábiles.</li>
-                            <li><strong>Ciudades intermedias y municipios:</strong> de 3 a 7 días hábiles.</li>
-                            <li><strong>Recoge en tienda (Medellín):</strong> el mismo día hábil si el pedido se confirma antes de las 3:00 p.m.</li>
-                        </ul>
-                        <p class="legal-seccion__nota">
-                            <i class="ri-information-line"></i> <strong>Nota:</strong> Estos tiempos son estimados
-                            y pueden variar por temporadas altas, días festivos o circunstancias de fuerza mayor
-                            ajenas a nuestra operación (paros, bloqueos, desastres naturales, etc.).
-                        </p>
-
-                        <h3><i class="ri-checkbox-circle-line"></i> 3. Costos de envío</h3>
-                        <ul>
-                            <li>El costo exacto se cotiza al momento de tu pedido por WhatsApp, según ciudad y peso.</li>
-                            <li>Despachos desde <strong>$8.000 COP</strong> en ciudades principales.</li>
-                            <li><strong>Envío GRATIS</strong> en compras superiores a $150.000 COP a todo el país.</li>
-                            <li>Recojo en tienda física (Medellín) — <strong>sin costo adicional</strong>.</li>
-                        </ul>
-
-                        <h3><i class="ri-checkbox-circle-line"></i> 4. Proceso y confirmación</h3>
-                        <p>
-                            Una vez tu pago sea confirmado, despacharemos tu pedido en el día hábil siguiente
-                            y te enviaremos el número de guía por WhatsApp para que realices el seguimiento
-                            en tiempo real.
-                        </p>
-
-                        <h3><i class="ri-checkbox-circle-line"></i> 5. Entrega fallida / Dirección incorrecta</h3>
-                        <p>
-                            Es tu responsabilidad proporcionar una dirección correcta, teléfono de contacto
-                            activo y disponibilidad para recibir. Si el pedido no puede ser entregado por
-                            causa imputable al destinatario, se generarán costos adicionales de re-envío que
-                            correrán por cuenta del cliente.
-                        </p>
+                    <div class="legales-callout__cuerpo">
+                        <strong>En resumen:</strong> Tus datos nunca se venden ni se comparten con terceros.
+                        Solo los usamos para gestionar tus pedidos y responder tus consultas.
+                        Puedes solicitar su eliminación en cualquier momento.
                     </div>
-                </article>
+                </div>
 
-                <!-- 4. CAMBIOS Y DEVOLUCIONES -->
-                <article class="legal-seccion" id="devoluciones">
-                    <header class="legal-seccion__header">
-                        <span class="legal-seccion__icono"><i class="ri-refresh-line"></i></span>
-                        <div>
-                            <h2 class="legal-seccion__titulo">Cambios y Devoluciones</h2>
-                            <p class="legal-seccion__subtitulo">Tu satisfacción es nuestra prioridad</p>
-                        </div>
-                    </header>
+                <nav class="legales-indice" aria-label="Índice de política de privacidad">
+                    <div class="legales-indice__titulo">
+                        <i class="ri-list-ordered" aria-hidden="true"></i> En esta sección
+                    </div>
+                    <ol class="legales-indice__lista">
+                        <li><a href="#pv-responsable">Responsable del tratamiento</a></li>
+                        <li><a href="#pv-datos">Datos que recolectamos</a></li>
+                        <li><a href="#pv-finalidad">Finalidad del tratamiento</a></li>
+                        <li><a href="#pv-seguridad">Seguridad y confidencialidad</a></li>
+                        <li><a href="#pv-derechos">Tus derechos (Habeas Data)</a></li>
+                        <li><a href="#pv-cookies">Cookies</a></li>
+                    </ol>
+                </nav>
 
-                    <div class="legal-seccion__cuerpo">
-                        <h3><i class="ri-checkbox-circle-line"></i> 1. Derecho de retracto</h3>
-                        <p>
-                            Tienes derecho a desistir de la compra dentro de <strong>5 (cinco) días hábiles</strong>
-                            contados a partir de la recepción del producto, conforme a la Ley 1480 de 2011
-                            (Estatuto del Consumidor colombiano). Durante este plazo podrás solicitar
-                            cambio o devolución del dinero, siempre y cuando el producto:
-                        </p>
+                <div class="legales-cuerpo">
+                    <h2 class="legales-seccion-titulo">
+                        <i class="ri-lock-password-line" aria-hidden="true"></i> Política de Privacidad y Datos
+                    </h2>
+
+                    <section id="pv-responsable">
+                        <h3>1. Responsable del tratamiento</h3>
+                        <p>El responsable es <strong>Maye Mundo Belleza</strong>, establecida en Medellín, Antioquia, Colombia. Contáctanos en <a href="mailto:mayemundobelleza@gmail.com">mayemundobelleza@gmail.com</a> o al WhatsApp <strong>+57 300 309 1641</strong>.</p>
+                    </section>
+
+                    <section id="pv-datos">
+                        <h3>2. Datos que recolectamos</h3>
                         <ul>
-                            <li>Se encuentre en <strong>perfecto estado</strong>, sin uso ni daño.</li>
-                            <li>Conserve su empaque original, etiquetas y sellos intactos.</li>
-                            <li>Incluya accesorios y manuales, si los tuviere.</li>
+                            <li><strong>Datos de contacto:</strong> nombre, correo electrónico, teléfono.</li>
+                            <li><strong>Datos de ubicación:</strong> ciudad y dirección de envío, cuando realizas un pedido.</li>
+                            <li><strong>Datos de navegación:</strong> información anónima sobre tu visita al sitio.</li>
+                            <li><strong>Historial de consultas:</strong> mensajes enviados por WhatsApp o formulario de contacto.</li>
                         </ul>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 2. Productos defectuosos o equivocados</h3>
-                        <p>
-                            Si recibiste un producto en mal estado, defectuoso o diferente al solicitado,
-                            tienes derecho a:
+                    <section id="pv-finalidad">
+                        <h3>3. Finalidad del tratamiento</h3>
+                        <ul>
+                            <li>Gestionar, procesar y hacer seguimiento a tus pedidos.</li>
+                            <li>Responder consultas, asesorías y solicitudes de información.</li>
+                            <li>Enviarte promociones (solo si autorizas expresamente).</li>
+                            <li>Cumplir con obligaciones legales y tributarias aplicables.</li>
+                            <li>Mejorar tu experiencia en nuestro sitio web y tienda.</li>
+                        </ul>
+                    </section>
+
+                    <section id="pv-seguridad">
+                        <h3>4. Seguridad y confidencialidad</h3>
+                        <p>Aplicamos medidas técnicas y organizativas para proteger tu información personal contra acceso no autorizado, alteración, divulgación o destrucción. Tus datos se almacenan de forma segura y solo son accedidos por personal autorizado.</p>
+                    </section>
+
+                    <section id="pv-derechos">
+                        <h3>5. Tus derechos (Habeas Data)</h3>
+                        <p>Como titular de los datos puedes ejercer en cualquier momento los derechos de <strong>acceso, corrección, actualización, supresión y revocación</strong> de tu consentimiento. Envíanos un mensaje a <a href="mailto:mayemundobelleza@gmail.com">mayemundobelleza@gmail.com</a> con tu nombre completo y la solicitud. Responderemos en máximo <strong>15 días hábiles</strong>.</p>
+                    </section>
+
+                    <section id="pv-cookies">
+                        <h3>6. Cookies</h3>
+                        <p>Nuestro sitio usa cookies técnicas esenciales para el correcto funcionamiento y preferencias del usuario. No usamos cookies publicitarias de terceros. Al navegar aceptas el uso de estas cookies mínimas.</p>
+                    </section>
+                </div>
+            </article><!-- /#panel-privacidad -->
+
+            <!-- ══════════════════════════════════════════════════════════
+                 PANEL 3 — ENVÍOS Y ENTREGAS
+            ══════════════════════════════════════════════════════════ -->
+            <article class="legales-panel"
+                     id="panel-envios" role="tabpanel"
+                     aria-labelledby="tab-envios" tabindex="0" hidden>
+
+                <div class="legales-callout legales-callout--naranja">
+                    <div class="legales-callout__icon" aria-hidden="true">
+                        <i class="ri-truck-line"></i>
+                    </div>
+                    <div class="legales-callout__cuerpo">
+                        <strong>En resumen:</strong> Envíos a todo Colombia desde $8.000 COP.
+                        <strong>Envío gratis</strong> en compras mayores a $150.000.
+                        Entrega en Medellín: 1–2 días hábiles.
+                    </div>
+                </div>
+
+                <nav class="legales-indice" aria-label="Índice de política de envíos">
+                    <div class="legales-indice__titulo">
+                        <i class="ri-list-ordered" aria-hidden="true"></i> En esta sección
+                    </div>
+                    <ol class="legales-indice__lista">
+                        <li><a href="#en-cobertura">Cobertura geográfica</a></li>
+                        <li><a href="#en-tiempos">Tiempos de entrega</a></li>
+                        <li><a href="#en-costos">Tarifas de envío</a></li>
+                        <li><a href="#en-proceso">Proceso y confirmación</a></li>
+                        <li><a href="#en-fallida">Entrega fallida</a></li>
+                    </ol>
+                </nav>
+
+                <div class="legales-cuerpo">
+                    <h2 class="legales-seccion-titulo">
+                        <i class="ri-truck-line" aria-hidden="true"></i> Envíos, Entregas y Tarifas
+                    </h2>
+
+                    <section id="en-cobertura">
+                        <h3>1. Cobertura geográfica</h3>
+                        <p>Realizamos envíos a <strong>toda Colombia</strong> a través de transportadoras aliadas (Interrapidísimo, Servientrega, Coordinadora, entre otras). También contamos con entrega en tienda física sin costo en Medellín.</p>
+                    </section>
+
+                    <section id="en-tiempos">
+                        <h3>2. Tiempos de entrega estimados</h3>
+                        <!-- Tabla responsiva de tiempos -->
+                        <div class="legales-tabla-wrap">
+                            <table class="legales-tabla" aria-label="Tiempos de entrega estimados por zona">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Zona de entrega</th>
+                                        <th scope="col">Tiempo estimado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><i class="ri-map-pin-2-line" aria-hidden="true"></i> Medellín y área metropolitana</td>
+                                        <td><span class="legales-badge legales-badge--verde">1–2 días hábiles</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="ri-building-line" aria-hidden="true"></i> Ciudades principales (Bogotá, Cali, Barranquilla...)</td>
+                                        <td><span class="legales-badge legales-badge--azul">2–4 días hábiles</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="ri-road-map-line" aria-hidden="true"></i> Ciudades intermedias y municipios</td>
+                                        <td><span class="legales-badge legales-badge--amarillo">3–7 días hábiles</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="ri-store-2-line" aria-hidden="true"></i> Recoge en tienda (Medellín)</td>
+                                        <td><span class="legales-badge legales-badge--verde">Mismo día hábil*</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="legales-nota">
+                            <i class="ri-information-line" aria-hidden="true"></i>
+                            <strong>Nota:</strong> *Para recogida el mismo día el pedido debe confirmarse antes de las 3:00 p.m. Los tiempos son estimados y pueden variar por temporadas altas, días festivos o fuerza mayor.
                         </p>
+                    </section>
+
+                    <section id="en-costos">
+                        <h3>3. Tarifas de envío</h3>
+                        <div class="legales-tabla-wrap">
+                            <table class="legales-tabla" aria-label="Tarifas de envío">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Condición</th>
+                                        <th scope="col">Costo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Envío estándar (ciudades principales)</td>
+                                        <td><span class="legales-badge legales-badge--gris">Desde $8.000 COP</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Compras superiores a $150.000 COP</td>
+                                        <td><span class="legales-badge legales-badge--verde">🎉 GRATIS</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Recojo en tienda física (Medellín)</td>
+                                        <td><span class="legales-badge legales-badge--verde">Sin costo</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section id="en-proceso">
+                        <h3>4. Proceso y confirmación</h3>
+                        <p>Una vez tu pago sea confirmado, despacharemos tu pedido en el día hábil siguiente y te enviaremos el número de guía por WhatsApp para seguimiento en tiempo real.</p>
+                    </section>
+
+                    <section id="en-fallida">
+                        <h3>5. Entrega fallida / Dirección incorrecta</h3>
+                        <p>Es tu responsabilidad proporcionar una dirección correcta y teléfono activo. Si el pedido no puede ser entregado por causa imputable al destinatario, se generarán costos adicionales de re-envío a cargo del cliente.</p>
+                    </section>
+                </div>
+            </article><!-- /#panel-envios -->
+
+            <!-- ══════════════════════════════════════════════════════════
+                 PANEL 4 — CAMBIOS Y DEVOLUCIONES
+            ══════════════════════════════════════════════════════════ -->
+            <article class="legales-panel"
+                     id="panel-devoluciones" role="tabpanel"
+                     aria-labelledby="tab-devoluciones" tabindex="0" hidden>
+
+                <div class="legales-callout legales-callout--verde">
+                    <div class="legales-callout__icon" aria-hidden="true">
+                        <i class="ri-shield-check-line"></i>
+                    </div>
+                    <div class="legales-callout__cuerpo">
+                        <strong>En resumen:</strong> Tienes <strong>5 días hábiles</strong> para solicitar cambio o devolución desde que recibes tu pedido. Productos defectuosos se cambian sin costo. Repórtanos en máximo 24 horas con fotos.
+                    </div>
+                </div>
+
+                <nav class="legales-indice" aria-label="Índice de cambios y devoluciones">
+                    <div class="legales-indice__titulo">
+                        <i class="ri-list-ordered" aria-hidden="true"></i> En esta sección
+                    </div>
+                    <ol class="legales-indice__lista">
+                        <li><a href="#dv-retracto">Derecho de retracto</a></li>
+                        <li><a href="#dv-defectuoso">Productos defectuosos o equivocados</a></li>
+                        <li><a href="#dv-noaplica">Cuándo NO aplica cambio</a></li>
+                        <li><a href="#dv-proceso">Proceso de solicitud</a></li>
+                        <li><a href="#dv-reembolso">Tiempos de reembolso</a></li>
+                    </ol>
+                </nav>
+
+                <div class="legales-cuerpo">
+                    <h2 class="legales-seccion-titulo">
+                        <i class="ri-refresh-line" aria-hidden="true"></i> Cambios, Garantías y Devoluciones
+                    </h2>
+
+                    <section id="dv-retracto">
+                        <h3>1. Derecho de retracto</h3>
+                        <p>Tienes derecho a desistir de la compra dentro de <strong>5 días hábiles</strong> contados desde la recepción del producto, conforme a la Ley 1480 de 2011 (Estatuto del Consumidor colombiano). El producto debe estar:</p>
+                        <ul>
+                            <li>En <strong>perfecto estado</strong>, sin uso ni daño.</li>
+                            <li>Con empaque original, etiquetas y sellos intactos.</li>
+                            <li>Con accesorios y manuales, si los tuviere.</li>
+                        </ul>
+                    </section>
+
+                    <section id="dv-defectuoso">
+                        <h3>2. Productos defectuosos o equivocados</h3>
+                        <p>Si recibiste un producto en mal estado o diferente al solicitado, tienes derecho a:</p>
                         <ul>
                             <li>Cambiarlo por otro igual en perfectas condiciones, sin costo adicional.</li>
                             <li>Solicitar la devolución íntegra del dinero (incluyendo el envío).</li>
                         </ul>
-                        <p>
-                            En estos casos, reporta la novedad en un plazo <strong>máximo de 24 horas</strong>
-                            después de recibir el pedido, con fotografías y número de guía. Nosotros
-                            cubriremos los costos de devolución o recolección.
-                        </p>
+                        <p>Reporta la novedad en máximo <strong>24 horas</strong> después de recibir, con fotografías y número de guía. Nosotros cubriremos los costos de devolución.</p>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 3. Casos en que NO aplica cambio o devolución</h3>
+                    <section id="dv-noaplica">
+                        <h3>3. Casos en que NO aplica cambio o devolución</h3>
                         <ul>
-                            <li>Productos de higiene personal o cosméticos cuyo sello de seguridad haya sido roto.</li>
-                            <li>Productos con signos evidentes de uso, lavado, manipulación indebida o daño causado por el cliente.</li>
-                            <li>Pedidos a la medida o personalizados (colores especiales, grabados, empaques personalizados).</li>
-                            <li>Promociones etiquetadas expresamente como "sin cambios" o "venta final".</li>
+                            <li>Productos de higiene o cosméticos cuyo sello de seguridad haya sido roto.</li>
+                            <li>Productos con signos de uso, lavado, manipulación indebida o daño por el cliente.</li>
+                            <li>Pedidos personalizados (colores especiales, grabados, empaques personalizados).</li>
+                            <li>Promociones expresamente etiquetadas como "sin cambios" o "venta final".</li>
                         </ul>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 4. Proceso para solicitar cambio / devolución</h3>
+                    <section id="dv-proceso">
+                        <h3>4. Proceso para solicitar cambio o devolución</h3>
                         <ol>
-                            <li>Contáctanos por WhatsApp <a href="#" data-cta-whatsapp data-wa-mensaje="Hola!%20Quiero%20solicitar%20cambio%20o%20devoluci%C3%B3n%20de%20mi%20pedido."><strong>+57 300 309 1641</strong></a> o email <a href="mailto:mayemundobelleza@gmail.com">mayemundobelleza@gmail.com</a>.</li>
+                            <li>Contáctanos por WhatsApp <strong>+57 300 309 1641</strong> o email <a href="mailto:mayemundobelleza@gmail.com">mayemundobelleza@gmail.com</a>.</li>
                             <li>Indica número de pedido/guía, producto a cambiar, motivo y fotografías de evidencia.</li>
-                            <li>Te responderemos en máximo 24 horas hábiles con la autorización y el procedimiento.</li>
+                            <li>Te responderemos en máximo <strong>24 horas hábiles</strong> con la autorización y el procedimiento.</li>
                             <li>Envía el producto de vuelta a la dirección acordada o coordina recolección.</li>
                             <li>Una vez recibamos y revisemos el artículo, procesamos el cambio o el reembolso.</li>
                         </ol>
+                    </section>
 
-                        <h3><i class="ri-checkbox-circle-line"></i> 5. Tiempos de reembolso</h3>
-                        <p>
-                            Los reembolsos se procesan dentro de <strong>5 a 10 días hábiles</strong>
-                            después de recibida y aprobada la mercancía, por el mismo método de pago
-                            que utilizaste o acuerdo directo por WhatsApp.
-                        </p>
+                    <section id="dv-reembolso">
+                        <h3>5. Tiempos de reembolso</h3>
+                        <p>Los reembolsos se procesan dentro de <strong>5 a 10 días hábiles</strong> después de recibida y aprobada la mercancía, por el mismo método de pago que utilizaste o acuerdo directo por WhatsApp.</p>
+                    </section>
 
-                        <div class="legal-seccion__cierre">
-                            <p>
-                                <i class="ri-heart-line"></i>
-                                Si tienes cualquier duda sobre cualquiera de nuestras políticas,
-                                no dudes en <a href="/maye-mundo-belleza/paginas/contacto.html">contactarnos</a>.
-                                Estaremos encantadas de ayudarte.
-                            </p>
+                    <div class="legales-cierre">
+                        <i class="ri-heart-line" aria-hidden="true"></i>
+                        ¿Tienes dudas sobre alguna política?
+                        <a href="/maye-mundo-belleza/paginas/contacto.html">Contáctanos</a> — estaremos encantadas de ayudarte.
+                    </div>
+                </div>
+            </article><!-- /#panel-devoluciones -->
+
+            <!-- ══════════════════════════════════════════════════════════
+                 PANEL 5 — PREGUNTAS FRECUENTES (FAQ)
+            ══════════════════════════════════════════════════════════ -->
+            <article class="legales-panel"
+                     id="panel-faq" role="tabpanel"
+                     aria-labelledby="tab-faq" tabindex="0" hidden>
+
+                <div class="legales-callout legales-callout--lila">
+                    <div class="legales-callout__icon" aria-hidden="true">
+                        <i class="ri-question-answer-line"></i>
+                    </div>
+                    <div class="legales-callout__cuerpo">
+                        <strong>Respuestas rápidas</strong> a las preguntas que más nos hacen.
+                        Si no encuentras lo que buscas,
+                        <a href="/maye-mundo-belleza/paginas/contacto.html">escríbenos</a> directamente.
+                    </div>
+                </div>
+
+                <div class="legales-cuerpo">
+                    <h2 class="legales-seccion-titulo">
+                        <i class="ri-question-answer-line" aria-hidden="true"></i>
+                        Preguntas Frecuentes
+                    </h2>
+
+                    <!-- Grupo: Pedidos y Pagos -->
+                    <div class="faq-grupo">
+                        <h3 class="faq-grupo__titulo">
+                            <i class="ri-shopping-bag-3-line" aria-hidden="true"></i>
+                            Pedidos y Pagos
+                        </h3>
+
+                        <details class="faq-item" id="faq-1">
+                            <summary class="faq-item__pregunta">
+                                <span>¿Cómo hago un pedido?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>Agrega los productos que desees al carrito y haz clic en <strong>"Realizar pedido por WhatsApp"</strong>. Una asesora te contactará para confirmar disponibilidad, forma de pago y coordinar el envío.</p>
+                            </div>
+                        </details>
+
+                        <details class="faq-item" id="faq-2">
+                            <summary class="faq-item__pregunta">
+                                <span>¿Qué métodos de pago aceptan?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>Aceptamos <strong>Nequi, Daviplata</strong>, transferencia bancaria (Bancolombia), efectivo contra entrega y efectivo en tienda física en Medellín.</p>
+                            </div>
+                        </details>
+
+                        <details class="faq-item" id="faq-3">
+                            <summary class="faq-item__pregunta">
+                                <span>¿Puedo cancelar mi pedido?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>Sí, siempre que el pedido no haya sido despachado. Escríbenos lo antes posible al WhatsApp <strong>+57 300 309 1641</strong>. Una vez despachado aplica la política de devoluciones.</p>
+                            </div>
+                        </details>
+
+                        <details class="faq-item" id="faq-4">
+                            <summary class="faq-item__pregunta">
+                                <span>¿Los precios incluyen IVA?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>Sí. Los precios publicados en el sitio son los precios finales en COP e incluyen IVA cuando aplica por categoría de producto.</p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- Grupo: Envíos -->
+                    <div class="faq-grupo">
+                        <h3 class="faq-grupo__titulo">
+                            <i class="ri-truck-line" aria-hidden="true"></i>
+                            Envíos y Entregas
+                        </h3>
+
+                        <details class="faq-item" id="faq-5">
+                            <summary class="faq-item__pregunta">
+                                <span>¿A qué ciudades envían?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>Realizamos envíos a <strong>toda Colombia</strong> mediante Interrapidísimo, Servientrega y Coordinadora. También puedes recoger en nuestra tienda física en Medellín sin costo adicional.</p>
+                            </div>
+                        </details>
+
+                        <details class="faq-item" id="faq-6">
+                            <summary class="faq-item__pregunta">
+                                <span>¿Cuánto cuesta el envío?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>El envío parte desde <strong>$8.000 COP</strong>. Si tu compra supera los <strong>$150.000 COP</strong>, el envío es completamente gratis a cualquier parte de Colombia.</p>
+                            </div>
+                        </details>
+
+                        <details class="faq-item" id="faq-7">
+                            <summary class="faq-item__pregunta">
+                                <span>¿Cuánto tarda en llegar mi pedido?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>En Medellín: <strong>1–2 días hábiles</strong>. Ciudades principales: <strong>2–4 días hábiles</strong>. Municipios y zonas apartadas: <strong>3–7 días hábiles</strong>. Estos tiempos son estimados.</p>
+                            </div>
+                        </details>
+
+                        <details class="faq-item" id="faq-8">
+                            <summary class="faq-item__pregunta">
+                                <span>¿Cómo hago seguimiento a mi pedido?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>Una vez despachado tu pedido, te enviaremos el <strong>número de guía</strong> por WhatsApp para que hagas seguimiento en tiempo real en el sitio de la transportadora.</p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- Grupo: Productos -->
+                    <div class="faq-grupo">
+                        <h3 class="faq-grupo__titulo">
+                            <i class="ri-star-line" aria-hidden="true"></i>
+                            Productos
+                        </h3>
+
+                        <details class="faq-item" id="faq-9">
+                            <summary class="faq-item__pregunta">
+                                <span>¿Los productos son originales?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>Sí. Todos nuestros productos son <strong>100% originales</strong> y cuentan con garantía de fabricante. Trabajamos únicamente con distribuidores autorizados.</p>
+                            </div>
+                        </details>
+
+                        <details class="faq-item" id="faq-10">
+                            <summary class="faq-item__pregunta">
+                                <span>¿Qué hago si recibo un producto diferente al pedido?</span>
+                                <i class="ri-arrow-down-s-line faq-item__flecha" aria-hidden="true"></i>
+                            </summary>
+                            <div class="faq-item__respuesta">
+                                <p>Escríbenos en máximo <strong>24 horas</strong> con fotos del producto recibido y tu número de pedido. Gestionaremos el cambio o reembolso sin costo para ti.</p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- CTA Contacto -->
+                    <div class="faq-cta">
+                        <div class="faq-cta__icon" aria-hidden="true">
+                            <i class="ri-customer-service-2-line"></i>
+                        </div>
+                        <div class="faq-cta__texto">
+                            <strong>¿No encontraste tu respuesta?</strong><br>
+                            Nuestro equipo responde en minutos.
+                        </div>
+                        <div class="faq-cta__btns">
+                            <a href="https://wa.me/573003091641?text=Hola!%20Tengo%20una%20pregunta."
+                               class="faq-cta__btn faq-cta__btn--whatsapp"
+                               target="_blank" rel="noopener noreferrer"
+                               aria-label="Contactar por WhatsApp">
+                                <i class="ri-whatsapp-line" aria-hidden="true"></i>
+                                WhatsApp
+                            </a>
+                            <a href="/maye-mundo-belleza/paginas/contacto.html"
+                               class="faq-cta__btn faq-cta__btn--outline"
+                               aria-label="Ir a la página de contacto">
+                                <i class="ri-mail-send-line" aria-hidden="true"></i>
+                                Formulario
+                            </a>
                         </div>
                     </div>
-                </article>
 
-            </div>
-        </div>
-    </main>
+                </div><!-- /.legales-cuerpo -->
+            </article><!-- /#panel-faq -->
+
+        </div><!-- /.legales-layout -->
+    </main><!-- /#legales-main -->
+
+    <!-- ── BOTÓN VOLVER ARRIBA ─────────────────────────────────────────────── -->
+    <button class="legales-back-top" id="btn-back-top"
+            aria-label="Volver al inicio de la página" hidden>
+        <i class="ri-arrow-up-line" aria-hidden="true"></i>
+    </button>
 
     {{> footer }}
     {{> whatsapp-flotante }}
