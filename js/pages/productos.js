@@ -3,8 +3,10 @@
 // Maneja filtros por categoría, búsqueda, renderizado de tarjetas y carrito.
 
 import { obtenerProductos, formatearPrecio, ETIQUETAS } from '../data/productos.data.js';
-import { agregarItem } from '../utils/carrito.js';
-import { waLink } from '../utils/constants.js';
+import { agregarItem }                                   from '../utils/carrito.js';
+import { toggleFavorito, esFavorito }                   from '../utils/wishlistService.js';
+import { abrirQuickView, iniciarQuickView }              from '../components/quickView.js';
+import { waLink }                                        from '../utils/constants.js';
 
 // ── ESTADO ────────────────────────────────────────────────────────────────────
 let productos       = [];
@@ -23,6 +25,9 @@ export function iniciarCatalogo() {
     inputBusqueda = document.getElementById('busqueda-catalogo');
 
     if (!grilla) return;
+
+    // Iniciar Quick View (inyecta el modal una sola vez)
+    iniciarQuickView();
 
     inyectarToastContainer();
     cargarYRenderizar();
@@ -47,17 +52,52 @@ export function iniciarCatalogo() {
 
     // Delegación de eventos para botones "Agregar al carrito" generados dinámicamente
     grilla.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-btn-carrito]');
-        if (!btn) return;
+        // ── Agregar al carrito ──────────────────────────────────────────
+        const btnCarrito = e.target.closest('[data-btn-carrito]');
+        if (btnCarrito) {
+            const id     = Number(btnCarrito.dataset.id);
+            const nombre = btnCarrito.dataset.nombre;
+            const precio = Number(btnCarrito.dataset.precio);
+            const imagen = btnCarrito.dataset.imagen;
+            agregarItem({ id, nombre, precio, imagen });
+            mostrarToastCatalogo(`${nombre} agregado al carrito`);
+            feedbackBoton(btnCarrito);
+            return;
+        }
 
-        const id     = Number(btn.dataset.id);
-        const nombre = btn.dataset.nombre;
-        const precio = Number(btn.dataset.precio);
-        const imagen = btn.dataset.imagen;
+        // ── Wishlist (corazón) ──────────────────────────────────────────
+        const btnWish = e.target.closest('[data-btn-wishlist]');
+        if (btnWish) {
+            // CRÍTICO: detener la burbuja para que el clic no active
+            // el <a> padre ni el listener de vista rápida
+            e.stopPropagation();
+            e.preventDefault();
 
-        agregarItem({ id, nombre, precio, imagen });
-        mostrarToastCatalogo(`${nombre} agregado al carrito`);
-        feedbackBoton(btn);
+            const id        = Number(btnWish.dataset.id);
+            // Obtener nombre del producto para el toast
+            const tarjeta   = btnWish.closest('.tarjeta-producto');
+            const nombre    = tarjeta?.querySelector('.nombre-producto')?.textContent.trim() ?? 'Producto';
+            const resultado = toggleFavorito(id);
+
+            if (resultado.requiereLogin) {
+                window.dispatchEvent(new CustomEvent('auth:solicitar-login', { detail: { tab: 'login' } }));
+                return;
+            }
+            // Actualizar icono y estado en TODAS las tarjetas con ese id
+            _sincronizarWishlistUI(id);
+            mostrarToastCatalogo(
+                resultado.accion === 'agregado'
+                    ? `❤️ "${nombre}" guardado en tu lista de deseos`
+                    : `"${nombre}" eliminado de la lista de deseos`
+            );
+            return;
+        }
+
+        // ── Vista rápida ────────────────────────────────────────────────
+        const btnQV = e.target.closest('[data-btn-quickview]');
+        if (btnQV) {
+            abrirQuickView(Number(btnQV.dataset.id));
+        }
     });
 
     // Escuchar cambios del admin (misma pestaña o localStorage)
@@ -65,6 +105,9 @@ export function iniciarCatalogo() {
     window.addEventListener('storage', (e) => {
         if (e.key === 'maye_productos') cargarYRenderizar();
     });
+
+    // Re-sincronizar corazones cuando cambie la wishlist (login/logout/toggle)
+    window.addEventListener('wishlist-actualizada', () => _sincronizarTodosWishlist());
 }
 
 function cargarYRenderizar() {
@@ -121,6 +164,7 @@ function tarjetaHTML(p) {
     const agotado  = p.stock === 0 || p.etiqueta === 'agotado';
     const etiqData = p.etiqueta && ETIQUETAS[p.etiqueta];
     const waURL    = waLink(p.whatsapp || encodeURIComponent(`Hola! Me interesa el producto ${p.nombre}`));
+    const enLista  = esFavorito(p.id);
 
     const etiqHTML = etiqData
         ? `<span class="etiqueta-producto ${etiqData.clase}">${etiqData.texto}</span>`
@@ -151,6 +195,11 @@ function tarjetaHTML(p) {
 
     const detalleURL = `/maye-mundo-belleza/paginas/producto.html?id=${p.id}`;
 
+    // ── Botones flotantes sobre la imagen ──────────────────────────────
+    const heartClass  = enLista ? 'btn-wishlist--activo' : '';
+    const heartIcon   = enLista ? 'ri-heart-fill' : 'ri-heart-line';
+    const heartLabel  = enLista ? 'Quitar de lista de deseos' : 'Agregar a lista de deseos';
+
     return `
     <article class="tarjeta-producto${agotado ? ' agotada' : ''}" data-id="${p.id}">
         <a href="${detalleURL}" class="tarjeta-producto__enlace" aria-label="Ver detalle de ${p.nombre.replace(/"/g, '&quot;')}">
@@ -163,6 +212,27 @@ function tarjetaHTML(p) {
                      onerror="this.src='https://placehold.co/400x400/FAF7F2/2A8C64?text=Maye'">
                 ${etiqHTML}
                 ${agotado ? '<div class="overlay-agotado"><span>Agotado</span></div>' : ''}
+
+                <!-- Botones flotantes: wishlist + vista rápida -->
+                <div class="tarjeta-overlay-acciones" aria-label="Acciones rápidas">
+                    <button class="tarjeta-accion-btn btn-wishlist ${heartClass}"
+                            data-btn-wishlist
+                            data-id="${p.id}"
+                            aria-label="${heartLabel}"
+                            aria-pressed="${enLista}"
+                            type="button">
+                        <i class="${heartIcon}"></i>
+                    </button>
+                </div>
+
+                <!-- Vista rápida (barra inferior) -->
+                <button class="btn-vista-rapida"
+                        data-btn-quickview
+                        data-id="${p.id}"
+                        type="button"
+                        aria-label="Vista rápida de ${p.nombre.replace(/"/g, '&quot;')}">
+                    <i class="ri-eye-line"></i> Vista rápida
+                </button>
             </div>
         </a>
         <div class="info-producto">
@@ -179,6 +249,37 @@ const CAT_LABELS = {
     unas: 'Uñas', skincare: 'Skincare', todos: 'General',
 };
 function categoriaLabel(cat) { return CAT_LABELS[cat] ?? cat; }
+
+// ── SINCRONIZAR CORAZONES ────────────────────────────────────────────────────
+// Actualiza el ícono/estado de todos los botones wishlist de una tarjeta por id
+function _sincronizarWishlistUI(productId) {
+    if (!grilla) return;
+    const enLista = esFavorito(productId);
+    grilla.querySelectorAll(`[data-btn-wishlist][data-id="${productId}"]`).forEach(btn => {
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = enLista ? 'ri-heart-fill' : 'ri-heart-line';
+        btn.classList.toggle('btn-wishlist--activo', enLista);
+        btn.setAttribute('aria-pressed', enLista);
+        btn.setAttribute('aria-label', enLista ? 'Quitar de lista de deseos' : 'Agregar a lista de deseos');
+        // Efecto latido
+        btn.classList.add('btn-wishlist--pulso');
+        setTimeout(() => btn.classList.remove('btn-wishlist--pulso'), 500);
+    });
+}
+
+// Recorre TODOS los botones de la grilla y sincroniza con el estado actual
+function _sincronizarTodosWishlist() {
+    if (!grilla) return;
+    grilla.querySelectorAll('[data-btn-wishlist]').forEach(btn => {
+        const id      = Number(btn.dataset.id);
+        const enLista = esFavorito(id);
+        const icon    = btn.querySelector('i');
+        if (icon) icon.className = enLista ? 'ri-heart-fill' : 'ri-heart-line';
+        btn.classList.toggle('btn-wishlist--activo', enLista);
+        btn.setAttribute('aria-pressed', enLista);
+        btn.setAttribute('aria-label', enLista ? 'Quitar de lista de deseos' : 'Agregar a lista de deseos');
+    });
+}
 
 // ── TOAST DEL CATÁLOGO ────────────────────────────────────────────────────────
 

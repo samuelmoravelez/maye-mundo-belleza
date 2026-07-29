@@ -4,6 +4,7 @@ import '../../css/global.css';
 import '../../css/carrito.css';
 import '../../css/productos.css';
 import '../../css/auth.css';
+import '../../css/wishlist-quickview.css';
 
 import '../main.js';
 import { iniciarCatalogo } from '../pages/productos.js';

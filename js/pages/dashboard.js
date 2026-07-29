@@ -21,6 +21,9 @@ import {
     generarId, formatearPrecio, CATEGORIAS, ETIQUETAS,
 } from '../data/productos.data.js';
 import { descargarFacturaPDF, imprimirFactura } from '../utils/invoiceService.js';
+import { agregarItem }                          from '../utils/carrito.js';
+import { eliminarFavorito, obtenerFavoritos }   from '../utils/wishlistService.js';
+import { abrirQuickView, iniciarQuickView }     from '../components/quickView.js';
 
 // ── Storage keys adicionales ───────────────────────────────────────────────
 const KEYS = {
@@ -161,7 +164,7 @@ function renderSidebarUser() {
 // ── Vista: Resumen del cliente ─────────────────────────────────────────────
 function renderClienteResumen() {
     const orders = getOrders().filter(o => o.userId === session.id);
-    const favs   = getFavorites();
+    const favs   = obtenerFavoritos();
     const kpis = [
         { icon: 'ri-shopping-bag-3-line', cls: 'db-kpi__icon--verde',  num: orders.length,      label: 'Pedidos realizados' },
         { icon: 'ri-heart-3-line',         cls: 'db-kpi__icon--lila',   num: favs.length,        label: 'En lista de deseos' },
@@ -302,46 +305,125 @@ function pedidoCardHTML(o) {
 
 // ── Vista: Favoritos del cliente ───────────────────────────────────────────
 function renderClienteFavoritos() {
-    const favIds = getFavorites();
+    const favIds = obtenerFavoritos();
     const prods  = obtenerProductos().filter(p => favIds.includes(p.id));
     const el     = document.getElementById('db-client-favs-grid');
     if (!el) return;
 
     if (prods.length === 0) {
-        el.innerHTML = `<div class="db-empty" style="grid-column:1/-1">
-            <i class="ri-heart-3-line"></i>
-            <p>Tu lista de deseos está vacía. <a href="${RUTAS.PRODUCTOS}" style="color:var(--verde-principal)">Descubre productos</a></p>
-        </div>`;
+        el.innerHTML = `
+            <div class="db-empty" style="grid-column:1/-1">
+                <i class="ri-heart-3-line"></i>
+                <p>Tu lista de deseos está vacía.<br>
+                   <a href="${RUTAS.PRODUCTOS}" style="color:var(--verde-principal);font-weight:600">
+                       Descubre productos
+                   </a>
+                </p>
+            </div>`;
         return;
     }
 
-    el.innerHTML = prods.map(p => `
-    <div class="db-fav-card">
-        <img src="${p.imagen}" alt="${p.nombre}"
-             onerror="this.src='https://placehold.co/180x180/FAF7F2/2A8C64?text=?'">
-        <div class="db-fav-card__body">
-            <div class="db-fav-card__nombre">${p.nombre}</div>
-            <div class="db-fav-card__precio">${formatearPrecio(p.precio)}</div>
-        </div>
-        <div class="db-fav-card__footer">
-            <a href="${RUTAS.PRODUCTOS}" class="db-btn db-btn--primary db-btn--sm" style="flex:1;justify-content:center;text-decoration:none">
-                <i class="ri-shopping-cart-line"></i> Comprar
-            </a>
-            <button class="db-btn db-btn--danger db-btn--sm db-btn--icon"
-                    data-rm-fav="${p.id}" title="Quitar de favoritos">
-                <i class="ri-heart-3-line"></i>
-            </button>
-        </div>
-    </div>`).join('');
+    el.innerHTML = prods.map(p => {
+        const agotado  = p.stock === 0 || p.etiqueta === 'agotado';
+        const etiqData = p.etiqueta && ETIQUETAS[p.etiqueta];
+        const badgeHTML = etiqData
+            ? `<span class="db-fav-card__badge etiqueta-producto ${etiqData.clase}">${etiqData.texto}</span>`
+            : '';
+        const catLabel  = CATEGORIAS.find(c => c.id === p.categoria)?.label ?? p.categoria;
+        const precioAnt = p.precioAnterior
+            ? `<span class="db-fav-card__precio-ant">${formatearPrecio(p.precioAnterior)}</span>`
+            : '';
 
-    el.querySelectorAll('[data-rm-fav]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id  = Number(btn.dataset.rmFav);
-            const fav = getFavorites().filter(f => f !== id);
-            Storage.guardar(KEYS.FAVORITES, fav);
-            renderClienteFavoritos();
+        return `
+        <div class="db-fav-card" data-fav-card-id="${p.id}">
+            <div class="db-fav-card__img-wrap">
+                <img src="${p.imagen}"
+                     alt="${p.nombre}"
+                     loading="lazy"
+                     onerror="this.src='https://placehold.co/240x240/FAF7F2/2A8C64?text=Maye'">
+                ${badgeHTML}
+            </div>
+            <div class="db-fav-card__body">
+                <span class="db-fav-card__cat">${catLabel}</span>
+                <div class="db-fav-card__nombre">${p.nombre}</div>
+                <div class="db-fav-card__precios">
+                    <span class="db-fav-card__precio">${formatearPrecio(p.precio)}</span>
+                    ${precioAnt}
+                </div>
+            </div>
+            <div class="db-fav-card__footer">
+                <button class="db-fav-card__btn-carrito"
+                        data-fav-carrito
+                        data-id="${p.id}"
+                        data-nombre="${p.nombre.replace(/"/g,'&quot;')}"
+                        data-precio="${p.precio}"
+                        data-imagen="${p.imagen}"
+                        ${agotado ? 'disabled' : ''}
+                        aria-label="${agotado ? 'Agotado' : `Agregar ${p.nombre} al carrito`}">
+                    <i class="${agotado ? 'ri-close-circle-line' : 'ri-shopping-bag-3-line'}"></i>
+                    ${agotado ? 'Agotado' : 'Al carrito'}
+                </button>
+                <button class="db-fav-card__btn-qv"
+                        data-fav-qv
+                        data-id="${p.id}"
+                        title="Vista rápida"
+                        aria-label="Vista rápida de ${p.nombre}">
+                    <i class="ri-eye-line"></i>
+                </button>
+                <button class="db-fav-card__btn-rm"
+                        data-fav-rm
+                        data-id="${p.id}"
+                        title="Quitar de favoritos"
+                        aria-label="Quitar ${p.nombre} de favoritos">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true" focusable="false">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+
+    // ── Delegación única en el contenedor (sobrevive a re-renders) ─────
+    // Removemos el listener anterior para evitar duplicados
+    el.replaceWith(el.cloneNode(true));
+    const grid = document.getElementById('db-client-favs-grid');
+
+    grid.addEventListener('click', e => {
+        // ── Agregar al carrito ──────────────────────────────────────
+        const btnCart = e.target.closest('[data-fav-carrito]');
+        if (btnCart && !btnCart.disabled) {
+            agregarItem({
+                id:     Number(btnCart.dataset.id),
+                nombre: btnCart.dataset.nombre,
+                precio: Number(btnCart.dataset.precio),
+                imagen: btnCart.dataset.imagen,
+            });
+            const orig = btnCart.innerHTML;
+            btnCart.innerHTML = '<i class="ri-check-line"></i> ¡Listo!';
+            btnCart.disabled  = true;
+            setTimeout(() => { btnCart.innerHTML = orig; btnCart.disabled = false; }, 1500);
+            return;
+        }
+
+        // ── Vista rápida ────────────────────────────────────────────
+        const btnQV = e.target.closest('[data-fav-qv]');
+        if (btnQV) {
+            abrirQuickView(Number(btnQV.dataset.id));
+            return;
+        }
+
+        // ── Eliminar de favoritos ───────────────────────────────────
+        const btnRm = e.target.closest('[data-fav-rm]');
+        if (btnRm) {
+            const id = Number(btnRm.dataset.id);
+            eliminarFavorito(id);
             toast('Producto eliminado de favoritos');
-        });
+            renderClienteFavoritos();   // re-render (incluye empty state)
+        }
     });
 }
 
@@ -1158,6 +1240,8 @@ export function iniciarDashboard() {
         renderAdminResumen();
         activarVista('admin-resumen');
     } else {
+        // Iniciar Quick View una vez para el panel de cliente
+        iniciarQuickView();
         renderClienteResumen();
         activarVista('resumen');
     }

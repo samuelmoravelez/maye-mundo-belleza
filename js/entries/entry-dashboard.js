@@ -10,6 +10,7 @@
 
 import '../../css/variables.css';
 import '../../css/dashboard.css';
+import '../../css/wishlist-quickview.css';
 
 import { getSession, inicializarAdmin } from '../utils/authService.js';
 import { RUTAS } from '../utils/constants.js';

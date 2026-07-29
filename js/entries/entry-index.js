@@ -4,6 +4,7 @@ import '../../css/global.css';
 import '../../css/carrito.css';
 import '../../css/index.css';
 import '../../css/auth.css';
+import '../../css/wishlist-quickview.css';
 
 import '../main.js';
 import { iniciarBotonesCarrito } from '../pages/index.js';
