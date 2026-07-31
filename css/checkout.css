@@ -849,3 +849,258 @@
 @media (max-width: 400px) {
     .checkout-header__volver-txt { display: none; }
 }
+
+/* ==========================================================================
+   CONFIRMACIÓN DE PEDIDO — Resumen completo de la orden
+   Añadido a checkout.css para reutilizar variables del proyecto
+   ========================================================================== */
+
+/* ── Contenedor del resumen ──────────────────────────────────────────────── */
+.exito-resumen {
+    margin-bottom: 20px;
+}
+
+.exito-resumen__card {
+    background: var(--blanco-puro);
+    border: 1px solid var(--borde-suave);
+    border-radius: var(--radio-lg);
+    overflow: hidden;
+    box-shadow: var(--sombra-xs);
+}
+
+/* ── Cabecera del resumen ────────────────────────────────────────────────── */
+.exito-resumen__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 18px;
+    background: var(--fondo-crema);
+    border-bottom: 1px solid var(--borde-suave);
+}
+
+.exito-resumen__head-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--fuente-titulos);
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--texto-oscuro);
+}
+
+.exito-resumen__head-left i {
+    color: var(--verde-principal);
+    font-size: 1rem;
+}
+
+.exito-resumen__fecha {
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.72rem;
+    color: var(--texto-mutado);
+}
+
+/* ── Badges de estado ────────────────────────────────────────────────────── */
+.exito-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: var(--radio-pill);
+    font-family: var(--fuente-titulos);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.exito-badge--verde    { background: rgba(42,140,100,0.12);  color: var(--verde-principal); }
+.exito-badge--amarillo { background: rgba(249,115,22,0.12);  color: #b45309; }
+.exito-badge--azul     { background: rgba(59,130,246,0.12);  color: #2563eb; }
+.exito-badge--rojo     { background: rgba(239,68,68,0.1);    color: #dc2626; }
+.exito-badge--gris     { background: rgba(107,114,128,0.1);  color: #6b7280; }
+
+/* ── Metadatos (cliente, dirección, pago) ────────────────────────────────── */
+.exito-resumen__meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--borde-suave);
+}
+
+.exito-resumen__meta-bloque {
+    padding: 14px 18px;
+    border-right: 1px solid var(--borde-suave);
+}
+
+.exito-resumen__meta-bloque:last-child {
+    border-right: none;
+}
+
+.exito-resumen__meta-titulo {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--fuente-titulos);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--texto-mutado);
+    margin-bottom: 6px;
+}
+
+.exito-resumen__meta-titulo i { color: var(--verde-principal); }
+
+.exito-resumen__meta-valor {
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.82rem;
+    color: var(--texto-medio);
+    line-height: 1.6;
+}
+
+.exito-resumen__meta-valor strong {
+    color: var(--texto-oscuro);
+    font-weight: 600;
+}
+
+.exito-resumen__meta-valor span {
+    color: var(--texto-mutado);
+    font-size: 0.78rem;
+}
+
+/* ── Tabla de productos ──────────────────────────────────────────────────── */
+.exito-resumen__tabla-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.exito-resumen__tabla {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 420px;
+}
+
+.exito-resumen__th {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--fuente-titulos);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--texto-mutado);
+    background: var(--fondo-crema);
+    border-bottom: 1px solid var(--borde-suave);
+    white-space: nowrap;
+}
+
+.exito-resumen__fila:last-child .exito-resumen__td {
+    border-bottom: none;
+}
+
+.exito-resumen__td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--borde-suave);
+    vertical-align: middle;
+    font-size: 0.84rem;
+    color: var(--texto-medio);
+}
+
+.exito-resumen__td--center { text-align: center; }
+.exito-resumen__td--right  { text-align: right; }
+
+.exito-resumen__img {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radio-md);
+    object-fit: cover;
+    border: 1px solid var(--borde-suave);
+    background: var(--fondo-crema);
+    flex-shrink: 0;
+}
+
+.exito-resumen__nombre {
+    font-family: var(--fuente-titulos);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--texto-oscuro);
+    line-height: 1.3;
+}
+
+.exito-resumen__qty {
+    font-family: var(--fuente-titulos);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texto-mutado);
+}
+
+.exito-resumen__precio-unit {
+    font-size: 0.8rem;
+    color: var(--texto-mutado);
+}
+
+.exito-resumen__subtotal {
+    font-family: var(--fuente-titulos);
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--texto-oscuro);
+}
+
+/* ── Totales ─────────────────────────────────────────────────────────────── */
+.exito-resumen__totales {
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--fondo-crema);
+    border-top: 1px solid var(--borde-suave);
+}
+
+.exito-resumen__total-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.84rem;
+    color: var(--texto-mutado);
+    font-family: var(--fuente-cuerpo);
+}
+
+.exito-resumen__total-fila--grande {
+    font-family: var(--fuente-titulos);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--texto-oscuro);
+    border-top: 1.5px solid var(--borde-suave);
+    margin-top: 6px;
+    padding-top: 10px;
+}
+
+.exito-resumen__total-fila--grande span:last-child {
+    color: var(--verde-principal);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+    .exito-resumen__meta {
+        grid-template-columns: 1fr;
+    }
+    .exito-resumen__meta-bloque {
+        border-right: none;
+        border-bottom: 1px solid var(--borde-suave);
+    }
+    .exito-resumen__meta-bloque:last-child {
+        border-bottom: none;
+    }
+    .exito-resumen__head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ── Animación del spinner en el botón PDF ───────────────────────────────── */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
