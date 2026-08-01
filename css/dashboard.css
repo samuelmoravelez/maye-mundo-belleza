@@ -1126,3 +1126,165 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* ==========================================================================
+   MÓDULOS NUEVOS — Inventario, Analítica, Cupones
+   ========================================================================== */
+
+/* ── INVENTARIO — barra de stock ────────────────────────────────────────── */
+.db-inv-stock-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.db-inv-stock-num {
+    font-family: var(--fuente-titulos);
+    font-size: 0.95rem;
+    min-width: 32px;
+    display: inline-block;
+    text-align: right;
+}
+
+.db-inv-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--fondo-gris);
+    border-radius: 3px;
+    overflow: hidden;
+    min-width: 80px;
+}
+
+.db-inv-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.db-inv-qty {
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--texto-oscuro);
+    display: inline-block;
+    min-width: 28px;
+    text-align: center;
+}
+
+/* ── ANALÍTICA — gráficos CSS ────────────────────────────────────────────── */
+.db-chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 0;
+}
+
+.db-chart-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.db-chart-label {
+    font-family: var(--fuente-titulos);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texto-medio);
+    min-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db-chart-label--sm { min-width: 130px; max-width: 130px; font-size: 0.75rem; }
+
+.db-chart-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: var(--fondo-gris);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.db-chart-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 3px;
+}
+
+.db-chart-val {
+    font-family: var(--fuente-titulos);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--texto-oscuro);
+    min-width: 28px;
+    text-align: right;
+}
+
+/* Métodos de pago */
+.db-chart-metodos {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.db-chart-metodo-item { display: flex; flex-direction: column; gap: 6px; }
+
+.db-chart-metodo-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.db-chart-metodo-dot {
+    width: 10px; height: 10px;
+    border-radius: var(--radio-circulo);
+    flex-shrink: 0;
+}
+
+.db-chart-metodo-nombre {
+    font-family: var(--fuente-titulos);
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--texto-oscuro);
+    flex: 1;
+}
+
+.db-chart-metodo-pct {
+    font-family: var(--fuente-titulos);
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--texto-oscuro);
+}
+
+.db-chart-metodo-cnt {
+    font-size: 0.75rem;
+    color: var(--texto-mutado);
+}
+
+/* Grid de analítica — responsive */
+.db-anal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 760px) {
+    .db-anal-grid { grid-template-columns: 1fr; }
+}
+
+/* ── CUPONES ─────────────────────────────────────────────────────────────── */
+.db-cupon-codigo {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    background: rgba(42, 140, 100, 0.08);
+    color: var(--verde-oscuro);
+    padding: 3px 10px;
+    border-radius: var(--radio-md);
+    border: 1px dashed rgba(42, 140, 100, 0.3);
+}

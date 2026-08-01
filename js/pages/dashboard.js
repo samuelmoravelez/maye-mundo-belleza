@@ -24,6 +24,10 @@ import { descargarFacturaPDF, imprimirFactura } from '../utils/invoiceService.js
 import { agregarItem }                          from '../utils/carrito.js';
 import { eliminarFavorito, obtenerFavoritos }   from '../utils/wishlistService.js';
 import { abrirQuickView, iniciarQuickView }     from '../components/quickView.js';
+import {
+    obtenerCupones, crearCupon, actualizarCupon,
+    toggleCupon, eliminarCupon,
+} from '../utils/couponService.js';
 
 // ── Storage keys adicionales ───────────────────────────────────────────────
 const KEYS = {
@@ -87,10 +91,13 @@ function activarVista(viewId) {
         'pedidos':    'Mis Pedidos',
         'favoritos':  'Lista de Deseos',
         // admin
-        'admin-resumen':   'Resumen General',
-        'admin-productos': 'Gestión de Productos',
-        'admin-pedidos':   'Gestión de Pedidos',
-        'admin-usuarios':  'Gestión de Usuarios',
+        'admin-resumen':    'Resumen General',
+        'admin-productos':  'Gestión de Productos',
+        'admin-pedidos':    'Gestión de Pedidos',
+        'admin-usuarios':   'Gestión de Usuarios',
+        'admin-inventario': 'Control de Inventario',
+        'admin-analitica':  'Analítica de Ventas',
+        'admin-cupones':    'Cupones y Promociones',
     };
     const tb = document.getElementById('db-topbar-titulo');
     if (tb) tb.textContent = titulos[viewId] ?? 'Dashboard';
@@ -929,6 +936,497 @@ function _vincularBotonesFactura(container, orders) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// PANEL ADMIN — Inventario y alertas de bajo stock
+// ─────────────────────────────────────────────────────────────────────────────
+let umbralStock = 5;  // configurable desde la UI
+
+function renderAdminInventario() {
+    const todos     = obtenerProductos();
+    const busqueda  = document.getElementById('db-inv-buscar')?.value.toLowerCase() ?? '';
+    const filtrados = busqueda
+        ? todos.filter(p => p.nombre.toLowerCase().includes(busqueda) ||
+                            p.categoria.toLowerCase().includes(busqueda))
+        : todos;
+
+    // ── Mini-KPIs ─────────────────────────────────────────────────────────
+    const kpiEl = document.getElementById('db-inv-kpis');
+    if (kpiEl) {
+        const agotados  = todos.filter(p => p.stock === 0).length;
+        const bajoStock = todos.filter(p => p.stock > 0 && p.stock <= umbralStock).length;
+        const ok        = todos.filter(p => p.stock > umbralStock).length;
+        const total     = todos.reduce((s, p) => s + p.stock, 0);
+        kpiEl.innerHTML = [
+            { icon:'ri-box-3-line',       cls:'db-kpi__icon--verde',   num: total,     label:'Unidades totales' },
+            { icon:'ri-checkbox-circle-line', cls:'db-kpi__icon--azul', num: ok,        label:'Stock OK' },
+            { icon:'ri-alarm-warning-line', cls:'db-kpi__icon--amarillo', num: bajoStock, label:`Bajo stock (≤${umbralStock})` },
+            { icon:'ri-archive-line',       cls:'db-kpi__icon--rojo',   num: agotados,  label:'Agotados' },
+        ].map(k => `
+        <div class="db-kpi">
+            <div class="db-kpi__icon ${k.cls}"><i class="${k.icon}"></i></div>
+            <div class="db-kpi__body">
+                <span class="db-kpi__num">${k.num}</span>
+                <span class="db-kpi__label">${k.label}</span>
+            </div>
+        </div>`).join('');
+    }
+
+    // ── Tabla ─────────────────────────────────────────────────────────────
+    const tbody = document.getElementById('db-inv-tbody');
+    if (!tbody) return;
+
+    if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="db-empty"><i class="ri-inbox-line"></i><p>Sin resultados</p></div></td></tr>`;
+        return;
+    }
+
+    // Ordenar: agotados primero, luego bajo stock, luego OK
+    const ordenados = [...filtrados].sort((a, b) => a.stock - b.stock);
+
+    tbody.innerHTML = ordenados.map(p => {
+        const cat     = CATEGORIAS.find(c => c.id === p.categoria)?.label ?? p.categoria;
+        const agotado = p.stock === 0;
+        const bajo    = p.stock > 0 && p.stock <= umbralStock;
+
+        // Barra de stock visual
+        const maxBar = 50;
+        const pct    = Math.min(100, (p.stock / maxBar) * 100);
+        const barClr = agotado ? '#ef4444' : bajo ? '#f59e0b' : 'var(--verde-principal)';
+        const estadoBadge = agotado
+            ? `<span class="db-badge db-badge--rojo"><i class="ri-close-circle-line"></i> Agotado</span>`
+            : bajo
+            ? `<span class="db-badge db-badge--amarillo"><i class="ri-alarm-warning-line"></i> Bajo stock</span>`
+            : `<span class="db-badge db-badge--verde"><i class="ri-checkbox-circle-line"></i> OK</span>`;
+
+        return `
+        <tr>
+            <td>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <img class="db-table__img" src="${p.imagen}" alt="${p.nombre}"
+                         onerror="this.src='https://placehold.co/44x44/FAF7F2/2A8C64?text=?'">
+                    <span class="db-table__bold">${p.nombre}</span>
+                </div>
+            </td>
+            <td class="db-table__muted">${cat}</td>
+            <td>
+                <div class="db-inv-stock-wrap">
+                    <span class="db-inv-stock-num" style="color:${barClr};font-weight:700">
+                        ${p.stock}
+                    </span>
+                    <div class="db-inv-bar-bg">
+                        <div class="db-inv-bar-fill"
+                             style="width:${pct}%;background:${barClr}"></div>
+                    </div>
+                </div>
+            </td>
+            <td>${estadoBadge}</td>
+            <td>
+                <div class="db-table__actions">
+                    <button class="db-btn db-btn--sm db-btn--icon"
+                            data-inv-dec="${p.id}"
+                            title="Reducir 1 unidad"
+                            aria-label="Reducir stock de ${p.nombre}">
+                        <i class="ri-subtract-line"></i>
+                    </button>
+                    <span class="db-inv-qty" id="db-inv-qty-${p.id}"
+                          style="min-width:28px;text-align:center;
+                                 font-family:var(--fuente-titulos);font-weight:700">
+                        ${p.stock}
+                    </span>
+                    <button class="db-btn db-btn--sm db-btn--icon"
+                            data-inv-inc="${p.id}"
+                            title="Aumentar 1 unidad"
+                            aria-label="Aumentar stock de ${p.nombre}">
+                        <i class="ri-add-line"></i>
+                    </button>
+                    <button class="db-btn db-btn--sm"
+                            data-inv-set="${p.id}"
+                            data-inv-nombre="${p.nombre.replace(/"/g,'&quot;')}"
+                            title="Establecer valor exacto"
+                            style="gap:4px">
+                        <i class="ri-pencil-line"></i> Editar
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+
+    // ── Eventos de la tabla ────────────────────────────────────────────────
+    tbody.querySelectorAll('[data-inv-dec]').forEach(btn => {
+        btn.addEventListener('click', () => _ajustarStock(Number(btn.dataset.invDec), -1));
+    });
+    tbody.querySelectorAll('[data-inv-inc]').forEach(btn => {
+        btn.addEventListener('click', () => _ajustarStock(Number(btn.dataset.invInc), +1));
+    });
+    tbody.querySelectorAll('[data-inv-set]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id     = Number(btn.dataset.invSet);
+            const nombre = btn.dataset.invNombre;
+            const actual = obtenerProductos().find(p => p.id === id)?.stock ?? 0;
+            const nuevo  = parseInt(prompt(`Stock actual de "${nombre}": ${actual}\nIngresa el nuevo valor:`, actual), 10);
+            if (!isNaN(nuevo) && nuevo >= 0) {
+                const prods = obtenerProductos();
+                const idx   = prods.findIndex(p => p.id === id);
+                if (idx !== -1) {
+                    prods[idx].stock    = nuevo;
+                    prods[idx].etiqueta = nuevo === 0 ? 'agotado'
+                                        : prods[idx].etiqueta === 'agotado' ? null
+                                        : prods[idx].etiqueta;
+                    guardarProductos(prods);
+                    renderAdminInventario();
+                    toast(`Stock de "${nombre}" actualizado a ${nuevo} unidades`);
+                }
+            }
+        });
+    });
+}
+
+function _ajustarStock(productId, delta) {
+    const prods = obtenerProductos();
+    const idx   = prods.findIndex(p => p.id === productId);
+    if (idx === -1) return;
+    const nuevo = Math.max(0, prods[idx].stock + delta);
+    prods[idx].stock    = nuevo;
+    prods[idx].etiqueta = nuevo === 0 ? 'agotado'
+                        : prods[idx].etiqueta === 'agotado' ? null
+                        : prods[idx].etiqueta;
+    guardarProductos(prods);
+    renderAdminInventario();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PANEL ADMIN — Analítica de Ventas (gráficos CSS puros, sin dependencias)
+// ─────────────────────────────────────────────────────────────────────────────
+function renderAdminAnalitica() {
+    const orders  = getOrders();
+    const prods   = obtenerProductos();
+    const users   = getUsers().filter(u => u.role === ROLES.CLIENT);
+
+    // ── KPIs principales ──────────────────────────────────────────────────
+    const kpiEl = document.getElementById('db-anal-kpis');
+    if (kpiEl) {
+        const totalVentas  = orders.reduce((s, o) => s + (o.pricing?.total ?? o.total ?? 0), 0);
+        const completados  = orders.filter(o => (o.status ?? o.estado) === 'completado');
+        const pendientes   = orders.filter(o => ['pending','pendiente'].includes(o.status ?? o.estado));
+        const ticketProm   = completados.length
+            ? Math.round(completados.reduce((s,o) => s+(o.pricing?.total??o.total??0), 0) / completados.length)
+            : 0;
+
+        kpiEl.innerHTML = [
+            { icon:'ri-money-dollar-circle-line', cls:'db-kpi__icon--verde',   num: formatearPrecio(totalVentas), label:'Total facturado', delta:`${completados.length} completados` },
+            { icon:'ri-file-list-3-line',         cls:'db-kpi__icon--azul',    num: orders.length,               label:'Pedidos totales', delta:`${pendientes.length} pendientes` },
+            { icon:'ri-user-heart-line',          cls:'db-kpi__icon--lila',    num: users.length,                label:'Clientes',        delta:'usuarios registrados' },
+            { icon:'ri-shopping-cart-2-line',     cls:'db-kpi__icon--naranja', num: formatearPrecio(ticketProm), label:'Ticket promedio', delta:'por pedido completado' },
+        ].map(k => `
+        <div class="db-kpi">
+            <div class="db-kpi__icon ${k.cls}"><i class="${k.icon}"></i></div>
+            <div class="db-kpi__body">
+                <span class="db-kpi__num">${k.num}</span>
+                <span class="db-kpi__label">${k.label}</span>
+                <span class="db-kpi__delta">${k.delta}</span>
+            </div>
+        </div>`).join('');
+    }
+
+    // ── Gráfico: ventas por estado ─────────────────────────────────────────
+    const chartEstados = document.getElementById('db-anal-estados-chart');
+    if (chartEstados) {
+        const estados = {
+            pending:    { label:'Pendiente', color:'#f59e0b' },
+            pendiente:  { label:'Pendiente', color:'#f59e0b' },
+            enviado:    { label:'Enviado',   color:'#3b82f6' },
+            completado: { label:'Completado',color:'var(--verde-principal)' },
+            cancelado:  { label:'Cancelado', color:'#ef4444' },
+        };
+        const conteo = {};
+        orders.forEach(o => {
+            const e = o.status ?? o.estado ?? 'pending';
+            const key = e === 'pendiente' ? 'pending' : e;
+            conteo[key] = (conteo[key] ?? 0) + 1;
+        });
+
+        const max = Math.max(...Object.values(conteo), 1);
+        const keys = ['pending','enviado','completado','cancelado'];
+        chartEstados.innerHTML = keys.map(k => {
+            const est = estados[k];
+            const cnt = conteo[k] ?? 0;
+            const pct = Math.round((cnt / max) * 100);
+            return `
+            <div class="db-chart-row">
+                <span class="db-chart-label">${est.label}</span>
+                <div class="db-chart-bar-bg">
+                    <div class="db-chart-bar-fill"
+                         style="width:${pct}%;background:${est.color}">
+                    </div>
+                </div>
+                <span class="db-chart-val">${cnt}</span>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Gráfico: top productos más pedidos ─────────────────────────────────
+    const chartTop = document.getElementById('db-anal-top-productos');
+    if (chartTop) {
+        const conteoProds = {};
+        orders.forEach(o => {
+            (o.items ?? []).forEach(item => {
+                const key = item.title ?? item.nombre ?? item.productId;
+                conteoProds[key] = (conteoProds[key] ?? 0) + (item.quantity ?? item.cantidad ?? 1);
+            });
+        });
+        const topProds = Object.entries(conteoProds)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 6);
+
+        if (topProds.length === 0) {
+            chartTop.innerHTML = `<div class="db-empty"><i class="ri-bar-chart-2-line"></i><p>Sin datos aún</p></div>`;
+        } else {
+            const maxP = Math.max(...topProds.map(x => x[1]), 1);
+            chartTop.innerHTML = topProds.map(([nombre, qty], i) => {
+                const pct = Math.round((qty / maxP) * 100);
+                const colores = ['var(--verde-principal)','var(--lila-oscuro)','#3b82f6','#f97316','#ec4899','#ca8a04'];
+                return `
+                <div class="db-chart-row">
+                    <span class="db-chart-label db-chart-label--sm">${nombre.length > 24 ? nombre.slice(0,22)+'…' : nombre}</span>
+                    <div class="db-chart-bar-bg">
+                        <div class="db-chart-bar-fill"
+                             style="width:${pct}%;background:${colores[i % colores.length]}">
+                        </div>
+                    </div>
+                    <span class="db-chart-val">${qty}</span>
+                </div>`;
+            }).join('');
+        }
+    }
+
+    // ── Gráfico: métodos de pago ───────────────────────────────────────────
+    const chartMetodos = document.getElementById('db-anal-metodos-pago');
+    if (chartMetodos) {
+        const METODO_LABELS = {
+            nequi:         'Nequi',
+            bancolombia:   'Bancolombia',
+            contraentrega: 'Contraentrega',
+        };
+        const conteoMet = {};
+        orders.forEach(o => {
+            const m = o.paymentMethod ?? 'desconocido';
+            conteoMet[m] = (conteoMet[m] ?? 0) + 1;
+        });
+        const total  = orders.length || 1;
+        const colMet = { nequi:'#a855f7', bancolombia:'#f59e0b', contraentrega:'var(--verde-principal)' };
+
+        if (Object.keys(conteoMet).length === 0) {
+            chartMetodos.innerHTML = `<div class="db-empty"><i class="ri-bank-card-line"></i><p>Sin datos aún</p></div>`;
+        } else {
+            chartMetodos.innerHTML = `
+            <div class="db-chart-metodos">
+                ${Object.entries(conteoMet).map(([m, cnt]) => {
+                    const pct  = Math.round((cnt / total) * 100);
+                    const lbl  = METODO_LABELS[m] ?? m;
+                    const clr  = colMet[m] ?? '#6b7280';
+                    return `
+                    <div class="db-chart-metodo-item">
+                        <div class="db-chart-metodo-header">
+                            <span class="db-chart-metodo-dot" style="background:${clr}"></span>
+                            <span class="db-chart-metodo-nombre">${lbl}</span>
+                            <span class="db-chart-metodo-pct">${pct}%</span>
+                            <span class="db-chart-metodo-cnt">(${cnt})</span>
+                        </div>
+                        <div class="db-chart-bar-bg" style="height:10px;border-radius:5px">
+                            <div class="db-chart-bar-fill"
+                                 style="width:${pct}%;height:10px;background:${clr};border-radius:5px"></div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>`;
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PANEL ADMIN — Cupones y Promociones
+// ─────────────────────────────────────────────────────────────────────────────
+let _cuponEdicionId = null;
+
+function renderAdminCupones() {
+    const cupones = obtenerCupones();
+    const tbody   = document.getElementById('db-cupones-tbody');
+    if (!tbody) return;
+
+    if (cupones.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8">
+            <div class="db-empty">
+                <i class="ri-coupon-line"></i>
+                <p>No hay cupones creados aún.</p>
+            </div>
+        </td></tr>`;
+        return;
+    }
+
+    const hoy = new Date();
+    tbody.innerHTML = cupones.map(c => {
+        const vencido  = c.fechaVence && new Date(c.fechaVence) < hoy;
+        const tipoLbl  = c.tipo === 'porcentaje' ? `${c.valor}%` : formatearPrecio(c.valor);
+        const minLbl   = c.minCompra > 0 ? formatearPrecio(c.minCompra) : '—';
+        const usosLbl  = c.usoMaximo ? `${c.usosActuales}/${c.usoMaximo}` : `${c.usosActuales}/∞`;
+        const venceLbl = c.fechaVence
+            ? new Date(c.fechaVence).toLocaleDateString('es-CO')
+            : '—';
+
+        let estadoBadge;
+        if (!c.activo) {
+            estadoBadge = `<span class="db-badge db-badge--gris">Inactivo</span>`;
+        } else if (vencido) {
+            estadoBadge = `<span class="db-badge db-badge--rojo">Expirado</span>`;
+        } else {
+            estadoBadge = `<span class="db-badge db-badge--verde">Activo</span>`;
+        }
+
+        return `
+        <tr style="${(!c.activo || vencido) ? 'opacity:0.6' : ''}">
+            <td>
+                <span class="db-cupon-codigo">${c.codigo}</span>
+                ${c.descripcion ? `<div class="db-table__muted" style="font-size:0.72rem">${c.descripcion}</div>` : ''}
+            </td>
+            <td class="db-table__muted">
+                ${c.tipo === 'porcentaje'
+                    ? `<i class="ri-percent-line"></i> Porcentaje`
+                    : `<i class="ri-money-dollar-circle-line"></i> Fijo`}
+            </td>
+            <td class="db-table__price">${tipoLbl}</td>
+            <td class="db-table__muted">${minLbl}</td>
+            <td class="db-table__muted">${usosLbl}</td>
+            <td class="db-table__muted">${venceLbl}</td>
+            <td>${estadoBadge}</td>
+            <td>
+                <div class="db-table__actions">
+                    <button class="db-btn db-btn--sm db-btn--icon"
+                            data-cupon-edit="${c.id}" title="Editar cupón">
+                        <i class="ri-pencil-line"></i>
+                    </button>
+                    <button class="db-btn db-btn--sm db-btn--icon"
+                            data-cupon-toggle="${c.id}"
+                            title="${c.activo ? 'Desactivar' : 'Activar'}">
+                        <i class="${c.activo ? 'ri-toggle-fill' : 'ri-toggle-line'}"
+                           style="${c.activo ? 'color:#f97316' : 'color:var(--verde-principal)'}"></i>
+                    </button>
+                    <button class="db-btn db-btn--sm db-btn--icon db-btn--danger"
+                            data-cupon-del="${c.id}" title="Eliminar cupón">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+
+    // Eventos
+    tbody.querySelectorAll('[data-cupon-edit]').forEach(btn => {
+        btn.addEventListener('click', () => _abrirModalCupon(btn.dataset.cuponEdit));
+    });
+    tbody.querySelectorAll('[data-cupon-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const res = toggleCupon(btn.dataset.cuponToggle);
+            if (res.ok) {
+                toast(`Cupón ${res.activo ? 'activado' : 'desactivado'}`);
+                renderAdminCupones();
+            }
+        });
+    });
+    tbody.querySelectorAll('[data-cupon-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!confirm('¿Eliminar este cupón permanentemente?')) return;
+            const res = eliminarCupon(btn.dataset.cuponDel);
+            if (res.ok) {
+                toast('Cupón eliminado');
+                renderAdminCupones();
+            }
+        });
+    });
+}
+
+function _abrirModalCupon(couponId = null) {
+    _cuponEdicionId = couponId;
+    document.getElementById('db-cupon-form')?.reset();
+    document.getElementById('db-cupon-id').value = '';
+
+    const titulo = document.getElementById('db-cupon-modal-titulo');
+
+    if (couponId) {
+        const c = obtenerCupones().find(x => x.id === couponId);
+        if (!c) return;
+        if (titulo) titulo.textContent = 'Editar cupón';
+        document.getElementById('db-cupon-id').value        = c.id;
+        document.getElementById('db-cp-codigo').value        = c.codigo;
+        document.getElementById('db-cp-tipo').value          = c.tipo;
+        document.getElementById('db-cp-valor').value         = c.valor;
+        document.getElementById('db-cp-mincompra').value     = c.minCompra ?? 0;
+        document.getElementById('db-cp-usomax').value        = c.usoMaximo ?? '';
+        document.getElementById('db-cp-vence').value         = c.fechaVence
+            ? c.fechaVence.slice(0, 10) : '';
+        document.getElementById('db-cp-descripcion').value   = c.descripcion ?? '';
+    } else {
+        if (titulo) titulo.textContent = 'Nuevo cupón';
+    }
+
+    document.getElementById('db-modal-cupon')
+        ?.classList.add('db-modal-overlay--visible');
+    setTimeout(() => document.getElementById('db-cp-codigo')?.focus(), 200);
+}
+
+function _cerrarModalCupon() {
+    _cuponEdicionId = null;
+    document.getElementById('db-modal-cupon')
+        ?.classList.remove('db-modal-overlay--visible');
+}
+
+function _guardarCupon(e) {
+    e.preventDefault();
+
+    const codigo      = document.getElementById('db-cp-codigo').value.trim().toUpperCase();
+    const tipo        = document.getElementById('db-cp-tipo').value;
+    const valor       = Number(document.getElementById('db-cp-valor').value);
+    const minCompra   = Number(document.getElementById('db-cp-mincompra').value) || 0;
+    const usoMax      = document.getElementById('db-cp-usomax').value;
+    const fechaVence  = document.getElementById('db-cp-vence').value || null;
+    const descripcion = document.getElementById('db-cp-descripcion').value.trim();
+
+    if (!codigo || !tipo || !valor) {
+        toast('Completa los campos obligatorios (*)', 'error');
+        return;
+    }
+
+    const idEnEdicion = document.getElementById('db-cupon-id').value;
+
+    let resultado;
+    if (idEnEdicion) {
+        resultado = actualizarCupon(idEnEdicion, {
+            codigo, tipo, valor, minCompra,
+            usoMaximo:  usoMax ? Number(usoMax) : null,
+            fechaVence, descripcion,
+        });
+    } else {
+        resultado = crearCupon({
+            codigo, tipo, valor, minCompra,
+            usoMaximo:  usoMax ? Number(usoMax) : null,
+            fechaVence, descripcion,
+        });
+    }
+
+    if (!resultado.ok) {
+        const errMsg = {
+            DUPLICATE_CODE: 'Este código ya existe.',
+            MISSING_FIELDS: 'Completa todos los campos requeridos.',
+            FORBIDDEN:      'Sin permisos de administrador.',
+        };
+        toast(errMsg[resultado.error] ?? 'Error al guardar el cupón', 'error');
+        return;
+    }
+
+    toast(idEnEdicion ? 'Cupón actualizado' : 'Cupón creado correctamente');
+    _cerrarModalCupon();
+    renderAdminCupones();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // LOGOUT
 // ─────────────────────────────────────────────────────────────────────────────
 async function handleLogout() {
@@ -1250,7 +1748,10 @@ export function iniciarDashboard() {
     // Si un cliente llega a tener en memoria algún botón de admin (ej. por
     // caché agresivo), el guard de esta lista lo bloquea antes de renderizar.
     const VISTAS_CLIENTE = new Set(['resumen','perfil','pedidos','favoritos']);
-    const VISTAS_ADMIN   = new Set(['admin-resumen','admin-productos','admin-pedidos','admin-usuarios']);
+    const VISTAS_ADMIN   = new Set([
+        'admin-resumen','admin-productos','admin-pedidos','admin-usuarios',
+        'admin-inventario','admin-analitica','admin-cupones',
+    ]);
     const vistasPermitidas = isAdminRole ? VISTAS_ADMIN : VISTAS_CLIENTE;
 
     // ── 5. Eventos del sidebar — navegación con guard de rol ──────────────
@@ -1276,6 +1777,9 @@ export function iniciarDashboard() {
                 'admin-productos':  () => renderAdminProductos(),
                 'admin-pedidos':    () => renderAdminPedidos(),
                 'admin-usuarios':   () => renderAdminUsuarios(),
+                'admin-inventario': () => renderAdminInventario(),
+                'admin-analitica':  () => renderAdminAnalitica(),
+                'admin-cupones':    () => renderAdminCupones(),
             };
             renders[view]?.();
 
@@ -1403,6 +1907,7 @@ export function iniciarDashboard() {
         if (e.key === 'Escape') {
             _modalProducto(false);
             _modalEditarUsuario(false);
+            _cerrarModalCupon();
             cerrarConfirm();
             _cerrarConfirmUsuario();
             cerrarSidebarMovil();
@@ -1415,6 +1920,32 @@ export function iniciarDashboard() {
             renderClienteFavoritos();
         }
     });
+
+    // ── 17. Módulos extra de admin ─────────────────────────────────────────
+    if (isAdminRole) {
+        // Umbral y búsqueda de inventario
+        document.getElementById('db-inv-umbral-input')?.addEventListener('change', e => {
+            umbralStock = Math.max(1, parseInt(e.target.value) || 5);
+            if (viewActual === 'admin-inventario') renderAdminInventario();
+        });
+        document.getElementById('db-inv-buscar')?.addEventListener('input', () => {
+            if (viewActual === 'admin-inventario') renderAdminInventario();
+        });
+
+        // Cupón: nuevo
+        document.getElementById('db-cupon-nuevo')
+            ?.addEventListener('click', () => _abrirModalCupon());
+        // Cupón: cerrar modal
+        ['db-cupon-modal-cerrar', 'db-cupon-modal-cancelar'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', _cerrarModalCupon);
+        });
+        document.getElementById('db-modal-cupon')?.addEventListener('click', e => {
+            if (e.target === document.getElementById('db-modal-cupon')) _cerrarModalCupon();
+        });
+        // Cupón: submit
+        document.getElementById('db-cupon-form')
+            ?.addEventListener('submit', _guardarCupon);
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

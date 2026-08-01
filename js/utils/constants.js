@@ -17,7 +17,8 @@ export const STORAGE_KEYS = Object.freeze({
     SESSION:       'maye_session',
     ORDERS:        'maye_orders',
     FAVORITES:     'maye_favorites',
-    CHECKOUT:      'maye_checkout_pendiente', // carrito snapshot al ir al checkout
+    CHECKOUT:      'maye_checkout_pendiente',
+    COUPONS:       'maye_coupons',
 });
 
 export const SCHEMA_VERSION = 1;

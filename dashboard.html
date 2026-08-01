@@ -70,6 +70,15 @@
             <button class="db-nav__item" data-view="admin-usuarios" aria-label="Gestión de usuarios">
                 <i class="ri-team-line"></i> Usuarios
             </button>
+            <button class="db-nav__item" data-view="admin-inventario" aria-label="Control de inventario">
+                <i class="ri-archive-drawer-line"></i> Inventario
+            </button>
+            <button class="db-nav__item" data-view="admin-analitica" aria-label="Analítica de ventas">
+                <i class="ri-line-chart-line"></i> Analítica
+            </button>
+            <button class="db-nav__item" data-view="admin-cupones" aria-label="Cupones y promociones">
+                <i class="ri-coupon-line"></i> Cupones
+            </button>
         </nav>
 
         <!-- Footer del sidebar -->
@@ -406,6 +415,168 @@
         </div>
     </section>
 
+    <!-- ── Vista: Control de Inventario ── -->
+    <section class="db-view" id="view-admin-inventario">
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon"
+                         style="background:rgba(249,115,22,0.1);color:#f97316">
+                        <i class="ri-archive-drawer-line"></i>
+                    </div>
+                    <div>
+                        <div class="db-card__titulo">Control de Inventario</div>
+                        <div class="db-card__subtitulo">
+                            Productos con bajo stock · Ajuste manual de unidades
+                        </div>
+                    </div>
+                </div>
+                <div class="db-toolbar">
+                    <div class="db-search">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="db-inv-buscar"
+                               placeholder="Buscar producto…"
+                               aria-label="Buscar producto en inventario">
+                    </div>
+                    <label class="db-btn" style="gap:6px;cursor:pointer" for="db-inv-umbral-input">
+                        <i class="ri-alarm-warning-line"></i>
+                        Umbral:
+                        <input id="db-inv-umbral-input" type="number"
+                               value="5" min="1" max="99"
+                               style="width:42px;border:none;background:transparent;
+                                      font-family:var(--fuente-titulos);font-weight:700;
+                                      font-size:0.82rem;outline:none;color:var(--texto-oscuro)"
+                               aria-label="Umbral de bajo stock">
+                    </label>
+                </div>
+            </div>
+            <!-- Mini-KPIs de inventario -->
+            <div class="db-kpis" id="db-inv-kpis"
+                 style="padding:20px 24px 0;grid-template-columns:repeat(4,1fr)"></div>
+            <div class="db-card__body--no-padding db-table-wrap">
+                <table class="db-table" aria-label="Inventario de productos">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Stock actual</th>
+                            <th>Estado</th>
+                            <th>Ajustar stock</th>
+                        </tr>
+                    </thead>
+                    <tbody id="db-inv-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Vista: Analítica de Ventas ── -->
+    <section class="db-view" id="view-admin-analitica">
+
+        <!-- KPIs principales -->
+        <div class="db-kpis" id="db-anal-kpis" style="margin-bottom:24px"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px"
+             class="db-anal-grid">
+
+            <!-- Ventas por período (barras) -->
+            <div class="db-card">
+                <div class="db-card__head">
+                    <div class="db-card__head-left">
+                        <div class="db-card__titulo-icon"
+                             style="background:rgba(59,130,246,0.1);color:#3b82f6">
+                            <i class="ri-bar-chart-box-line"></i>
+                        </div>
+                        <div>
+                            <div class="db-card__titulo">Ventas por estado</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="db-card__body">
+                    <div id="db-anal-estados-chart" class="db-chart-container"></div>
+                </div>
+            </div>
+
+            <!-- Top productos más pedidos -->
+            <div class="db-card">
+                <div class="db-card__head">
+                    <div class="db-card__head-left">
+                        <div class="db-card__titulo-icon"
+                             style="background:rgba(234,179,8,0.1);color:#ca8a04">
+                            <i class="ri-trophy-line"></i>
+                        </div>
+                        <div>
+                            <div class="db-card__titulo">Top productos más pedidos</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="db-card__body">
+                    <div id="db-anal-top-productos" class="db-chart-container"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Métodos de pago -->
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon"
+                         style="background:rgba(184,160,228,0.15);color:var(--lila-oscuro)">
+                        <i class="ri-bank-card-line"></i>
+                    </div>
+                    <div>
+                        <div class="db-card__titulo">Métodos de pago preferidos</div>
+                    </div>
+                </div>
+            </div>
+            <div class="db-card__body">
+                <div id="db-anal-metodos-pago" class="db-chart-container"></div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ── Vista: Cupones y Promociones ── -->
+    <section class="db-view" id="view-admin-cupones">
+        <div class="db-card">
+            <div class="db-card__head">
+                <div class="db-card__head-left">
+                    <div class="db-card__titulo-icon"
+                         style="background:rgba(42,140,100,0.1);color:var(--verde-principal)">
+                        <i class="ri-coupon-line"></i>
+                    </div>
+                    <div>
+                        <div class="db-card__titulo">Cupones y Promociones</div>
+                        <div class="db-card__subtitulo">
+                            Crea códigos de descuento por porcentaje o monto fijo
+                        </div>
+                    </div>
+                </div>
+                <button class="db-btn db-btn--primary" id="db-cupon-nuevo">
+                    <i class="ri-add-line"></i> Nuevo cupón
+                </button>
+            </div>
+            <div class="db-card__body--no-padding db-table-wrap">
+                <table class="db-table" aria-label="Cupones de descuento">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Min. compra</th>
+                            <th>Usos</th>
+                            <th>Vence</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="db-cupones-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
 </div><!-- /#db-panel-admin -->
 
         </main><!-- /.db-content -->
@@ -643,6 +814,97 @@
                     style="background:#ef4444;color:#fff;border-color:#ef4444">
                 <i class="ri-check-line" id="db-cusr-si-icon"></i>
                 <span id="db-cusr-si-label">Confirmar</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     MODAL — CREAR / EDITAR CUPÓN (solo admin)
+══════════════════════════════════════════════════════════════════════ -->
+<div class="db-modal-overlay" id="db-modal-cupon"
+     role="dialog" aria-modal="true" aria-labelledby="db-cupon-modal-titulo">
+    <div class="db-modal">
+        <div class="db-modal__head">
+            <div style="display:flex;align-items:center;gap:10px">
+                <div class="db-card__titulo-icon"
+                     style="background:rgba(42,140,100,0.1);color:var(--verde-principal)">
+                    <i class="ri-coupon-line"></i>
+                </div>
+                <h2 class="db-modal__titulo" id="db-cupon-modal-titulo">Nuevo cupón</h2>
+            </div>
+            <button class="db-modal__cerrar" id="db-cupon-modal-cerrar"
+                    aria-label="Cerrar modal cupón">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="db-modal__body">
+            <form id="db-cupon-form" novalidate>
+                <input type="hidden" id="db-cupon-id">
+                <div class="db-perfil-grid">
+
+                    <div class="db-form-grupo">
+                        <label for="db-cp-codigo">
+                            Código <span style="color:#ef4444">*</span>
+                        </label>
+                        <input type="text" id="db-cp-codigo"
+                               placeholder="Ej: MAYE10"
+                               style="text-transform:uppercase"
+                               autocomplete="off" required>
+                        <small style="font-size:0.7rem;color:var(--texto-mutado);margin-top:3px;display:block">
+                            Solo letras y números, sin espacios
+                        </small>
+                    </div>
+
+                    <div class="db-form-grupo">
+                        <label for="db-cp-tipo">Tipo de descuento <span style="color:#ef4444">*</span></label>
+                        <select id="db-cp-tipo" required>
+                            <option value="porcentaje">Porcentaje (%)</option>
+                            <option value="fijo">Monto fijo (COP)</option>
+                        </select>
+                    </div>
+
+                    <div class="db-form-grupo">
+                        <label for="db-cp-valor">
+                            Valor <span style="color:#ef4444">*</span>
+                        </label>
+                        <input type="number" id="db-cp-valor"
+                               placeholder="Ej: 10 para 10% o 15000 para $15.000"
+                               min="1" required>
+                    </div>
+
+                    <div class="db-form-grupo">
+                        <label for="db-cp-mincompra">Compra mínima (COP)</label>
+                        <input type="number" id="db-cp-mincompra"
+                               placeholder="0 = sin mínimo" min="0" value="0">
+                    </div>
+
+                    <div class="db-form-grupo">
+                        <label for="db-cp-usomax">Límite de usos</label>
+                        <input type="number" id="db-cp-usomax"
+                               placeholder="Vacío = ilimitado" min="1">
+                    </div>
+
+                    <div class="db-form-grupo">
+                        <label for="db-cp-vence">Fecha de vencimiento</label>
+                        <input type="date" id="db-cp-vence">
+                    </div>
+
+                    <div class="db-form-grupo db-form-grupo--full">
+                        <label for="db-cp-descripcion">Descripción interna</label>
+                        <input type="text" id="db-cp-descripcion"
+                               placeholder="Ej: Descuento de bienvenida para nuevos clientes">
+                    </div>
+
+                </div>
+            </form>
+        </div>
+        <div class="db-modal__footer">
+            <button type="button" class="db-btn"
+                    id="db-cupon-modal-cancelar">Cancelar</button>
+            <button type="submit" form="db-cupon-form"
+                    class="db-btn db-btn--primary">
+                <i class="ri-save-line"></i> Guardar cupón
             </button>
         </div>
     </div>
