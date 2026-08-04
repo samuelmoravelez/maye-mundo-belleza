@@ -7,25 +7,25 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
-    base: '/maye-mundo-belleza/',
+    base: '/',
     root: '.',
 
     plugins: [
         handlebars({
             partialDirectory: resolve(__dirname, 'partials'),
             context: {
-                base: '/maye-mundo-belleza/',
-                assets: '/maye-mundo-belleza',
+                base: '/',
+                assets: '',
                 rutas: {
-                    home:          '/maye-mundo-belleza/index.html',
-                    productos:     '/maye-mundo-belleza/paginas/productos.html',
-                    contacto:      '/maye-mundo-belleza/paginas/contacto.html',
-                    legales:       '/maye-mundo-belleza/paginas/legales.html',
-                    producto:      '/maye-mundo-belleza/paginas/producto.html',
-                    admin:         '/maye-mundo-belleza/admin.html',
-                    dashboard:     '/maye-mundo-belleza/dashboard.html',
-                    checkout:      '/maye-mundo-belleza/checkout.html',
-                    pedidoExitoso: '/maye-mundo-belleza/pedido-exitoso.html',
+                    home:          '/index.html',
+                    productos:     '/paginas/productos.html',
+                    contacto:      '/paginas/contacto.html',
+                    legales:       '/paginas/legales.html',
+                    producto:      '/paginas/producto.html',
+                    admin:         '/admin.html',
+                    dashboard:     '/dashboard.html',
+                    checkout:      '/checkout.html',
+                    pedidoExitoso: '/pedido-exitoso.html',
                 },
             },
         }),
