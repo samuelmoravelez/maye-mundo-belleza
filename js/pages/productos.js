@@ -1,8 +1,8 @@
 // js/pages/productos.js
-// Catálogo dinámico: lee productos desde localStorage (admin) o defaults.
+// Catálogo dinámico: lee productos desde Supabase vía productService.
 // Maneja filtros por categoría, búsqueda, renderizado de tarjetas y carrito.
 
-import { obtenerProductos, formatearPrecio, ETIQUETAS } from '../data/productos.data.js';
+import { obtenerProductos, ensureProductosLoaded, formatearPrecio, ETIQUETAS } from '../data/productos.data.js';
 import { agregarItem }                                   from '../utils/carrito.js';
 import { toggleFavorito, esFavorito }                   from '../utils/wishlistService.js';
 import { abrirQuickView, iniciarQuickView }              from '../components/quickView.js';
@@ -101,7 +101,11 @@ export function iniciarCatalogo() {
     });
 
     // Escuchar cambios del admin (misma pestaña o localStorage)
-    window.addEventListener('productos-actualizados', cargarYRenderizar);
+    window.addEventListener('productos-actualizados', () => {
+        // productService ya actualizó _cache — solo releer y renderizar
+        productos = obtenerProductos().filter(p => p.visible);
+        renderizar();
+    });
     window.addEventListener('storage', (e) => {
         if (e.key === 'maye_productos') cargarYRenderizar();
     });
@@ -111,8 +115,19 @@ export function iniciarCatalogo() {
 }
 
 function cargarYRenderizar() {
-    productos = obtenerProductos().filter(p => p.visible);
-    renderizar();
+    // Mostrar skeleton mientras carga
+    _mostrarSkeleton();
+
+    // Garantizar que el caché de Supabase esté cargado antes de leer
+    ensureProductosLoaded().then(() => {
+        productos = obtenerProductos().filter(p => p.visible);
+        renderizar();
+    }).catch(err => {
+        console.error('[Catálogo] Error al cargar productos:', err);
+        // Fallback: intentar con lo que haya en caché (puede estar vacío)
+        productos = obtenerProductos().filter(p => p.visible);
+        renderizar();
+    });
 }
 
 function renderizar() {
@@ -249,6 +264,22 @@ const CAT_LABELS = {
     unas: 'Uñas', skincare: 'Skincare', todos: 'General',
 };
 function categoriaLabel(cat) { return CAT_LABELS[cat] ?? cat; }
+
+// ── SKELETON ──────────────────────────────────────────────────────────────────
+function _mostrarSkeleton() {
+    if (!grilla) return;
+    grilla.innerHTML = Array.from({ length: 6 }).map(() => `
+        <article class="tarjeta-producto">
+            <div class="imagen-producto-wrapper skeleton" style="height:280px;border-radius:var(--radio-lg)"></div>
+            <div class="info-producto" style="padding:14px 12px;display:flex;flex-direction:column;gap:8px">
+                <div class="skeleton" style="height:12px;width:50%;border-radius:4px"></div>
+                <div class="skeleton" style="height:18px;width:80%;border-radius:4px"></div>
+                <div class="skeleton" style="height:22px;width:40%;border-radius:4px"></div>
+                <div class="skeleton" style="height:38px;width:100%;border-radius:8px"></div>
+            </div>
+        </article>`).join('');
+    if (contadorTotal) contadorTotal.textContent = 'Cargando…';
+}
 
 // ── SINCRONIZAR CORAZONES ────────────────────────────────────────────────────
 // Actualiza el ícono/estado de todos los botones wishlist de una tarjeta por id

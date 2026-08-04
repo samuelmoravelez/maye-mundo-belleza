@@ -10,5 +10,8 @@
   "devDependencies": {
     "vite": "^5.4.19",
     "vite-plugin-handlebars": "^2.0.3"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.0"
   }
 }

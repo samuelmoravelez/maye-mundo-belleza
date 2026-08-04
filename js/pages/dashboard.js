@@ -13,12 +13,14 @@
 import {
     getSession, logout, AUTH_KEYS, ROLES, STATUS, ADMIN_PRINCIPAL_ID,
     actualizarUsuarioPorAdmin, toggleUserStatus, deleteUserById,
+    getUsersCache, refreshUsersCache, updateOwnProfile,
 } from '../utils/authService.js';
 import Storage from '../utils/storage.js';
 import { STORAGE_KEYS, RUTAS, waLink } from '../utils/constants.js';
 import {
     obtenerProductos, guardarProductos,
     generarId, formatearPrecio, CATEGORIAS, ETIQUETAS,
+    ensureProductosLoaded,
 } from '../data/productos.data.js';
 import { descargarFacturaPDF, imprimirFactura } from '../utils/invoiceService.js';
 import { agregarItem }                          from '../utils/carrito.js';
@@ -26,27 +28,32 @@ import { eliminarFavorito, obtenerFavoritos }   from '../utils/wishlistService.j
 import { abrirQuickView, iniciarQuickView }     from '../components/quickView.js';
 import {
     obtenerCupones, crearCupon, actualizarCupon,
-    toggleCupon, eliminarCupon,
+    toggleCupon, eliminarCupon, refreshCuponesCache,
 } from '../utils/couponService.js';
+import {
+    obtenerTodasLasOrdenes,
+    obtenerOrdenesPorUsuario,
+    actualizarEstadoOrden,
+} from '../utils/orderService.js';
 
 // ── Storage keys adicionales ───────────────────────────────────────────────
 const KEYS = {
-    ORDERS:    'maye_orders',
     FAVORITES: 'maye_favorites',
 };
 
 // ── Estado del módulo ──────────────────────────────────────────────────────
 let session        = null;
 let productos      = [];
+/** @type {object[]} */
+let _ordersCache   = [];
 let toastTimer     = null;
 let productoTarget = null; // id a eliminar
 let viewActual     = '';
 
 // ── Helpers de datos ───────────────────────────────────────────────────────
-function getOrders()    { return Storage.obtener(KEYS.ORDERS,    []); }
-function saveOrders(o)  { Storage.guardar(KEYS.ORDERS,    o); }
+function getOrders()    { return _ordersCache; }
 function getFavorites() { return Storage.obtener(KEYS.FAVORITES, []); }
-function getUsers()     { return Storage.obtener(AUTH_KEYS.USERS, []); }
+function getUsers()     { return getUsersCache(); }
 
 function iniciales(name = '') {
     return name.split(' ').slice(0, 2).map(p => p[0]?.toUpperCase() ?? '').join('');
@@ -204,34 +211,29 @@ function renderClienteResumen() {
 function renderClientePerfil() {
     const users = getUsers();
     const user  = users.find(u => u.id === session.id) ?? {};
+    const extra = Storage.obtener('maye_profile_extra', {});
     document.getElementById('pf-nombre').value    = user.name    ?? session.name;
     document.getElementById('pf-email').value     = user.email   ?? session.email;
-    document.getElementById('pf-telefono').value  = user.phone   ?? '';
-    document.getElementById('pf-direccion').value = user.address ?? '';
-    document.getElementById('pf-ciudad').value    = user.city    ?? '';
+    document.getElementById('pf-telefono').value  = user.phone   ?? session.phone ?? '';
+    document.getElementById('pf-direccion').value = extra.address ?? user.address ?? '';
+    document.getElementById('pf-ciudad').value    = extra.city    ?? user.city    ?? '';
 }
 
-function guardarPerfil(e) {
+async function guardarPerfil(e) {
     e.preventDefault();
-    const users = getUsers();
-    const idx   = users.findIndex(u => u.id === session.id);
-    if (idx === -1) return;
+    const name    = document.getElementById('pf-nombre').value.trim();
+    const phone   = document.getElementById('pf-telefono').value.trim();
+    const address = document.getElementById('pf-direccion').value.trim();
+    const city    = document.getElementById('pf-ciudad').value.trim();
 
-    users[idx] = {
-        ...users[idx],
-        name:    document.getElementById('pf-nombre').value.trim(),
-        phone:   document.getElementById('pf-telefono').value.trim(),
-        address: document.getElementById('pf-direccion').value.trim(),
-        city:    document.getElementById('pf-ciudad').value.trim(),
-    };
-    Storage.guardar(AUTH_KEYS.USERS, users);
+    const res = await updateOwnProfile({ name, phone, address, city });
+    if (!res.ok) {
+        toast('No se pudo guardar el perfil', 'error');
+        return;
+    }
 
-    // Actualizar la sesión local con el nombre nuevo
-    const newSession = { ...session, name: users[idx].name };
-    Storage.guardar(AUTH_KEYS.SESSION, newSession);
-    session = newSession;
+    session = getSession();
     renderSidebarUser();
-
     toast('Perfil actualizado correctamente');
 }
 
@@ -743,28 +745,23 @@ function renderAdminPedidos() {
 
     // ── Estado: change listener ───────────────────────────────────────────
     tbody.querySelectorAll('[data-order-id]').forEach(sel => {
-        sel.addEventListener('change', () => {
-            const all = getOrders();
-            const idx = all.findIndex(o => String(o.id) === String(sel.dataset.orderId));
-            if (idx !== -1) {
-                // Actualizar el campo correcto según el formato de la orden
-                if ('status' in all[idx]) {
-                    all[idx].status = sel.value;
-                } else {
-                    all[idx].estado = sel.value;
-                }
-                all[idx].updatedAt = new Date().toISOString();
-                saveOrders(all);
-                toast(`Pedido ${sel.dataset.orderId} → ${sel.value}`, 'info');
-                const row     = sel.closest('tr');
-                const badgeCls = { pending:'db-badge--amarillo', pendiente:'db-badge--amarillo',
-                                    enviado:'db-badge--azul', completado:'db-badge--verde',
-                                    cancelado:'db-badge--rojo' };
-                const badgeEl = row?.querySelector('.db-badge');
-                if (badgeEl) {
-                    badgeEl.className   = `db-badge ${badgeCls[sel.value]??'db-badge--gris'}`;
-                    badgeEl.textContent = sel.value;
-                }
+        sel.addEventListener('change', async () => {
+            const res = await actualizarEstadoOrden(sel.dataset.orderId, sel.value);
+            if (!res.ok) {
+                toast('No se pudo actualizar el pedido', 'error');
+                return;
+            }
+            const idx = _ordersCache.findIndex(o => String(o.id) === String(sel.dataset.orderId));
+            if (idx !== -1) _ordersCache[idx] = res.order;
+            toast(`Pedido ${sel.dataset.orderId} → ${sel.value}`, 'info');
+            const row     = sel.closest('tr');
+            const badgeCls = { pending:'db-badge--amarillo', pendiente:'db-badge--amarillo',
+                                enviado:'db-badge--azul', completado:'db-badge--verde',
+                                cancelado:'db-badge--rojo' };
+            const badgeEl = row?.querySelector('.db-badge');
+            if (badgeEl) {
+                badgeEl.className   = `db-badge ${badgeCls[sel.value]??'db-badge--gris'}`;
+                badgeEl.textContent = sel.value;
             }
         });
     });
@@ -1691,9 +1688,18 @@ function pedirConfirmEliminarUsuario(userId) { _abrirConfirmUsuario('delete', us
 // ─────────────────────────────────────────────────────────────────────────────
 // INICIALIZACIÓN PRINCIPAL — punto de entrada
 // ─────────────────────────────────────────────────────────────────────────────
-export function iniciarDashboard() {
-    session   = getSession();
+export async function iniciarDashboard() {
+    session = getSession();
+    await ensureProductosLoaded();
     productos = obtenerProductos();
+
+    if (session?.role === ROLES.ADMIN) {
+        await refreshUsersCache();
+        await refreshCuponesCache();
+        _ordersCache = await obtenerTodasLasOrdenes();
+    } else if (session?.id) {
+        _ordersCache = await obtenerOrdenesPorUsuario(session.id);
+    }
 
     const isAdminRole = session?.role === ROLES.ADMIN;
     const isClient    = session?.role === ROLES.CLIENT;

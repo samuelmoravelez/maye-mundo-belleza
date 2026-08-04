@@ -6,6 +6,15 @@
 
 import Storage from '../utils/storage.js';
 import { STORAGE_KEYS, SCHEMA_VERSION } from '../utils/constants.js';
+import {
+    obtenerProductos as _obtenerProductos,
+    guardarProductos as _guardarProductos,
+    generarId as _generarId,
+    refreshProductos,
+    ensureProductosLoaded,
+} from '../../src/js/services/productService.js';
+
+export { refreshProductos, ensureProductosLoaded };
 
 export const STORAGE_KEY = STORAGE_KEYS.PRODUCTOS;
 export const SCHEMA_VERSION_ACTUAL = SCHEMA_VERSION;
@@ -345,37 +354,22 @@ export const PRODUCTOS_DEFAULT = [
 ];
 
 /**
- * Devuelve los productos desde localStorage o los defaults.
+ * Devuelve los productos en caché (cargados vía refreshProductos / bootstrapApp).
  * @returns {Producto[]}
  */
 export function obtenerProductos() {
-    try {
-        const stored = Storage.obtener(STORAGE_KEY, null);
-        if (stored && Array.isArray(stored)) {
-            return stored.map(normalizarProducto);
-        }
-        // Primer uso: guardamos defaults para que el admin pueda editarlos
-        Storage.guardar(STORAGE_KEY, PRODUCTOS_DEFAULT);
-        return PRODUCTOS_DEFAULT;
-    } catch {
-        return PRODUCTOS_DEFAULT.map(normalizarProducto);
-    }
+    return _obtenerProductos();
 }
 
 /**
- * Persiste el array de productos en localStorage.
- * Emite el CustomEvent productos-actualizados para informar a todos los módulos.
+ * Persiste productos en Supabase (async). Mantiene firma síncrona de llamada;
+ * la UI puede escuchar `productos-actualizados`.
  * @param {Producto[]} productos
  */
 export function guardarProductos(productos) {
-    const conVersiones = productos.map(p => {
-        const ahora = new Date().toISOString();
-        if (!p.fechaCreacion) p.fechaCreacion = ahora;
-        p.fechaModificacion = ahora;
-        return normalizarProducto(p);
-    });
-    Storage.guardar(STORAGE_KEY, conVersiones);
-    window.dispatchEvent(new CustomEvent('productos-actualizados', { detail: { productos: conVersiones } }));
+    _guardarProductos(productos).catch(err =>
+        console.error('[productos.data] guardar:', err)
+    );
 }
 
 /**
@@ -384,9 +378,7 @@ export function guardarProductos(productos) {
  * @returns {number}
  */
 export function generarId(productos) {
-    return productos.length > 0
-        ? Math.max(...productos.map(p => p.id)) + 1
-        : 1;
+    return _generarId(productos);
 }
 
 /**
