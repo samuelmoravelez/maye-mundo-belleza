@@ -24,15 +24,15 @@ export const STORAGE_KEYS = Object.freeze({
 export const SCHEMA_VERSION = 1;
 
 export const RUTAS = Object.freeze({
-    HOME:           '/maye-mundo-belleza/index.html',
-    PRODUCTOS:      '/maye-mundo-belleza/paginas/productos.html',
-    CONTACTO:       '/maye-mundo-belleza/paginas/contacto.html',
-    LEGAL:          '/maye-mundo-belleza/paginas/legales.html',
-    PRODUCTO:       '/maye-mundo-belleza/paginas/producto.html',
-    ADMIN:          '/maye-mundo-belleza/admin.html',
-    DASHBOARD:      '/maye-mundo-belleza/dashboard.html',
-    CHECKOUT:       '/maye-mundo-belleza/checkout.html',
-    PEDIDO_EXITOSO: '/maye-mundo-belleza/pedido-exitoso.html',
+    HOME:           '/index.html',
+    PRODUCTOS:      '/paginas/productos.html',
+    CONTACTO:       '/paginas/contacto.html',
+    LEGAL:          '/paginas/legales.html',
+    PRODUCTO:       '/paginas/producto.html',
+    ADMIN:          '/admin.html',
+    DASHBOARD:      '/dashboard.html',
+    CHECKOUT:       '/checkout.html',
+    PEDIDO_EXITOSO: '/pedido-exitoso.html',
 });
 
 // Costo de envío estándar (COP). Cambiar aquí para todo el sistema.

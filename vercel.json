@@ -1,0 +1,22 @@
+{
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/paginas/productos",      "destination": "/paginas/productos.html" },
+    { "source": "/paginas/contacto",       "destination": "/paginas/contacto.html" },
+    { "source": "/paginas/legales",        "destination": "/paginas/legales.html" },
+    { "source": "/paginas/producto",       "destination": "/paginas/producto.html" },
+    { "source": "/admin",                  "destination": "/admin.html" },
+    { "source": "/dashboard",              "destination": "/dashboard.html" },
+    { "source": "/checkout",               "destination": "/checkout.html" },
+    { "source": "/pedido-exitoso",         "destination": "/pedido-exitoso.html" }
+  ]
+}

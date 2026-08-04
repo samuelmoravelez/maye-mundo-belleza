@@ -5,13 +5,13 @@
 // header sea 100% idéntico en todas las páginas.
 
 const MAPA_NAV = Object.freeze({
-    '/maye-mundo-belleza/index.html':              'home',
-    '/maye-mundo-belleza/':                        'home',
-    '/maye-mundo-belleza/paginas/productos.html':  'productos',
-    '/maye-mundo-belleza/paginas/producto.html':   'productos',
-    '/maye-mundo-belleza/paginas/contacto.html':   'contacto',
-    '/maye-mundo-belleza/paginas/legales.html':    null,
-    '/maye-mundo-belleza/admin.html':              null,
+    '/index.html':              'home',
+    '/':                        'home',
+    '/paginas/productos.html':  'productos',
+    '/paginas/producto.html':   'productos',
+    '/paginas/contacto.html':   'contacto',
+    '/paginas/legales.html':    null,
+    '/admin.html':              null,
 });
 
 export function iniciarNavActivo() {
