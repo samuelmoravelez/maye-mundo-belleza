@@ -240,7 +240,10 @@ async function _manejarConfirmar(items, session) {
         }
 
         // ── Éxito: guardar orden en sessionStorage y redirigir ────────────
-        sessionStorage.setItem('maye_ultima_orden', resultado.order.id);
+        // Se guarda el UUID interno (para buscar la orden completa) y el
+        // orderNumber secuencial (MMB-XXXXX) para mostrarlo sin otra query.
+        sessionStorage.setItem('maye_ultima_orden',        resultado.order.id);
+        sessionStorage.setItem('maye_ultima_orden_number', resultado.order.orderNumber ?? '');
         window.location.href = RUTAS.PEDIDO_EXITOSO;
 
     } catch (err) {

@@ -39,10 +39,97 @@ const STATUS_TO_DB = {
     cancelado:  'CANCELADO',
 };
 
-function _generarOrderNumber() {
-    const ts = Date.now();
-    const rand = Math.floor(Math.random() * 9000) + 1000;
-    return `ORD-${rand}-${ts.toString().slice(-6)}`;
+/**
+ * Obtiene el siguiente número de pedido secuencial desde Supabase.
+ *
+ * Estrategia de dos capas para garantizar unicidad y tolerancia a fallos:
+ *
+ * 1. PRIMARIA — RPC `next_order_sequence`:
+ *    Llama a una función PostgreSQL que ejecuta:
+ *      SELECT nextval('order_sequence') AS seq
+ *    Esto es atómico: dos llamadas concurrentes nunca devuelven el mismo valor.
+ *    El resultado se formatea como MMB-00001, MMB-00002, …
+ *
+ * 2. FALLBACK — MAX(order_number) + 1:
+ *    Si la RPC no existe todavía en Supabase (proyecto en migración), cuenta
+ *    las filas existentes con prefijo MMB- y genera el siguiente número.
+ *    NO es 100% seguro bajo concurrencia extrema, pero es aceptable como
+ *    transición hasta que se cree la secuencia en la base de datos.
+ *
+ * SQL para crear la secuencia (ejecutar UNA VEZ en el editor SQL de Supabase):
+ * ─────────────────────────────────────────────────────────────────────────────
+ * -- 1. Crear la secuencia empezando desde 1
+ * CREATE SEQUENCE IF NOT EXISTS order_sequence START 1;
+ *
+ * -- 2. Si ya hay pedidos, sincronizar el inicio con el último número MMB-
+ * --    (ejecutar solo si hay datos previos):
+ * SELECT setval(
+ *   'order_sequence',
+ *   COALESCE(
+ *     (SELECT MAX(CAST(SUBSTRING(order_number FROM 5) AS INTEGER))
+ *      FROM orders WHERE order_number LIKE 'MMB-%'),
+ *     0
+ *   ) + 1,
+ *   false   -- false = el próximo nextval() devolverá este valor
+ * );
+ *
+ * -- 3. Crear la función RPC que el cliente llama
+ * CREATE OR REPLACE FUNCTION next_order_sequence()
+ * RETURNS TABLE(seq bigint)
+ * LANGUAGE sql SECURITY DEFINER AS $$
+ *   SELECT nextval('order_sequence') AS seq;
+ * $$;
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @returns {Promise<string>} Ej: "MMB-00001"
+ */
+async function _generarOrderNumber() {
+    const PREFIX  = 'MMB';
+    const PADDING = 5; // dígitos: MMB-00001 … MMB-99999
+
+    // ── Capa 1: RPC atómica (fuente de verdad en producción) ──────────────
+    try {
+        const { data, error } = await supabase.rpc('next_order_sequence');
+        if (!error && data != null) {
+            const seq = Array.isArray(data) ? data[0]?.seq : data?.seq ?? data;
+            if (seq != null && !isNaN(Number(seq))) {
+                return `${PREFIX}-${String(Number(seq)).padStart(PADDING, '0')}`;
+            }
+        }
+        if (error) {
+            console.warn('[orderService] next_order_sequence RPC no disponible, usando fallback:', error.message);
+        }
+    } catch (rpcErr) {
+        console.warn('[orderService] RPC error:', rpcErr.message);
+    }
+
+    // ── Capa 2: Fallback — MAX existente + 1 ─────────────────────────────
+    // Busca el número MMB- más alto en la tabla y suma 1.
+    // Se usa ILIKE para que sea case-insensitive y robusto.
+    try {
+        const { data: rows, error: qErr } = await supabase
+            .from('orders')
+            .select('order_number')
+            .ilike('order_number', `${PREFIX}-%`)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+        if (!qErr && rows?.length > 0) {
+            const lastNum = rows[0].order_number;
+            // Extraer la parte numérica: "MMB-00042" → 42
+            const parts = lastNum.split('-');
+            const lastSeq = parseInt(parts[parts.length - 1], 10);
+            if (!isNaN(lastSeq)) {
+                return `${PREFIX}-${String(lastSeq + 1).padStart(PADDING, '0')}`;
+            }
+        }
+    } catch (fbErr) {
+        console.warn('[orderService] fallback query error:', fbErr.message);
+    }
+
+    // ── Capa 3: Emergencia — timestamp compacto (nunca debería llegar aquí)
+    const emergency = Date.now().toString().slice(-PADDING);
+    return `${PREFIX}-${emergency}`;
 }
 
 function _mapOrderRow(row, items = []) {
@@ -138,7 +225,7 @@ export async function crearOrden(payload) {
     const total = Math.max(subtotal + shipping - discount, 1);
 
     const session = getSession();
-    const orderNumber = _generarOrderNumber();
+    const orderNumber = await _generarOrderNumber();
     const shippingSnapshot = {
         recipient_name: customerInfo.name.trim(),
         phone: customerInfo.phone.trim(),

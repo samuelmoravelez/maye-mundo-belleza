@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página no encontrada | Maye Mundo Belleza</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="/js/entries/entry-404.js"></script>
+    <style>
+        /* ── Estilos exclusivos de la página 404 ─────────────────────── */
+
+        .nf-seccion {
+            min-height: calc(100vh - 240px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            background: var(--fondo-crema);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Círculos decorativos de fondo */
+        .nf-seccion::before,
+        .nf-seccion::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .nf-seccion::before {
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, rgba(42,140,100,0.06) 0%, transparent 70%);
+            top: -120px;
+            right: -100px;
+        }
+        .nf-seccion::after {
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(184,160,228,0.08) 0%, transparent 70%);
+            bottom: -80px;
+            left: -60px;
+        }
+
+        .nf-contenido {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 580px;
+            animation: fadeInUp 0.65s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        /* Ilustración con el número 404 */
+        .nf-ilustracion {
+            margin-bottom: 32px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .nf-numero {
+            font-family: var(--fuente-titulos);
+            font-size: clamp(7rem, 20vw, 10rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -4px;
+            background: linear-gradient(135deg, var(--verde-principal) 0%, var(--lila-acento) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            user-select: none;
+        }
+
+        .nf-icono-wrap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 72px;
+            height: 72px;
+            background: var(--blanco-puro);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--sombra-alta);
+            border: 3px solid rgba(42,140,100,0.12);
+            animation: nf-float 3s ease-in-out infinite;
+        }
+        .nf-icono-wrap i {
+            font-size: 2rem;
+            color: var(--verde-principal);
+        }
+
+        /* Textos */
+        .nf-titulo {
+            font-family: var(--fuente-titulos);
+            font-size: clamp(1.4rem, 4vw, 1.9rem);
+            font-weight: 700;
+            color: var(--texto-oscuro);
+            margin-bottom: 14px;
+            line-height: 1.3;
+        }
+
+        .nf-descripcion {
+            font-size: 1rem;
+            color: var(--texto-mutado);
+            line-height: 1.75;
+            margin-bottom: 10px;
+        }
+
+        /* Ruta que causó el 404 */
+        .nf-ruta-wrap {
+            margin-bottom: 32px;
+        }
+        .nf-ruta {
+            display: inline-block;
+            background: rgba(42,140,100,0.07);
+            border: 1px solid rgba(42,140,100,0.18);
+            border-radius: var(--radio-md);
+            padding: 6px 16px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--verde-principal);
+            word-break: break-all;
+            max-width: 100%;
+        }
+
+        /* Botones de acción */
+        .nf-acciones {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 36px;
+        }
+
+        .nf-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 28px;
+            font-family: var(--fuente-titulos);
+            font-weight: 600;
+            font-size: 0.92rem;
+            border-radius: var(--radio-md);
+            text-decoration: none;
+            transition: var(--transicion);
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .nf-btn--primario {
+            background: var(--verde-principal);
+            color: var(--blanco-puro);
+            box-shadow: var(--sombra-verde);
+        }
+        .nf-btn--primario:hover {
+            background: var(--verde-oscuro);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(42,140,100,0.35);
+        }
+
+        .nf-btn--secundario {
+            background: var(--blanco-puro);
+            color: var(--texto-oscuro);
+            border: 1.5px solid var(--borde-medio);
+            box-shadow: var(--sombra-xs);
+        }
+        .nf-btn--secundario:hover {
+            border-color: var(--verde-principal);
+            color: var(--verde-principal);
+            transform: translateY(-2px);
+            box-shadow: var(--sombra-suave);
+        }
+
+        /* Links rápidos */
+        .nf-links {
+            margin-top: 44px;
+            padding-top: 32px;
+            border-top: 1px solid var(--borde-suave);
+        }
+        .nf-links__titulo {
+            font-family: var(--fuente-titulos);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--texto-mutado);
+            margin-bottom: 18px;
+        }
+        .nf-links__grid {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .nf-link-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            background: var(--blanco-puro);
+            border: 1px solid var(--borde-suave);
+            border-radius: var(--radio-pill);
+            font-size: 0.84rem;
+            font-family: var(--fuente-titulos);
+            font-weight: 500;
+            color: var(--texto-medio);
+            text-decoration: none;
+            transition: var(--transicion);
+            box-shadow: var(--sombra-xs);
+        }
+        .nf-link-pill i {
+            font-size: 0.95rem;
+            color: var(--verde-principal);
+        }
+        .nf-link-pill:hover {
+            border-color: var(--verde-principal);
+            color: var(--verde-principal);
+            transform: translateY(-2px);
+            box-shadow: var(--sombra-suave);
+        }
+
+        /* Animación flotante del icono central */
+        @keyframes nf-float {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0px);   }
+            50%       { transform: translate(-50%, -50%) translateY(-8px);  }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .nf-acciones { flex-direction: column; align-items: stretch; }
+            .nf-btn      { justify-content: center; }
+            .nf-icono-wrap { width: 56px; height: 56px; }
+            .nf-icono-wrap i { font-size: 1.55rem; }
+        }
+    </style>
+</head>
+<body>
+
+    {{> barra-anuncio }}
+    {{> header }}
+
+    <main class="nf-seccion" role="main" aria-labelledby="nf-titulo">
+        <div class="nf-contenido">
+
+            <!-- Número 404 con icono flotante -->
+            <div class="nf-ilustracion" aria-hidden="true">
+                <span class="nf-numero">404</span>
+                <div class="nf-icono-wrap">
+                    <i class="ri-map-pin-2-line"></i>
+                </div>
+            </div>
+
+            <!-- Mensaje principal -->
+            <h1 class="nf-titulo" id="nf-titulo">
+                ¡Ups! La página que buscas no existe
+            </h1>
+
+            <p class="nf-descripcion">
+                Es posible que la dirección esté escrita incorrectamente,
+                que el contenido haya sido movido o que el enlace esté desactualizado.
+            </p>
+
+            <!-- Ruta que causó el 404 (visible solo si JS la detecta) -->
+            <div class="nf-ruta-wrap" hidden>
+                <code class="nf-ruta" id="not-found-path"></code>
+            </div>
+
+            <!-- Botones principales -->
+            <div class="nf-acciones">
+                <a href="/index.html" class="nf-btn nf-btn--primario"
+                   aria-label="Volver a la página de inicio">
+                    <i class="ri-home-4-line"></i>
+                    Volver al inicio
+                </a>
+                <a href="/paginas/productos.html" class="nf-btn nf-btn--secundario"
+                   aria-label="Ver el catálogo de productos">
+                    <i class="ri-store-2-line"></i>
+                    Ver catálogo
+                </a>
+            </div>
+
+            <!-- Links rápidos secundarios -->
+            <nav class="nf-links" aria-label="Páginas frecuentes">
+                <p class="nf-links__titulo">¿A dónde querías ir?</p>
+                <div class="nf-links__grid">
+                    <a href="/index.html" class="nf-link-pill">
+                        <i class="ri-home-4-line"></i> Inicio
+                    </a>
+                    <a href="/paginas/productos.html" class="nf-link-pill">
+                        <i class="ri-shopping-bag-3-line"></i> Productos
+                    </a>
+                    <a href="/paginas/contacto.html" class="nf-link-pill">
+                        <i class="ri-customer-service-2-line"></i> Contacto
+                    </a>
+                    <a href="/paginas/legales.html" class="nf-link-pill">
+                        <i class="ri-file-text-line"></i> Legales
+                    </a>
+                    <a href="/dashboard.html" class="nf-link-pill">
+                        <i class="ri-dashboard-3-line"></i> Mi cuenta
+                    </a>
+                </div>
+            </nav>
+
+        </div>
+    </main>
+
+    {{> footer }}
+    {{> whatsapp-flotante }}
+
+</body>
+</html>

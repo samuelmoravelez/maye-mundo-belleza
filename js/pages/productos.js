@@ -208,7 +208,7 @@ function tarjetaHTML(p) {
                <span><i class="ri-shopping-bag-3-line"></i> Agregar al carrito</span>
            </button>`;
 
-    const detalleURL = `/maye-mundo-belleza/paginas/producto.html?id=${p.id}`;
+    const detalleURL = `/paginas/producto.html?id=${p.id}`;
 
     // ── Botones flotantes sobre la imagen ──────────────────────────────
     const heartClass  = enLista ? 'btn-wishlist--activo' : '';

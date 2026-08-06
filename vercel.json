@@ -1,6 +1,13 @@
 {
   "cleanUrls": false,
   "trailingSlash": false,
+
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev -- --port 3000",
+  "installCommand": "npm install",
+
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -9,14 +16,24 @@
       ]
     }
   ],
+
   "rewrites": [
-    { "source": "/paginas/productos",      "destination": "/paginas/productos.html" },
-    { "source": "/paginas/contacto",       "destination": "/paginas/contacto.html" },
-    { "source": "/paginas/legales",        "destination": "/paginas/legales.html" },
-    { "source": "/paginas/producto",       "destination": "/paginas/producto.html" },
-    { "source": "/admin",                  "destination": "/admin.html" },
-    { "source": "/dashboard",              "destination": "/dashboard.html" },
-    { "source": "/checkout",               "destination": "/checkout.html" },
-    { "source": "/pedido-exitoso",         "destination": "/pedido-exitoso.html" }
+    { "source": "/paginas/productos",        "destination": "/paginas/productos.html" },
+    { "source": "/paginas/productos/",       "destination": "/paginas/productos.html" },
+    { "source": "/paginas/producto",         "destination": "/paginas/producto.html"  },
+    { "source": "/paginas/producto/:path*",  "destination": "/paginas/producto.html"  },
+    { "source": "/paginas/contacto",         "destination": "/paginas/contacto.html"  },
+    { "source": "/paginas/legales",          "destination": "/paginas/legales.html"   },
+    { "source": "/paginas/legales/:path*",   "destination": "/paginas/legales.html"   },
+    { "source": "/admin",                    "destination": "/admin.html"             },
+    { "source": "/dashboard",               "destination": "/dashboard.html"         },
+    { "source": "/checkout",                "destination": "/checkout.html"          },
+    { "source": "/pedido-exitoso",          "destination": "/pedido-exitoso.html"    }
+  ],
+
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "^/paginas/producto\\.html$", "dest": "/paginas/producto.html" },
+    { "src": "/(.*)",                      "dest": "/404.html", "status": 404 }
   ]
 }

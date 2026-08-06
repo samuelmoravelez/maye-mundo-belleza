@@ -87,9 +87,13 @@ export async function iniciarPedidoExitoso() {
 
     const order = resultado.order;
 
-    // 1. Número de orden visible en el hero
+    // 1. Número de orden visible en el hero: preferir orderNumber (MMB-XXXXX)
+    //    sobre el UUID interno de Supabase.
+    const codigoVisible = order.orderNumber
+        ? String(order.orderNumber).toUpperCase()
+        : String(order.id).toUpperCase().slice(0, 8);
     const idEl = document.getElementById('exito-orden-id');
-    if (idEl) idEl.textContent = order.id;
+    if (idEl) idEl.textContent = codigoVisible;
 
     // 2. Instrucciones de pago
     _renderInfoPago(order);
@@ -281,9 +285,12 @@ function _conectarBotones(order) {
     // ── WhatsApp soporte ──────────────────────────────────────────────────
     const btnWA = document.getElementById('btn-soporte-whatsapp');
     if (btnWA) {
+        const codigoWA = order.orderNumber
+            ? String(order.orderNumber).toUpperCase()
+            : String(order.id).toUpperCase().slice(0, 8);
         const msg = encodeURIComponent(
             `Hola ${EMPRESA.NOMBRE}! 👋\n` +
-            `Acabo de realizar el pedido *${order.id}*.\n` +
+            `Acabo de realizar el pedido *${codigoWA}*.\n` +
             `Método de pago: ${METODO_LABEL[order.paymentMethod] ?? order.paymentMethod}.\n` +
             `Total: ${formatearPrecio(order.pricing?.total ?? 0)}.\n\n` +
             `Adjunto el comprobante. ¡Gracias! 💚`

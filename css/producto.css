@@ -407,26 +407,69 @@
 /* ==========================================================================
    5. LOADING SKELETON
    ========================================================================== */
+
+/*
+ * .producto-loading — usado tanto por el HTML estático inicial como por el
+ * fallback JS cuando ensureProductosLoaded() tarda en resolver.
+ */
 .producto-loading {
     display: grid;
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
     gap: 60px;
     align-items: start;
+    /* Animación de entrada suave cuando el JS inyecta el skeleton */
+    animation: fadeInUp 0.35s ease both;
 }
+
+.producto-loading__imagen {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radio-lg);
+}
+
 .producto-loading__info {
     display: flex;
     flex-direction: column;
+    gap: 12px;
+    padding-top: 8px;
 }
 
+/* Clase base compartida por global.css y este archivo.
+   Se define aquí de forma defensiva para que producto.html
+   funcione incluso si global.css no se cargó primero. */
 .skeleton {
     background: linear-gradient(90deg, #ecebe8 25%, #f6f5f2 37%, #ecebe8 63%);
     background-size: 400% 100%;
-    animation: skeleton-loading 1.4s ease infinite;
+    animation: skeleton-shimmer 1.4s ease infinite;
     border-radius: var(--radio-sm);
+    /* Garantiza visibilidad mínima cuando el hijo tiene height 0 */
+    min-height: 16px;
 }
-@keyframes skeleton-loading {
+
+/* Shimmer unificado — mismo nombre en global.css para evitar duplicados.
+   Si global.css ya definió @keyframes shimmer, este no entra en conflicto
+   porque usa un nombre diferente. */
+@keyframes skeleton-shimmer {
     0%   { background-position: 100% 50%; }
-    100% { background-position: 0 50%; }
+    100% { background-position:   0% 50%; }
+}
+
+/* ── Responsive del skeleton ── */
+@media (max-width: 960px) {
+    .producto-loading {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+}
+
+@media (max-width: 600px) {
+    .producto-loading {
+        gap: 20px;
+    }
+    .producto-loading__imagen {
+        height: 280px !important;
+        aspect-ratio: unset;
+    }
 }
 
 /* ==========================================================================
@@ -498,16 +541,23 @@
         gap: 28px;
     }
     .producto-info__nombre {
-        font-size: 1.4rem;
+        font-size: 1.35rem;
     }
     .producto-precio__actual {
-        font-size: 1.7rem;
+        font-size: 1.65rem;
+    }
+    /* Botones CTA apilados en móvil, cada uno ocupa todo el ancho */
+    .producto-acciones {
+        flex-direction: column;
     }
     .btn-accion {
         padding: 14px 20px;
         font-size: 0.9rem;
         min-height: 50px;
+        flex: none;
+        width: 100%;
     }
+    /* Tabs apilados verticalmente en móvil */
     .tabs-lista {
         flex-direction: column;
         gap: 4px;
@@ -516,12 +566,34 @@
     .tab-btn {
         border-radius: var(--radio-sm);
         border: 1px solid rgba(0, 0, 0, 0.06);
+        top: 0;
+        margin-bottom: 0;
     }
     .tab-btn.activo {
         border-color: var(--verde-principal);
+        background-color: rgba(42, 140, 100, 0.06);
     }
     .tab-btn.activo::after { display: none; }
+    /* Sección relacionados: menos padding superior */
     .relacionados {
         padding-top: 40px !important;
+    }
+    /* Miniaturas de galería: 3 columnas en móvil */
+    .producto-galeria__miniatura-wrap {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    /* Estado "no encontrado": padding reducido */
+    .producto-no-encontrado {
+        padding: 48px 16px;
+    }
+    .producto-no-encontrado__icono {
+        font-size: 3rem;
+    }
+}
+
+/* Pantallas muy pequeñas: miniaturas 2 col */
+@media (max-width: 360px) {
+    .producto-galeria__miniatura-wrap {
+        grid-template-columns: repeat(2, 1fr);
     }
 }

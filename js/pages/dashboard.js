@@ -256,6 +256,12 @@ function pedidoCardHTML(o) {
     const estadoCls   = { pending:'db-badge--amarillo', pendiente:'db-badge--amarillo', enviado:'db-badge--azul', completado:'db-badge--verde', cancelado:'db-badge--rojo' };
     const estadoLabel = { pending:'Pendiente', pendiente:'Pendiente', enviado:'Enviado', completado:'Completado', cancelado:'Cancelado' };
 
+    // Código visible: preferir el número secuencial MMB-XXXXX.
+    // Fallback: primeros 8 chars del UUID para órdenes legacy sin orderNumber.
+    const codigoVisible = o.orderNumber
+        ? String(o.orderNumber).toUpperCase()
+        : String(o.id).toUpperCase().slice(0, 8);
+
     // Normalizar campos: las órdenes del orderService usan 'items[].title',
     // las antiguas usaban 'items[].nombre'. Soportar ambas.
     const items = (o.items ?? []).map(it => {
@@ -283,7 +289,7 @@ function pedidoCardHTML(o) {
     <div class="db-pedido-card" data-order-id="${o.id}">
         <div class="db-pedido-card__head">
             <span class="db-pedido-card__id">
-                <i class="ri-file-list-3-line"></i> ${o.id}
+                <i class="ri-file-list-3-line"></i> ${codigoVisible}
             </span>
             <span class="db-pedido-card__fecha">${fmtFecha(fecha)}</span>
             <span class="db-badge ${estadoCls[estado] ?? 'db-badge--gris'}">
@@ -295,7 +301,7 @@ function pedidoCardHTML(o) {
                 <button class="db-btn db-btn--sm"
                         data-factura-pdf="${o.id}"
                         title="Descargar factura PDF"
-                        aria-label="Descargar factura PDF del pedido ${o.id}"
+                        aria-label="Descargar factura PDF del pedido ${codigoVisible}"
                         style="gap:5px">
                     <i class="ri-file-download-line"></i>
                     <span class="hide-xs">PDF</span>
@@ -303,7 +309,7 @@ function pedidoCardHTML(o) {
                 <button class="db-btn db-btn--sm"
                         data-factura-print="${o.id}"
                         title="Imprimir comprobante"
-                        aria-label="Imprimir comprobante del pedido ${o.id}">
+                        aria-label="Imprimir comprobante del pedido ${codigoVisible}">
                     <i class="ri-printer-line"></i>
                 </button>
             </div>
@@ -482,6 +488,10 @@ function renderAdminResumen() {
         const total  = o.pricing?.total ?? o.total ?? 0;
         const fecha  = o.createdAt ?? o.fecha;
         const cliente = o.customerInfo?.name ?? o.clienteName ?? '—';
+        // Mostrar el código secuencial MMB- en lugar del UUID interno
+        const codigoVisible = o.orderNumber
+            ? String(o.orderNumber).toUpperCase()
+            : String(o.id).toUpperCase().slice(0, 8);
         const badge = o => {
             const m = { pending:'db-badge--amarillo', pendiente:'db-badge--amarillo', enviado:'db-badge--azul', completado:'db-badge--verde', cancelado:'db-badge--rojo' };
             const l = { pending:'Pendiente', pendiente:'Pendiente', enviado:'Enviado', completado:'Completado', cancelado:'Cancelado' };
@@ -489,7 +499,7 @@ function renderAdminResumen() {
         };
         return `
     <tr>
-        <td class="db-table__bold">${o.id}</td>
+        <td class="db-table__bold">${codigoVisible}</td>
         <td>${cliente}</td>
         <td>${fmtFecha(fecha)}</td>
         <td class="db-table__price">${formatearPrecio(total)}</td>
@@ -707,13 +717,17 @@ function renderAdminPedidos() {
         const email   = o.customerInfo
             ? `${o.customerInfo.phone ?? ''}` : (o.clienteEmail ?? '');
         const nItems  = (o.items ?? []).length;
+        // Mostrar el código secuencial MMB- en lugar del UUID interno
+        const codigoVisible = o.orderNumber
+            ? String(o.orderNumber).toUpperCase()
+            : String(o.id).toUpperCase().slice(0, 8);
         const badge   = { pending:'db-badge--amarillo', pendiente:'db-badge--amarillo',
                           enviado:'db-badge--azul', completado:'db-badge--verde',
                           cancelado:'db-badge--rojo' };
 
         return `
         <tr>
-            <td class="db-table__bold">${o.id}</td>
+            <td class="db-table__bold">${codigoVisible}</td>
             <td>${cliente}<br><span class="db-table__muted">${email}</span></td>
             <td>${fmtFecha(fecha)}</td>
             <td class="db-table__price">${formatearPrecio(total)}</td>
@@ -729,13 +743,13 @@ function renderAdminPedidos() {
                     <button class="db-btn db-btn--sm db-btn--icon"
                             data-factura-pdf="${o.id}"
                             title="Descargar PDF"
-                            aria-label="Descargar factura PDF del pedido ${o.id}">
+                            aria-label="Descargar factura PDF del pedido ${codigoVisible}">
                         <i class="ri-file-download-line"></i>
                     </button>
                     <button class="db-btn db-btn--sm db-btn--icon"
                             data-factura-print="${o.id}"
                             title="Imprimir"
-                            aria-label="Imprimir comprobante del pedido ${o.id}">
+                            aria-label="Imprimir comprobante del pedido ${codigoVisible}">
                         <i class="ri-printer-line"></i>
                     </button>
                 </div>

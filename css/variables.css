@@ -21,6 +21,10 @@
     --etiqueta-oferta:   #ef4444;
     --etiqueta-agotado:  #9ca3af;
 
+    /* ── COLORES SEMÁNTICOS EXTRA ──────────────────────────── */
+    --rosa-claro:        #fce7f3;
+    --rosa-oscuro:       #be185d;
+
     /* ── TIPOGRAFÍAS ───────────────────────────────────────── */
     --fuente-titulos: 'Poppins', sans-serif;
     --fuente-cuerpo:  'Inter', sans-serif;
