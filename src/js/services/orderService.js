@@ -1,7 +1,7 @@
 // src/js/services/orderService.js
 
 import Storage from '../../../js/utils/storage.js';
-import { STORAGE_KEYS, SHIPPING_COST } from '../../../js/utils/constants.js';
+import { STORAGE_KEYS, SHIPPING_COST, ENVIO_GRATIS_MINIMO } from '../../../js/utils/constants.js';
 import { supabase } from './supabaseClient.js';
 import { getSession, isLoggedIn } from './authService.js';
 import { ensureProductosLoaded } from './productService.js';
@@ -17,11 +17,21 @@ export const ORDER_ERRORS = Object.freeze({
     AUTH_REQUIRED:  'AUTH_REQUIRED',
 });
 
+// ── Mapeo frontend-key → valor del ENUM payment_method en PostgreSQL ──────────
+// IMPORTANTE: los valores deben coincidir EXACTAMENTE (case-sensitive) con
+// los definidos en el ENUM de la BD. PostgreSQL rechaza cualquier variación.
+//
+// Valores actuales del ENUM (ejecutar en Supabase para verificar):
+//   SELECT unnest(enum_range(NULL::payment_method));
+//
+// Si algún valor no existe todavía en el ENUM, añadirlo con el SQL al final
+// de este archivo antes de desplegar.
 const PAYMENT_TO_DB = {
-    nequi:        'Nequi',
-    bancolombia:  'Bancolombia',
-    contraentrega:'Web_Simulado',
-    whatsapp:     'WhatsApp',
+    nequi:         'nequi',
+    bancolombia:   'bancolombia',
+    contraentrega: 'contraentrega',
+    whatsapp:      'whatsapp',
+    mercadopago:   'mercadopago',
 };
 
 const STATUS_TO_FRONT = {
@@ -161,6 +171,7 @@ function _mapOrderRow(row, items = []) {
             total,
         },
         paymentMethod: _paymentFromDb(row.payment_method),
+        paymentStatus: row.payment_status ?? 'pending',
         status: STATUS_TO_FRONT[row.status] ?? 'pending',
         createdAt: row.created_at,
         updatedAt: row.updated_at,
@@ -168,8 +179,11 @@ function _mapOrderRow(row, items = []) {
 }
 
 function _paymentFromDb(method) {
-    const entry = Object.entries(PAYMENT_TO_DB).find(([, v]) => v === method);
-    return entry?.[0] ?? 'nequi';
+    // Los valores del ENUM están en minúsculas; el reverso es directo.
+    // Si el método ya existe como clave en PAYMENT_TO_DB, lo devolvemos tal cual.
+    // Fallback: normalizar a minúsculas para robustez ante datos legacy.
+    const normalized = String(method ?? '').toLowerCase();
+    return PAYMENT_TO_DB[normalized] !== undefined ? normalized : 'nequi';
 }
 
 async function _fetchOrderItems(orderId) {
@@ -181,7 +195,7 @@ async function _fetchOrderItems(orderId) {
 }
 
 export async function crearOrden(payload) {
-    const { userId, customerInfo, items, paymentMethod, couponCode, discountAmount = 0, couponId = null } = payload;
+    const { userId, customerInfo, items, paymentMethod, couponCode, discountAmount = 0, couponId = null, shippingCost } = payload;
 
     if (!isLoggedIn() || !userId || userId === 'guest') {
         return { ok: false, error: ORDER_ERRORS.AUTH_REQUIRED };
@@ -220,7 +234,11 @@ export async function crearOrden(payload) {
     }
 
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-    const shipping = SHIPPING_COST;
+    // Usar el costo de envío calculado por el caller (que ya aplicó la regla
+    // de envío gratis). Si no se proporciona, calcular aquí como fallback.
+    const shipping = (typeof shippingCost === 'number')
+        ? shippingCost
+        : (subtotal >= ENVIO_GRATIS_MINIMO ? 0 : SHIPPING_COST);
     const discount = Number(discountAmount) || 0;
     const total = Math.max(subtotal + shipping - discount, 1);
 
@@ -233,7 +251,7 @@ export async function crearOrden(payload) {
         city: customerInfo.city.trim(),
     };
 
-    const { data: orderRow, error: orderErr } = await supabase
+    let { data: orderRow, error: orderErr } = await supabase
         .from('orders')
         .insert({
             order_number: orderNumber,
@@ -254,6 +272,29 @@ export async function crearOrden(payload) {
         })
         .select('*')
         .single();
+
+    if (orderErr && orderErr.code === '22P02' && paymentMethod === 'mercadopago') {
+        console.warn('[orderService] ENUM payment_method aun no tiene mercadopago en la BD. Usando Web_Simulado.');
+        const retry = await supabase.from('orders').insert({
+            order_number: orderNumber,
+            user_id: session.id,
+            status: 'PENDIENTE',
+            subtotal,
+            shipping_cost: shipping,
+            discount_amount: discount,
+            total,
+            coupon_id: couponId,
+            payment_method: 'Web_Simulado',
+            payment_status: 'pending',
+            shipping_snapshot: shippingSnapshot,
+            customer_name: customerInfo.name.trim(),
+            customer_phone: customerInfo.phone.trim(),
+            customer_email: session.email ?? null,
+            notes: ('[Mercado Pago] ' + (customerInfo.notes?.trim() || '')).trim(),
+        }).select('*').single();
+        orderRow = retry.data;
+        orderErr = retry.error;
+    }
 
     if (orderErr || !orderRow) {
         console.error('[orderService]', orderErr?.message);

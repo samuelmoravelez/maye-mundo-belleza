@@ -362,14 +362,15 @@ export function obtenerProductos() {
 }
 
 /**
- * Persiste productos en Supabase (async). Mantiene firma síncrona de llamada;
- * la UI puede escuchar `productos-actualizados`.
+ * Persiste productos en Supabase (async).
+ * IMPORTANTE: devuelve la Promise sin silenciarla, para que los
+ * callers que hacen `await guardarProductos(...)` reciban el error
+ * y puedan mostrarlo en pantalla en lugar de fallar silenciosamente.
  * @param {Producto[]} productos
+ * @returns {Promise<Producto[]>}
  */
 export function guardarProductos(productos) {
-    _guardarProductos(productos).catch(err =>
-        console.error('[productos.data] guardar:', err)
-    );
+    return _guardarProductos(productos);
 }
 
 /**

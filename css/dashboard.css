@@ -9,6 +9,7 @@
     color: var(--texto-oscuro);
     font-family: var(--fuente-cuerpo);
     min-height: 100vh;
+    overflow-x: clip;
 }
 
 /* ── 2. LAYOUT SHELL ────────────────────────────────────────────────────────── */
@@ -228,6 +229,7 @@
     margin-left: 260px;
     flex: 1;
     min-height: 100vh;
+    min-width: 0;
     display: flex;
     flex-direction: column;
 }
@@ -236,15 +238,17 @@
 .db-topbar {
     background: var(--blanco-puro);
     border-bottom: 1px solid var(--borde-suave);
-    padding: 0 32px;
-    height: 60px;
+    padding: 0 clamp(12px, 2.4vw, 32px);
+    min-height: 60px;
+    height: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky; top: 0;
     z-index: 100;
     box-shadow: var(--sombra-xs);
-    gap: 16px;
+    gap: 12px;
+    min-width: 0;
 }
 
 .db-topbar__left { display: flex; align-items: center; gap: 14px; }
@@ -299,8 +303,9 @@
 
 /* ── Contenido scrollable ── */
 .db-content {
-    padding: 28px 32px;
+    padding: clamp(16px, 2.4vw, 32px) clamp(12px, 2.8vw, 32px);
     flex: 1;
+    min-width: 0;
 }
 
 /* ── Secciones de vista (mostrar/ocultar) ── */
@@ -361,7 +366,7 @@
 /* ── 6. GRID DE KPIs ────────────────────────────────────────────────────────── */
 .db-kpis {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
     gap: 16px;
     margin-bottom: 28px;
 }
@@ -736,7 +741,7 @@
 /* ── 13. FAVORITOS ──────────────────────────────────────────────────────────── */
 .db-favs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
     gap: 16px;
 }
 
@@ -779,7 +784,7 @@
     backdrop-filter: blur(5px);
     z-index: var(--z-modal);
     display: flex; align-items: center; justify-content: center;
-    padding: 20px;
+    padding: 16px;
     opacity: 0; visibility: hidden;
     transition: opacity 0.25s, visibility 0.25s;
 }
@@ -790,9 +795,11 @@
 .db-modal {
     background: var(--blanco-puro);
     border-radius: var(--radio-2xl);
-    width: 100%; max-width: 580px;
+    width: 100%; max-width: min(580px, 100%);
     max-height: 90vh;
+    max-height: 90dvh;
     overflow-y: auto;
+    overflow-x: hidden;
     box-shadow: var(--sombra-alta);
     transform: translateY(20px) scale(0.97);
     transition: transform 0.3s cubic-bezier(0.34,1.4,0.64,1), opacity 0.25s;

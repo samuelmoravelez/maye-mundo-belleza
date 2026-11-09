@@ -18,16 +18,22 @@ import { descargarFacturaPDF,
          imprimirFactura }     from '../utils/invoiceService.js';   // ← INTACTO
 import { formatearPrecio }     from '../data/productos.data.js';
 import { waLink, RUTAS,
-         EMPRESA }             from '../utils/constants.js';
+         EMPRESA,
+         PAYMENT_SESSION_KEYS }  from '../utils/constants.js';
 
 // ── Labels de métodos de pago ──────────────────────────────────────────────
 const METODO_LABEL = {
+    mercadopago:   'Mercado Pago',
     nequi:         'Nequi',
     bancolombia:   'Bancolombia / Transferencia',
     contraentrega: 'Pago Contraentrega (Efectivo)',
 };
 
 const METODO_INSTRUCCIONES = {
+    mercadopago: `
+        Pago procesado exitosamente mediante <strong>Mercado Pago Checkout Pro</strong>.<br>
+        Tu transacción ha sido validada de forma segura y tu pedido ya está en preparación.`,
+
     nequi: `
         Transfiere el total a <strong>Nequi</strong>:<br>
         Número: <strong>+57 300 309 1641</strong>
@@ -74,39 +80,29 @@ function _fmtFecha(iso) {
 // INICIALIZACIÓN PRINCIPAL
 // ─────────────────────────────────────────────────────────────────────────────
 export async function iniciarPedidoExitoso() {
-    // El entry ya validó que el orderId existe → lo leemos de sessionStorage
-    const orderId = sessionStorage.getItem('maye_ultima_orden');
+    const orderId = sessionStorage.getItem(PAYMENT_SESSION_KEYS.ULTIMA_ORDEN);
 
     const resultado = await obtenerOrdenPorId(orderId);
 
     if (!resultado.ok) {
-        // Fallback defensivo (el entry ya debería haberlo evitado)
         _renderFallback(orderId);
         return;
     }
 
     const order = resultado.order;
 
-    // 1. Número de orden visible en el hero: preferir orderNumber (MMB-XXXXX)
-    //    sobre el UUID interno de Supabase.
     const codigoVisible = order.orderNumber
         ? String(order.orderNumber).toUpperCase()
         : String(order.id).toUpperCase().slice(0, 8);
     const idEl = document.getElementById('exito-orden-id');
     if (idEl) idEl.textContent = codigoVisible;
 
-    // 2. Instrucciones de pago
     _renderInfoPago(order);
-
-    // 3. Resumen completo del pedido
     _renderResumenPedido(order);
-
-    // 4. Conectar botones de acción (invoiceService intacto)
     _conectarBotones(order);
 
-    // Limpiar sessionStorage al salir del tab (permite múltiples descargas)
     window.addEventListener('pagehide', () => {
-        sessionStorage.removeItem('maye_ultima_orden');
+        sessionStorage.removeItem(PAYMENT_SESSION_KEYS.ULTIMA_ORDEN);
     });
 }
 
@@ -116,6 +112,7 @@ export async function iniciarPedidoExitoso() {
 function _renderInfoPago(order) {
     const el = document.getElementById('exito-info-pago');
     if (!el) return;
+
     const instrucciones = METODO_INSTRUCCIONES[order.paymentMethod]
         ?? 'Tu pedido fue registrado. Nos pondremos en contacto para coordinar el pago.';
     el.innerHTML = instrucciones;
@@ -132,6 +129,7 @@ function _renderResumenPedido(order) {
     const estadoLbl = ESTADO_LABEL[estado] ?? estado;
     const estadoCls = ESTADO_CLS[estado]   ?? 'exito-badge--gris';
     const metodo    = METODO_LABEL[order.paymentMethod] ?? order.paymentMethod;
+    const totalLabel = 'TOTAL';
 
     // ── Filas de productos ────────────────────────────────────────────────
     const itemsHTML = (order.items ?? []).map(item => {
@@ -242,7 +240,7 @@ function _renderResumenPedido(order) {
                 </span>
             </div>
             <div class="exito-resumen__total-fila exito-resumen__total-fila--grande">
-                <span>TOTAL PAGADO</span>
+                <span>${totalLabel}</span>
                 <span>${formatearPrecio(total)}</span>
             </div>
         </div>

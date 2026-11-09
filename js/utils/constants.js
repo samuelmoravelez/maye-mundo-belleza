@@ -21,6 +21,12 @@ export const STORAGE_KEYS = Object.freeze({
     COUPONS:       'maye_coupons',
 });
 
+/** Claves de sessionStorage para el flujo de pagos (no persisten entre tabs) */
+export const PAYMENT_SESSION_KEYS = Object.freeze({
+    ULTIMA_ORDEN:    'maye_ultima_orden',
+    ORDEN_PENDIENTE: 'maye_orden_pendiente',
+});
+
 export const SCHEMA_VERSION = 1;
 
 export const RUTAS = Object.freeze({
@@ -31,12 +37,26 @@ export const RUTAS = Object.freeze({
     PRODUCTO:       '/paginas/producto.html',
     ADMIN:          '/admin.html',
     DASHBOARD:      '/dashboard.html',
+    CARRITO:        '/carrito.html',
     CHECKOUT:       '/checkout.html',
     PEDIDO_EXITOSO: '/pedido-exitoso.html',
+    CONFIRMACION:   '/confirmacion.html',
+    LOGIN:          '/login.html',
+    REGISTER:       '/register.html',
 });
+
+// Mercado Pago (Sandbox / Pruebas)
+export const MERCADOPAGO_PUBLIC_KEY = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MERCADOPAGO_PUBLIC_KEY)
+    || 'APP_USR-99d10d96-950f-4ead-a7fb-b4ed189a93dc';
+
+export const MERCADOPAGO_ACCESS_TOKEN = (typeof import.meta !== 'undefined' && (import.meta.env?.VITE_MERCADOPAGO_ACCESS_TOKEN || import.meta.env?.MERCADOPAGO_ACCESS_TOKEN))
+    || 'APP_USR-1646223387749622-102416-bc0db2e1152dcb370d623c952c2c03a2-3788190103';
 
 // Costo de envío estándar (COP). Cambiar aquí para todo el sistema.
 export const SHIPPING_COST = 8000;
+
+/** Umbral de compra (COP) a partir del cual el envío es gratuito */
+export const ENVIO_GRATIS_MINIMO = 120_000;
 
 export const EMPRESA = Object.freeze({
     NOMBRE:      'Maye Mundo Belleza',

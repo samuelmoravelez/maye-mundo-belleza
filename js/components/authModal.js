@@ -42,8 +42,8 @@ function crearHTMLModal() {
     <!-- Cabecera con gradiente + pestañas -->
     <div class="auth-modal__header">
       <div class="auth-modal__logo">
-        <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png"
-             alt="Maye Mundo Belleza" class="auth-modal__logo-img">
+        <img src="https://res.cloudinary.com/ocnnxclz/image/upload/f_auto,q_auto,w_96/v1784219028/333_mvofgw.png"
+             alt="Maye Mundo Belleza" class="auth-modal__logo-img" width="38" height="38">
         <span class="auth-modal__logo-nombre">Maye Mundo Belleza</span>
       </div>
       <button class="auth-modal__cerrar" id="auth-modal-cerrar" aria-label="Cerrar modal">
@@ -53,12 +53,12 @@ function crearHTMLModal() {
         <button class="auth-tab auth-tab--activo" id="tab-login"
                 role="tab" aria-selected="true" aria-controls="panel-login"
                 data-auth-tab="login">
-          <i class="ri-login-circle-line"></i> Iniciar Sesión
+          <i class="ri-login-circle-line"></i> <span class="auth-tab__label">Iniciar Sesión</span>
         </button>
         <button class="auth-tab" id="tab-registro"
                 role="tab" aria-selected="false" aria-controls="panel-registro"
                 data-auth-tab="registro">
-          <i class="ri-user-add-line"></i> Crear Cuenta
+          <i class="ri-user-add-line"></i> <span class="auth-tab__label">Crear Cuenta</span>
         </button>
       </div>
     </div>
@@ -117,9 +117,7 @@ function crearHTMLModal() {
         </form>
 
         <div class="auth-separador">¿No tienes cuenta?</div>
-        <button type="button" class="auth-btn-submit"
-                style="background:transparent;color:var(--verde-principal);box-shadow:none;border:1.5px solid var(--verde-principal);margin-top:0;"
-                data-auth-tab-switch="registro">
+        <button type="button" class="auth-btn-outline" data-auth-tab-switch="registro">
           Crear cuenta gratis
         </button>
       </div>
@@ -163,7 +161,7 @@ function crearHTMLModal() {
 
           <div class="auth-campo" id="campo-reg-telefono">
             <label class="auth-campo__label" for="reg-telefono">
-              Teléfono / WhatsApp <span style="font-weight:400;opacity:.7">(opcional)</span>
+              Teléfono / WhatsApp <span class="auth-campo__opcional">(opcional)</span>
             </label>
             <div class="auth-campo__wrapper">
               <i class="auth-campo__icono ri-phone-line"></i>
@@ -226,9 +224,7 @@ function crearHTMLModal() {
         </form>
 
         <div class="auth-separador">¿Ya tienes cuenta?</div>
-        <button type="button" class="auth-btn-submit"
-                style="background:transparent;color:var(--verde-principal);box-shadow:none;border:1.5px solid var(--verde-principal);margin-top:0;"
-                data-auth-tab-switch="login">
+        <button type="button" class="auth-btn-outline" data-auth-tab-switch="login">
           Iniciar sesión
         </button>
       </div>
@@ -242,10 +238,10 @@ function crearHTMLModal() {
 function crearHTMLHeaderAuth(session) {
     if (!session) {
         return `
-        <button class="btn-auth-header" id="btn-abrir-auth" aria-label="Iniciar sesión o crear cuenta">
+        <a class="btn-auth-header" href="/login.html" aria-label="Iniciar sesión o crear cuenta">
           <i class="ri-user-line"></i>
           <span>Ingresar</span>
-        </button>`;
+        </a>`;
     }
 
     const iniciales = session.name
@@ -412,13 +408,7 @@ function actualizarHeader() {
     const session = getSession();
     contenedor.innerHTML = crearHTMLHeaderAuth(session);
 
-    // Botón "Ingresar" → abrir modal
-    const btnAbrir = document.getElementById('btn-abrir-auth');
-    if (btnAbrir) {
-        btnAbrir.addEventListener('click', () => abrirModal());
-    }
-
-    // Botón logout en dropdown
+    // El enlace "Ingresar" ahora es un <a href="/login.html"> — no necesita listener.
     const btnLogout = document.getElementById('btn-logout-header');
     if (btnLogout) {
         btnLogout.addEventListener('click', async () => {
@@ -740,11 +730,5 @@ export function iniciarAuthModal() {
         } else if (v) {
             setCampoValido('reg-email');
         }
-    });
-
-    // 14. Evento global: carritoDrawer pide abrir el modal de login
-    window.addEventListener('auth:solicitar-login', (e) => {
-        const tab = e.detail?.tab ?? 'login';
-        abrirModal(tab);
     });
 }

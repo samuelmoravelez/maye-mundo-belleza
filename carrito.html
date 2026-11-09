@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito de Compras | Maye Mundo Belleza</title>
+    <meta name="description" content="Revisa los productos en tu carrito de compras, aprovecha envío gratis y cupones de descuento exclusivos en Maye Mundo Belleza.">
+    
+    <!-- Favicon Oficial -->
+    <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
+    
+    <!-- Remix Icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    
+    <!-- Tipografías Oficiales: Poppins & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Entry point Vite del módulo de Carrito -->
+    <script type="module" src="/js/entries/entry-carrito.js"></script>
+</head>
+<body class="carrito-body">
+
+    {{> barra-anuncio }}
+    {{> header }}
+
+    <main class="carrito-main-content">
+        <div class="contenedor">
+
+            <!-- ── BARRA SUPERIOR: TÍTULO Y PASOS DE COMPRA ── -->
+            <section class="carrito-header-bar" aria-label="Progreso de compra">
+                <div class="carrito-header-bar__info">
+                    <h1 class="carrito-header-bar__titulo">
+                        <i class="ri-shopping-cart-2-line" aria-hidden="true"></i>
+                        Carrito de compras
+                    </h1>
+                    <span id="carrito-contador-badge" class="carrito-header-bar__badge">0 productos</span>
+                </div>
+
+                <!-- Stepper tipo Checkout -->
+                <nav class="carrito-stepper" aria-label="Pasos de la compra">
+                    <span class="carrito-stepper__paso carrito-stepper__paso--activo">
+                        <span class="carrito-stepper__num">1</span>
+                        <span>Carrito</span>
+                    </span>
+                    <i class="ri-arrow-right-s-line carrito-stepper__sep" aria-hidden="true"></i>
+                    <span class="carrito-stepper__paso">
+                        <span class="carrito-stepper__num">2</span>
+                        <span>Checkout</span>
+                    </span>
+                    <i class="ri-arrow-right-s-line carrito-stepper__sep" aria-hidden="true"></i>
+                    <span class="carrito-stepper__paso">
+                        <span class="carrito-stepper__num">3</span>
+                        <span>Confirmación</span>
+                    </span>
+                </nav>
+            </section>
+
+            <!-- ── ESTADO CARGANDO (SKELETON) ── -->
+            <div id="carrito-loading" class="carrito-skeleton-grid" role="status" aria-label="Cargando carrito">
+                <div class="carrito-skeleton-card">
+                    <div class="skeleton-shimmer skeleton-line skeleton-line--title"></div>
+                    <div class="skeleton-shimmer skeleton-item-row"></div>
+                    <div class="skeleton-shimmer skeleton-item-row"></div>
+                </div>
+                <div class="carrito-skeleton-card carrito-skeleton-card--sidebar">
+                    <div class="skeleton-shimmer skeleton-line skeleton-line--title"></div>
+                    <div class="skeleton-shimmer skeleton-line"></div>
+                    <div class="skeleton-shimmer skeleton-line"></div>
+                    <div class="skeleton-shimmer skeleton-btn"></div>
+                </div>
+            </div>
+
+            <!-- ── ESTADO NO AUTENTICADO ── -->
+            <section id="carrito-no-auth" class="carrito-estado-card" hidden aria-labelledby="no-auth-titulo">
+                <div class="carrito-estado-card__inner">
+                    <div class="carrito-estado-card__icono">
+                        <i class="ri-user-follow-line" aria-hidden="true"></i>
+                    </div>
+                    <h2 id="no-auth-titulo" class="carrito-estado-card__titulo">Inicia sesión para ver tu carrito</h2>
+                    <p class="carrito-estado-card__desc">
+                        En Maye Mundo Belleza tus productos se sincronizan directamente con tu cuenta en la nube para garantizar total seguridad y disponibilidad.
+                    </p>
+                    <div class="carrito-estado-card__acciones">
+                        <a href="/login.html" class="btn btn-primario carrito-btn-auth">
+                            <i class="ri-login-circle-line" aria-hidden="true"></i> Iniciar Sesión
+                        </a>
+                        <a href="/register.html" class="btn btn-outline carrito-btn-reg">
+                            Crear Cuenta Gratis
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── ESTADO CARRITO VACÍO ── -->
+            <section id="carrito-vacio-full" class="carrito-estado-card" hidden aria-labelledby="vacio-titulo">
+                <div class="carrito-estado-card__inner">
+                    <div class="carrito-estado-card__icono carrito-estado-card__icono--vacio">
+                        <i class="ri-shopping-bag-3-line" aria-hidden="true"></i>
+                    </div>
+                    <h2 id="vacio-titulo" class="carrito-estado-card__titulo">Tu carrito está vacío</h2>
+                    <p class="carrito-estado-card__desc">
+                        ¿Aún no decides qué consentirte hoy? Explora nuestro catálogo y descubre los mejores productos de cuidado capilar, piel y belleza profesional.
+                    </p>
+                    <a href="/paginas/productos.html" class="btn btn-primario">
+                        <i class="ri-compass-3-line" aria-hidden="true"></i> Descubrir Productos
+                    </a>
+                </div>
+            </section>
+
+            <!-- ── GRID PRINCIPAL DEL CARRITO (ESTILO MERCADO LIBRE) ── -->
+            <div id="carrito-grid" class="carrito-layout-grid" hidden>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     COLUMNA IZQUIERDA: PRODUCTOS Y BENEFICIOS
+                     ══════════════════════════════════════════════════════════ -->
+                <div class="carrito-col-izquierda">
+
+                    <!-- 1. BARRA DINÁMICA DE ENVÍO GRATIS -->
+                    <div class="carrito-envio-gratis-card" id="carrito-envio-gratis-card">
+                        <div class="carrito-envio-gratis__header">
+                            <i id="envio-gratis-icono" class="ri-truck-line" aria-hidden="true"></i>
+                            <div class="carrito-envio-gratis__texto">
+                                <span id="envio-gratis-mensaje" class="carrito-envio-gratis__titulo">
+                                    Calculando envío gratis...
+                                </span>
+                                <span class="carrito-envio-gratis__meta">
+                                    Envíos seguros a toda Colombia
+                                </span>
+                            </div>
+                        </div>
+                        <div class="envio-gratis-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="envio-gratis-progreso">
+                            <div class="envio-gratis-bar" id="envio-gratis-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 2. TARJETA PRINCIPAL DE ÍTEMS -->
+                    <section class="carrito-productos-card" aria-label="Lista de productos en el carrito">
+                        
+                        <!-- Header de lista con Checkbox Global -->
+                        <header class="carrito-productos-card__top">
+                            <label class="ml-checkbox-label" for="check-seleccionar-todos">
+                                <input type="checkbox" id="check-seleccionar-todos" class="checkbox-custom" checked>
+                                <span class="ml-checkbox-text">
+                                    Seleccionar todos (<span id="txt-cant-seleccionados">0</span>)
+                                </span>
+                            </label>
+
+                            <button type="button" id="btn-eliminar-seleccionados" class="btn-link-accion" title="Eliminar productos seleccionados">
+                                <i class="ri-delete-bin-line" aria-hidden="true"></i>
+                                <span>Eliminar seleccionados</span>
+                            </button>
+                        </header>
+
+                        <!-- Contenedor dinámico de filas de productos -->
+                        <div id="carrito-items-contenedor" class="carrito-items-lista">
+                            <!-- Inyectado dinámicamente desde carrito.js -->
+                        </div>
+
+                    </section>
+
+                    <!-- 3. BANNER DE GARANTÍA Y CONFIANZA -->
+                    <div class="carrito-confianza-banner">
+                        <div class="confianza-item">
+                            <i class="ri-shield-check-line" aria-hidden="true"></i>
+                            <div>
+                                <strong>Compra protegida</strong>
+                                <span>Recibe el producto esperado o te devolvemos tu dinero</span>
+                            </div>
+                        </div>
+                        <div class="confianza-item">
+                            <i class="ri-truck-line" aria-hidden="true"></i>
+                            <div>
+                                <strong>Envíos garantizados</strong>
+                                <span>Cobertura a todas las ciudades y municipios de Colombia</span>
+                            </div>
+                        </div>
+                        <div class="confianza-item">
+                            <i class="ri-customer-service-2-line" aria-hidden="true"></i>
+                            <div>
+                                <strong>Asesoría personalizada</strong>
+                                <span>Acompañamiento experto vía WhatsApp para resolver dudas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     COLUMNA DERECHA: RESUMEN DE COMPRA STICKY
+                     ══════════════════════════════════════════════════════════ -->
+                <aside class="carrito-col-derecha" aria-label="Resumen de compra">
+                    <div class="carrito-resumen-card">
+                        
+                        <h2 class="carrito-resumen-card__titulo">Resumen de compra</h2>
+
+                        <!-- Desglose de totales -->
+                        <div class="carrito-resumen-filas">
+                            <div class="resumen-fila">
+                                <span id="resumen-label-cant">Productos (0)</span>
+                                <span id="resumen-subtotal">$ 0</span>
+                            </div>
+
+                            <div class="resumen-fila">
+                                <span>Envío</span>
+                                <span id="resumen-envio" class="resumen-envio-valor">$ 8.000</span>
+                            </div>
+
+                            <!-- Fila de descuento (visible sólo si hay cupón) -->
+                            <div class="resumen-fila resumen-fila--descuento" id="resumen-fila-descuento" hidden>
+                                <span>
+                                    Descuento cupón
+                                    <strong id="resumen-cupon-codigo" class="resumen-cupon-tag"></strong>
+                                </span>
+                                <span id="resumen-descuento" class="resumen-descuento-valor">-$ 0</span>
+                            </div>
+
+                            <div class="resumen-separador"></div>
+
+                            <!-- Total final -->
+                            <div class="resumen-fila resumen-fila--total">
+                                <span>Total</span>
+                                <span id="resumen-total" class="resumen-total-valor">$ 0</span>
+                            </div>
+                        </div>
+
+                        <!-- ── MÓDULO DE CUPONES DESPLEGABLE ── -->
+                        <div class="carrito-cupon-box">
+                            <button type="button" id="btn-toggle-cupon" class="btn-toggle-cupon" aria-expanded="false" aria-controls="cupon-desplegable">
+                                <span class="btn-toggle-cupon__left">
+                                    <i class="ri-coupon-3-line" aria-hidden="true"></i>
+                                    <span>¿Tienes un cupón de descuento?</span>
+                                </span>
+                                <i class="ri-arrow-down-s-line btn-toggle-cupon__chevron" aria-hidden="true"></i>
+                            </button>
+
+                            <div id="cupon-desplegable" class="cupon-desplegable" hidden>
+                                <!-- Formulario de ingreso -->
+                                <div id="cupon-form-wrap" class="cupon-form-wrap">
+                                    <div class="cupon-input-group">
+                                        <input type="text"
+                                               id="input-cupon-codigo"
+                                               class="cupon-input"
+                                               placeholder="Ingresa el código"
+                                               aria-label="Código de cupón"
+                                               autocomplete="off">
+                                        <button type="button" id="btn-aplicar-cupon" class="btn-aplicar-cupon">
+                                            <span class="btn-txt">Aplicar</span>
+                                            <span class="btn-ldr" style="display: none;"><i class="ri-loader-4-line spinner"></i></span>
+                                        </button>
+                                    </div>
+                                    <span id="cupon-error-msg" class="cupon-msg-feedback" hidden></span>
+                                </div>
+
+                                <!-- Badge de cupón aplicado con opción para remover -->
+                                <div id="cupon-aplicado-badge" class="cupon-aplicado-badge" hidden>
+                                    <div class="cupon-aplicado-info">
+                                        <i class="ri-checkbox-circle-fill" aria-hidden="true"></i>
+                                        <div>
+                                            <span id="cupon-aplicado-codigo" class="cupon-codigo-texto"></span>
+                                            <span id="cupon-aplicado-desc" class="cupon-desc-texto"></span>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="btn-remover-cupon" class="btn-remover-cupon" title="Quitar cupón" aria-label="Quitar cupón">
+                                        <i class="ri-close-line" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── BOTÓN PRINCIPAL DE CONTINUAR ── -->
+                        <button type="button" id="btn-continuar-checkout" class="btn btn-primario btn-continuar-compra">
+                            <span class="btn-txt">
+                                Continuar <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                            </span>
+                            <span class="btn-ldr" style="display: none;">
+                                <i class="ri-loader-4-line spinner"></i> Preparando compra...
+                            </span>
+                        </button>
+
+                        <div class="resumen-garantia-pago">
+                            <i class="ri-lock-line" aria-hidden="true"></i>
+                            <span>Pago 100% seguro y encriptado</span>
+                        </div>
+
+                    </div>
+                </aside>
+
+            </div>
+
+        </div>
+    </main>
+
+    {{> footer }}
+    {{> whatsapp-flotante }}
+
+</body>
+</html>

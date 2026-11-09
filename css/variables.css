@@ -47,9 +47,22 @@
     --radio-pill:    50px;
     --radio-circulo: 50%;
 
+    /* ── LAYOUT FLUIDO ─────────────────────────────────────── */
+    --contenedor-max:  1200px;
+    --contenedor-pad:  clamp(16px, 4.2vw, 40px);
+
+    /* ── TIPOGRAFÍA FLUIDA ─────────────────────────────────── */
+    --fs-hero:    clamp(1.85rem, 1.1rem + 4.2vw, 4.25rem);
+    --fs-h1:      clamp(1.55rem, 1.1rem + 2.2vw, 2.75rem);
+    --fs-h2:      clamp(1.35rem, 1rem + 1.4vw, 2.15rem);
+    --fs-h3:      clamp(1rem, 0.92rem + 0.4vw, 1.2rem);
+    --fs-cuerpo:  clamp(0.9rem, 0.84rem + 0.25vw, 1.05rem);
+    --fs-btn:     clamp(0.82rem, 0.78rem + 0.2vw, 0.95rem);
+    --logo-h:     clamp(44px, 5.5vw, 72px);
+
     /* ── ESPACIADOS DE SECCIÓN ─────────────────────────────── */
-    --padding-seccion:    80px 0;
-    --padding-seccion-sm: 50px 0;
+    --padding-seccion:    clamp(48px, 7vw, 100px) 0;
+    --padding-seccion-sm: clamp(36px, 5vw, 56px) 0;
 
     /* ── TRANSICIONES ──────────────────────────────────────── */
     --transicion:       all 0.25s cubic-bezier(0.4,0,0.2,1);
@@ -61,4 +74,23 @@
     --z-modal:   2000;
     --z-toast:   3000;
     --z-overlay: 1500;
+}
+
+/* Portátiles anchos y monitores */
+@media (min-width: 1400px) {
+    :root { --contenedor-max: 1320px; }
+}
+
+/* Escritorio Full HD */
+@media (min-width: 1800px) {
+    :root { --contenedor-max: 1540px; }
+}
+
+/* 4K / Smart TV */
+@media (min-width: 2400px) {
+    :root {
+        --contenedor-max: 1840px;
+        --contenedor-pad: clamp(32px, 3vw, 64px);
+        --logo-h: 88px;
+    }
 }

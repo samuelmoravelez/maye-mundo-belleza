@@ -22,15 +22,13 @@ import { iniciarCheckout }                      from '../pages/checkout.js';
     const session = getSession();
 
     if (!session) {
-        sessionStorage.setItem('maye_auth_redirect', 'checkout');
-        window.location.replace(RUTAS.HOME);
+        window.location.replace(RUTAS.LOGIN);
         throw new Error('[Checkout] Redirigiendo: sin sesión activa.');
     }
 
     // Bloquear cuentas inactivas
     if ((session.status ?? STATUS.ACTIVE) === STATUS.INACTIVE) {
-        sessionStorage.setItem('maye_auth_redirect', 'checkout');
-        window.location.replace(RUTAS.HOME);
+        window.location.replace(RUTAS.LOGIN);
         throw new Error('[Checkout] Cuenta inactiva.');
     }
 })();

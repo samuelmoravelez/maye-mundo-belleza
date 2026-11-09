@@ -139,9 +139,27 @@
             <div class="checkout-card__body">
                 <div class="co-metodos" id="co-metodos" role="radiogroup" aria-labelledby="titulo-pago">
 
+                    <!-- Mercado Pago (Checkout Pro) -->
+                    <label class="co-metodo co-metodo--seleccionado" id="co-metodo-mercadopago">
+                        <input type="radio" name="metodoPago" value="mercadopago" checked>
+                        <div class="co-metodo__icono co-metodo__icono--mercadopago" aria-hidden="true">
+                            <i class="ri-bank-card-2-line"></i>
+                        </div>
+                        <div class="co-metodo__info">
+                            <div class="co-metodo__nombre">
+                                Mercado Pago
+                                <span class="co-metodo__badge-mp">Checkout Pro</span>
+                            </div>
+                            <div class="co-metodo__desc">Tarjetas de crédito/débito, PSE, Efecty y saldo en cuenta.</div>
+                            <div class="co-metodo__detalle">
+                                Pago protegido en <strong>Modo Sandbox</strong>. Serás redirigido a la pasarela oficial de Mercado Pago para completar tu compra.
+                            </div>
+                        </div>
+                    </label>
+
                     <!-- Nequi -->
-                    <label class="co-metodo co-metodo--seleccionado" id="co-metodo-nequi">
-                        <input type="radio" name="metodoPago" value="nequi" checked>
+                    <label class="co-metodo" id="co-metodo-nequi">
+                        <input type="radio" name="metodoPago" value="nequi">
                         <div class="co-metodo__icono co-metodo__icono--nequi" aria-hidden="true"><i class="ri-smartphone-line"></i></div>
                         <div class="co-metodo__info">
                             <div class="co-metodo__nombre">Nequi</div>
@@ -185,6 +203,70 @@
                     </label>
 
                 </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: Cupón de descuento -->
+        <section class="checkout-card" aria-labelledby="titulo-cupon" id="seccion-cupon">
+            <div class="checkout-card__head">
+                <span class="checkout-card__num" aria-hidden="true">3</span>
+                <h2 class="checkout-card__titulo" id="titulo-cupon">
+                    <i class="ri-coupon-3-line" aria-hidden="true"></i> Cupón de descuento
+                    <span style="font-size:0.7rem;font-weight:400;opacity:.55;margin-left:6px">(opcional)</span>
+                </h2>
+            </div>
+            <div class="checkout-card__body">
+
+                <!-- Estado: sin cupón aplicado -->
+                <div id="co-cupon-form-wrap">
+                    <p style="font-size:0.83rem;color:var(--texto-mutado);margin-bottom:14px;line-height:1.5">
+                        Si tienes un código de cupón, ingrésalo aquí para obtener tu descuento.
+                    </p>
+                    <div class="co-cupon-row">
+                        <div class="co-campo" id="campo-co-cupon" style="flex:1;margin-bottom:0">
+                            <div class="co-campo__input-wrap">
+                                <i class="ri-ticket-2-line co-campo__ico" aria-hidden="true"></i>
+                                <input class="co-campo__input"
+                                       type="text"
+                                       id="co-cupon-input"
+                                       placeholder="Ej: BIENVENIDA10"
+                                       autocomplete="off"
+                                       autocapitalize="characters"
+                                       maxlength="32"
+                                       aria-label="Código de cupón de descuento"
+                                       style="text-transform:uppercase;letter-spacing:0.05em">
+                            </div>
+                            <span class="co-campo__error" role="alert" id="co-cupon-error" hidden></span>
+                        </div>
+                        <button type="button"
+                                id="co-cupon-btn-aplicar"
+                                class="co-btn-cupon"
+                                aria-label="Aplicar cupón de descuento">
+                            <span class="co-spinner" aria-hidden="true"></span>
+                            <span class="co-btn-texto">Aplicar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Estado: cupón aplicado exitosamente -->
+                <div id="co-cupon-aplicado" hidden
+                     role="status" aria-live="polite"
+                     class="co-cupon-aplicado">
+                    <div class="co-cupon-aplicado__badge">
+                        <i class="ri-checkbox-circle-fill" aria-hidden="true"></i>
+                        <div>
+                            <strong id="co-cupon-codigo-visible"></strong>
+                            <span id="co-cupon-desc-visible" style="margin-left:6px;font-size:0.82rem;opacity:.8"></span>
+                        </div>
+                        <button type="button"
+                                id="co-cupon-btn-quitar"
+                                class="co-cupon-aplicado__quitar"
+                                aria-label="Quitar cupón">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </section>
 

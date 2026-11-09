@@ -12,7 +12,7 @@
 .producto-detalle {
     display: grid;
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-    gap: 60px;
+    gap: clamp(28px, 5vw, 60px);
     align-items: start;
 }
 
@@ -136,7 +136,7 @@
 
 .producto-info__nombre {
     font-family: var(--fuente-titulos);
-    font-size: 2rem;
+    font-size: clamp(1.35rem, 1rem + 1.6vw, 2rem);
     font-weight: 700;
     color: var(--texto-oscuro);
     line-height: 1.2;
@@ -165,7 +165,7 @@
 }
 .producto-precio__actual {
     font-family: var(--fuente-titulos);
-    font-size: 2.1rem;
+    font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.1rem);
     font-weight: 700;
     color: var(--verde-oscuro);
     line-height: 1;

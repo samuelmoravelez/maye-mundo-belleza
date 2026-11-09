@@ -137,24 +137,49 @@ export async function registerClient(data) {
         options: {
             data: {
                 name: name.trim(),
+                full_name: name.trim(),
                 phone: phone?.trim() ?? '',
             },
         },
     });
 
     if (error) {
-        if (error.message?.toLowerCase().includes('registered')) {
-            return { ok: false, error: AUTH_ERRORS.EMAIL_IN_USE };
+        const errorMsg = error.message?.toLowerCase() || '';
+        if (errorMsg.includes('registered') || errorMsg.includes('already') || error.status === 422 || error.code === 'user_already_exists') {
+            return { ok: false, error: AUTH_ERRORS.EMAIL_IN_USE, mensaje: 'Este correo electrónico ya se encuentra registrado.' };
         }
-        return { ok: false, error: AUTH_ERRORS.UNKNOWN };
+        return { ok: false, error: AUTH_ERRORS.UNKNOWN, mensaje: error.message };
     }
 
     if (signUpData.user && !signUpData.session) {
         return {
-            ok: false,
-            error: AUTH_ERRORS.UNKNOWN,
-            mensaje: 'Revisa tu correo para confirmar la cuenta antes de iniciar sesión.',
+            ok: true,
+            requiresEmailConfirmation: true,
+            mensaje: '¡Registro exitoso! Revisa tu correo electrónico para confirmar la cuenta antes de iniciar sesión.',
+            user: {
+                id: signUpData.user.id,
+                name: name.trim(),
+                email: emailNorm,
+                phone: phone?.trim() ?? '',
+            },
         };
+    }
+
+    // Sincronizar en la tabla profiles de la BD SQL
+    if (signUpData.session?.user) {
+        try {
+            await supabase.from('profiles').upsert({
+                id: signUpData.session.user.id,
+                name: name.trim(),
+                email: emailNorm,
+                phone: phone?.trim() ?? '',
+                role: 'cliente',
+                status: STATUS.ACTIVE,
+                updated_at: new Date().toISOString(),
+            }, { onConflict: 'id' });
+        } catch (syncErr) {
+            console.warn('[authService] Sincronización manual profiles:', syncErr);
+        }
     }
 
     await _syncSessionFromAuth(signUpData.session);

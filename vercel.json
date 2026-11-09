@@ -18,6 +18,12 @@
   ],
 
   "rewrites": [
+    { "source": "/login",                    "destination": "/login.html"             },
+    { "source": "/login/",                   "destination": "/login.html"             },
+    { "source": "/register",                 "destination": "/register.html"          },
+    { "source": "/register/",                "destination": "/register.html"          },
+    { "source": "/carrito",                  "destination": "/carrito.html"           },
+    { "source": "/carrito/",                 "destination": "/carrito.html"           },
     { "source": "/paginas/productos",        "destination": "/paginas/productos.html" },
     { "source": "/paginas/productos/",       "destination": "/paginas/productos.html" },
     { "source": "/paginas/producto",         "destination": "/paginas/producto.html"  },
@@ -28,7 +34,9 @@
     { "source": "/admin",                    "destination": "/admin.html"             },
     { "source": "/dashboard",               "destination": "/dashboard.html"         },
     { "source": "/checkout",                "destination": "/checkout.html"          },
-    { "source": "/pedido-exitoso",          "destination": "/pedido-exitoso.html"    }
+    { "source": "/pedido-exitoso",          "destination": "/pedido-exitoso.html"    },
+    { "source": "/confirmacion",             "destination": "/confirmacion.html"      },
+    { "source": "/confirmacion/",            "destination": "/confirmacion.html"      }
   ],
 
   "routes": [

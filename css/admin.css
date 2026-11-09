@@ -10,6 +10,7 @@
     color: var(--texto-oscuro);
     font-family: var(--fuente-cuerpo);
     min-height: 100vh;
+    overflow-x: clip;
 }
 
 /* ==========================================================================

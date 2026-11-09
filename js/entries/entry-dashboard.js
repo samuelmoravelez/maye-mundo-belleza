@@ -24,9 +24,8 @@ import { iniciarDashboard } from '../pages/dashboard.js';
     const session = getSession();
 
     if (!session) {
-        // Sin sesión → redirigir a inicio y pedir login
-        sessionStorage.setItem('maye_auth_redirect', 'dashboard');
-        window.location.replace(RUTAS.HOME);
+        // Sin sesión → redirigir directamente a login
+        window.location.replace(RUTAS.LOGIN);
         // Detener ejecución del módulo completo
         throw new Error('[Dashboard] Redirigiendo: sin sesión activa.');
     }

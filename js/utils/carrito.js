@@ -1,8 +1,9 @@
 // js/utils/carrito.js
-// Fachada del carrito — delega en src/js/services/cartService.js
+// Fachada del carrito — delega 100 % en src/js/services/cartService.js
+// Fuente única de verdad: Supabase.
 
 import { formatearPrecio } from '../data/productos.data.js';
-import { STORAGE_KEYS, waLink } from './constants.js';
+import { waLink } from './constants.js';
 import {
     obtenerItems as _obtenerItems,
     agregarItem as _agregarItem,
@@ -18,7 +19,7 @@ export { syncCartFromRemote };
 
 let _waLinkFn = waLink;
 
-/** @internal */
+/** @internal — permite sobreescribir waLink en tests */
 export function _establecerWaLink(fn) { _waLinkFn = fn; }
 
 function _run(promise) {
@@ -83,5 +84,3 @@ export function generarEnlaceWhatsApp() {
     if (!msg) return null;
     return _waLinkFn(msg);
 }
-
-export const CLAVE = STORAGE_KEYS.CARRITO;

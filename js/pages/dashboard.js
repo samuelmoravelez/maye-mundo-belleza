@@ -24,7 +24,8 @@ import {
 } from '../data/productos.data.js';
 import { descargarFacturaPDF, imprimirFactura } from '../utils/invoiceService.js';
 import { agregarItem }                          from '../utils/carrito.js';
-import { eliminarFavorito, obtenerFavoritos }   from '../utils/wishlistService.js';
+import { eliminarFavorito, obtenerFavoritos,
+         syncWishlistFromRemote }            from '../utils/wishlistService.js';
 import { abrirQuickView, iniciarQuickView }     from '../components/quickView.js';
 import {
     obtenerCupones, crearCupon, actualizarCupon,
@@ -319,11 +320,50 @@ function pedidoCardHTML(o) {
 }
 
 // ── Vista: Favoritos del cliente ───────────────────────────────────────────
-function renderClienteFavoritos() {
+//
+// BUG CORREGIDO — "Lista de deseos vacía en el dashboard":
+//   obtenerFavoritos() lee _remoteIds, que es un array en memoria.
+//   Ese array solo se llena cuando syncWishlistFromRemote() resuelve.
+//   La función era síncrona, así que leía _remoteIds = [] antes de que
+//   Supabase respondiera → siempre mostraba "Tu lista está vacía".
+//
+//   El flujo completo del bug:
+//     1. Usuario hace clic en corazón del index → toggleFavorito() escribe
+//        en Supabase y actualiza _remoteIds en esa sesión de index.js.
+//     2. Usuario navega al dashboard → nueva carga de módulo → _remoteIds = [].
+//     3. bootstrap.js llama syncWishlistFromRemote() pero sin await en el
+//        nivel que llega a renderClienteFavoritos().
+//     4. renderClienteFavoritos() lee [] → "vacío".
+//
+//   Solución: hacer la función async y esperar syncWishlistFromRemote()
+//   antes de leer los IDs. Si la sync ya ocurrió (caché caliente), la
+//   llamada resuelve instantáneamente sin overhead.
+async function renderClienteFavoritos() {
+    const el = document.getElementById('db-client-favs-grid');
+    if (!el) return;
+
+    // Mostrar spinner mientras se espera la sincronización remota
+    el.innerHTML = `
+        <div class="db-empty" style="grid-column:1/-1" aria-live="polite">
+            <i class="ri-loader-4-line"
+               style="font-size:2rem;color:var(--verde-principal);
+                      animation:spin 0.8s linear infinite;display:block;
+                      margin:0 auto 10px"></i>
+            <p style="color:var(--texto-mutado);font-size:0.88rem">
+                Cargando tu lista de deseos…
+            </p>
+        </div>`;
+
+    // Garantizar que _remoteIds está actualizado con Supabase
+    try {
+        await syncWishlistFromRemote();
+    } catch (err) {
+        console.warn('[dashboard] syncWishlistFromRemote falló:', err);
+        // Continuar con lo que haya en caché local
+    }
+
     const favIds = obtenerFavoritos();
     const prods  = obtenerProductos().filter(p => favIds.includes(p.id));
-    const el     = document.getElementById('db-client-favs-grid');
-    if (!el) return;
 
     if (prods.length === 0) {
         el.innerHTML = `
@@ -437,7 +477,10 @@ function renderClienteFavoritos() {
             const id = Number(btnRm.dataset.id);
             eliminarFavorito(id);
             toast('Producto eliminado de favoritos');
-            renderClienteFavoritos();   // re-render (incluye empty state)
+            // renderClienteFavoritos es async — capturar la Promise
+            renderClienteFavoritos().catch(err =>
+                console.error('[dashboard] re-render favoritos:', err)
+            );
         }
     });
 }
@@ -562,7 +605,11 @@ function _pintarTablaProductos() {
     }).join('');
 
     tbody.querySelectorAll('[data-prod-edit]').forEach(b => b.addEventListener('click', () => abrirModalProducto(Number(b.dataset.prodEdit))));
-    tbody.querySelectorAll('[data-prod-toggle]').forEach(b => b.addEventListener('click', () => toggleProducto(Number(b.dataset.prodToggle))));
+    tbody.querySelectorAll('[data-prod-toggle]').forEach(b => b.addEventListener('click', () => {
+        toggleProducto(Number(b.dataset.prodToggle)).catch(err =>
+            console.error('[Dashboard] toggle unhandled:', err)
+        );
+    }));
     tbody.querySelectorAll('[data-prod-del]').forEach(b => b.addEventListener('click', () => pedirConfirmEliminar(Number(b.dataset.prodDel))));
 }
 
@@ -607,7 +654,21 @@ function _modalProducto(abrir) {
     el.classList.toggle('db-modal-overlay--visible', abrir);
 }
 
-function guardarProducto() {
+/**
+ * Guarda (crea o actualiza) un producto en Supabase.
+ *
+ * Era SÍNCRONA — error raíz del bug:
+ *   guardarProductos() dispara una Promise que se ignora. Supabase
+ *   recibe la petición después de que el modal ya cerró y el toast
+ *   "creado" ya se mostró. Si la inserción falla, nadie lo sabe.
+ *
+ * Ahora es ASYNC:
+ *   1. Bloquea el botón con spinner durante la escritura en Supabase.
+ *   2. Hace await de la persistencia real.
+ *   3. Re-renderiza la tabla con los datos reales de la BD (no el array local).
+ *   4. Muestra el error exacto de Supabase si algo falla.
+ */
+async function guardarProducto() {
     const idGuardado = document.getElementById('db-prod-id').value;
     const nombre     = document.getElementById('db-p-nombre').value.trim();
     const categoria  = document.getElementById('db-p-categoria').value;
@@ -619,49 +680,156 @@ function guardarProducto() {
     const desc       = document.getElementById('db-p-descripcion').value.trim();
     const wa         = document.getElementById('db-p-whatsapp').value.trim();
 
+    // ── Validación ─────────────────────────────────────────────────────────
     if (!nombre || !categoria || !precio || !imagen) {
-        toast('Completa los campos obligatorios (*)', 'error'); return;
+        toast('Completa los campos obligatorios: nombre, categoría, precio e imagen.', 'error');
+        return;
     }
 
-    if (idGuardado) {
-        const idx = productos.findIndex(p => p.id === Number(idGuardado));
-        if (idx !== -1) {
-            productos[idx] = {
-                ...productos[idx],
-                nombre, categoria, precio,
-                precioAnterior: precioAnt ? Number(precioAnt) : null,
-                stock, etiqueta, imagen,
-                descripcion: desc,
-                whatsapp: wa || `Hola!%20Me%20interesa%20${encodeURIComponent(nombre)}`,
-            };
-        }
-        toast('Producto actualizado correctamente');
-    } else {
-        productos.push({
-            id:           generarId(productos),
-            nombre, categoria, precio,
-            precioAnterior: precioAnt ? Number(precioAnt) : null,
-            stock, etiqueta, imagen,
-            descripcion:  desc,
-            whatsapp:     wa || `Hola!%20Me%20interesa%20${encodeURIComponent(nombre)}`,
-            visible:      true,
-        });
-        toast('Producto creado correctamente');
+    // ── Feedback visual de carga ───────────────────────────────────────────
+    const btnGuardar = document.getElementById('db-prod-modal-guardar');
+    const textoOriginal = btnGuardar?.innerHTML ?? '';
+    if (btnGuardar) {
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<i class="ri-loader-4-line" style="animation:spin 0.8s linear infinite;display:inline-block"></i> Guardando…';
     }
-    guardarProductos(productos);
-    _pintarTablaProductos();
-    _actualizarStatsBadges();
-    _modalProducto(false);
+
+    // ── Construir objeto producto ──────────────────────────────────────────
+    const productoPayload = {
+        nombre,
+        categoria,
+        precio,
+        precioAnterior: precioAnt ? Number(precioAnt) : null,
+        stock,
+        etiqueta,
+        imagen,
+        descripcion: desc,
+        whatsapp: wa || `Hola!%20Me%20interesa%20${encodeURIComponent(nombre)}`,
+        visible: true,
+    };
+
+    try {
+        if (idGuardado) {
+            // ── EDICIÓN: mantener campos no tocados por el formulario ───────
+            const idx = productos.findIndex(p => p.id === Number(idGuardado));
+            const productoEditado = {
+                ...(idx !== -1 ? productos[idx] : {}),
+                ...productoPayload,
+                id: Number(idGuardado),
+            };
+
+            console.info('[Dashboard] Actualizando producto id:', idGuardado, productoEditado);
+
+            // guardarProductos devuelve Promise — ahora sí la esperamos
+            await new Promise((resolve, reject) => {
+                import('../data/productos.data.js').then(({ guardarProductos: _gp }) => {
+                    _gp([productoEditado])
+                        .then(resolve)
+                        .catch(reject);
+                }).catch(reject);
+            });
+
+            toast('Producto actualizado correctamente');
+
+        } else {
+            // ── CREACIÓN: id=0 → productService le asigna el real de Supabase
+            const productoNuevo = {
+                ...productoPayload,
+                id: 0,   // 0 = sin ID → _upsertProducto hace INSERT en lugar de UPDATE
+                slug: '', // productService lo genera con _slugify(nombre)
+            };
+
+            console.info('[Dashboard] Creando producto nuevo:', productoNuevo);
+
+            await new Promise((resolve, reject) => {
+                import('../data/productos.data.js').then(({ guardarProductos: _gp }) => {
+                    _gp([productoNuevo])
+                        .then(resolve)
+                        .catch(reject);
+                }).catch(reject);
+            });
+
+            toast('Producto creado correctamente');
+        }
+
+        // ── Re-render con datos reales de Supabase (post-refresh) ──────────
+        productos = obtenerProductos();
+        _pintarTablaProductos();
+        _actualizarStatsBadges();
+        _modalProducto(false);
+
+    } catch (err) {
+        // ── Error detallado en consola y en pantalla ───────────────────────
+        console.error('[Dashboard] Error al guardar producto:', err);
+
+        let mensajeError = 'No se pudo guardar el producto. Intenta de nuevo.';
+
+        if (err?.message) {
+            // Errores comunes de Supabase RLS / BD
+            if (err.message.includes('row-level security') || err.message.includes('policy')) {
+                mensajeError = 'Sin permisos para esta acción. Verifica tu sesión de administrador y las políticas RLS de Supabase.';
+            } else if (err.message.includes('duplicate') || err.message.includes('23505')) {
+                mensajeError = 'Ya existe un producto con ese nombre o SKU. Usa un nombre diferente.';
+            } else if (err.message.includes('not-null') || err.message.includes('23502')) {
+                mensajeError = `Campo obligatorio vacío en la base de datos: ${err.message}`;
+            } else if (err.message.includes('foreign key') || err.message.includes('23503')) {
+                mensajeError = `Categoría inválida. Verifica que "${categoria}" exista en la tabla categories de Supabase.`;
+            } else if (err.message.includes('JWT') || err.message.includes('token')) {
+                mensajeError = 'Sesión expirada. Recarga la página e inicia sesión nuevamente.';
+            } else {
+                mensajeError = `Error de Supabase: ${err.message}`;
+            }
+        }
+
+        toast(mensajeError, 'error');
+
+    } finally {
+        // ── Restaurar botón siempre ────────────────────────────────────────
+        if (btnGuardar) {
+            btnGuardar.disabled = false;
+            btnGuardar.innerHTML = textoOriginal;
+        }
+    }
 }
 
-function toggleProducto(id) {
+/**
+ * Alterna visibilidad de un producto en Supabase.
+ * Era síncrona — guardarProductos() devuelve una Promise ignorada.
+ * Ahora es async: bloquea el botón, espera la escritura real y
+ * re-renderiza solo cuando Supabase confirma el cambio.
+ */
+async function toggleProducto(id) {
     const idx = productos.findIndex(p => p.id === id);
     if (idx === -1) return;
-    productos[idx].visible = !productos[idx].visible;
-    guardarProductos(productos);
+
+    const productoActualizado = {
+        ...productos[idx],
+        visible: !productos[idx].visible,
+    };
+
+    // Feedback optimista inmediato en memoria local
+    productos[idx].visible = productoActualizado.visible;
     _pintarTablaProductos();
     _actualizarStatsBadges();
-    toast(`Producto ${productos[idx].visible ? 'visible' : 'oculto'}`);
+
+    try {
+        console.info('[Dashboard] Toggle visibilidad producto id:', id, '→', productoActualizado.visible);
+        await guardarProductos([productoActualizado]);
+
+        // Re-renderizar con datos reales de Supabase tras el flush
+        productos = obtenerProductos();
+        _pintarTablaProductos();
+        _actualizarStatsBadges();
+        toast(`Producto ${productoActualizado.visible ? 'visible' : 'oculto en catálogo'}`);
+
+    } catch (err) {
+        // Revertir el cambio optimista si Supabase falla
+        console.error('[Dashboard] Error toggle producto:', err);
+        productos[idx].visible = !productoActualizado.visible;
+        _pintarTablaProductos();
+        _actualizarStatsBadges();
+        toast(`No se pudo cambiar la visibilidad: ${err?.message ?? 'error desconocido'}`, 'error');
+    }
 }
 
 // ── Confirm eliminar ───────────────────────────────────────────────────────
@@ -675,14 +843,53 @@ function cerrarConfirm() {
     const el = document.getElementById('db-confirm');
     if (el) el.classList.remove('db-confirm-overlay--visible');
 }
-function confirmarEliminar() {
+
+/**
+ * Confirma y ejecuta el borrado lógico (soft-delete) en Supabase.
+ * Era síncrona — el producto desaparecía del array local pero la
+ * llamada a Supabase flotaba sin await ni manejo de errores.
+ * Ahora es async con feedback visual y reversión en caso de fallo.
+ */
+async function confirmarEliminar() {
     if (productoTarget === null) return;
-    productos = productos.filter(p => p.id !== productoTarget);
-    guardarProductos(productos);
-    _pintarTablaProductos();
-    _actualizarStatsBadges();
-    cerrarConfirm();
-    toast('Producto eliminado');
+
+    const idAEliminar   = productoTarget;
+    const btnSi         = document.getElementById('db-confirm-si');
+    const textoOriginal = btnSi?.innerHTML ?? '';
+
+    // Bloquear botón durante la operación
+    if (btnSi) {
+        btnSi.disabled = true;
+        btnSi.innerHTML = '<i class="ri-loader-4-line" style="animation:spin 0.8s linear infinite;display:inline-block"></i> Eliminando…';
+    }
+
+    try {
+        console.info('[Dashboard] Eliminando producto id:', idAEliminar);
+
+        // Usar eliminarProducto() del productService (soft-delete: deleted_at + is_visible=false)
+        const { eliminarProducto } = await import('../../src/js/services/productService.js');
+        const resultado = await eliminarProducto(idAEliminar);
+
+        if (!resultado.ok) {
+            throw new Error(resultado.error ?? 'Error desconocido al eliminar');
+        }
+
+        // Re-renderizar con datos reales de Supabase
+        productos = obtenerProductos();
+        _pintarTablaProductos();
+        _actualizarStatsBadges();
+        cerrarConfirm();
+        toast('Producto eliminado correctamente');
+
+    } catch (err) {
+        console.error('[Dashboard] Error al eliminar producto:', err);
+        toast(`No se pudo eliminar: ${err?.message ?? 'error desconocido'}`, 'error');
+    } finally {
+        if (btnSi) {
+            btnSi.disabled = false;
+            btnSi.innerHTML = textoOriginal;
+        }
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1792,6 +1999,8 @@ export async function iniciarDashboard() {
                 'resumen':          () => renderClienteResumen(),
                 'perfil':           () => renderClientePerfil(),
                 'pedidos':          () => renderClientePedidos(),
+                // renderClienteFavoritos es async — la arrow devuelve su Promise
+                // para que el navegador de vistas pueda encadenarla si lo necesita
                 'favoritos':        () => renderClienteFavoritos(),
                 'admin-resumen':    () => renderAdminResumen(),
                 'admin-productos':  () => renderAdminProductos(),
@@ -1852,13 +2061,22 @@ export async function iniciarDashboard() {
     document.getElementById('db-prod-form')?.addEventListener('submit', e => {
         e.preventDefault();
         if (!isAdminRole) { _mostrarAccesoDenegado(); return; }
-        guardarProducto();
+        // guardarProducto es async — se llama con await implícito vía then/catch
+        // para capturar cualquier rechazo no manejado dentro de la función.
+        guardarProducto().catch(err => {
+            console.error('[Dashboard] submit producto (unhandled):', err);
+            toast('Error inesperado al guardar. Revisa la consola.', 'error');
+        });
     });
 
     // ── 13. Confirm eliminar ───────────────────────────────────────────────
     document.getElementById('db-confirm-si')?.addEventListener('click', () => {
         if (!isAdminRole) { cerrarConfirm(); return; }
-        confirmarEliminar();
+        // confirmarEliminar es async — capturar rechazos no manejados
+        confirmarEliminar().catch(err => {
+            console.error('[Dashboard] confirmar eliminar (unhandled):', err);
+            toast('Error inesperado al eliminar. Revisa la consola.', 'error');
+        });
     });
     document.getElementById('db-confirm-no')?.addEventListener('click', cerrarConfirm);
     document.getElementById('db-confirm')?.addEventListener('click', e => {
@@ -1937,7 +2155,11 @@ export async function iniciarDashboard() {
     // ── 15. Escuchar cambios de favoritos en otras pestañas ────────────────
     window.addEventListener('storage', (e) => {
         if (e.key === KEYS.FAVORITES && viewActual === 'favoritos') {
-            renderClienteFavoritos();
+            // renderClienteFavoritos es async — la Promise no necesita await aquí
+            // porque el evento storage es fire-and-forget, pero capturamos errores
+            renderClienteFavoritos().catch(err =>
+                console.error('[dashboard] storage re-render favoritos:', err)
+            );
         }
     });
 

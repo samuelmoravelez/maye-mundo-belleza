@@ -8,20 +8,26 @@ import '../../css/wishlist-quickview.css';
 
 import '../main.js';
 import { iniciarBotonesCarrito } from '../pages/index.js';
-import { iniciarFAQ } from '../pages/faq.js';
-import { iniciarAuthModal, abrirModal } from '../components/authModal.js';
-import { inicializarAdmin } from '../utils/authService.js';
+import { iniciarFAQ }            from '../pages/faq.js';
+import { iniciarAuthModal }            from '../components/authModal.js';
+import { inicializarAdmin }      from '../utils/authService.js';
+import { ensureProductosLoaded } from '../data/productos.data.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    inicializarAdmin(); // ← siempre primero: garantiza que el admin exista antes de montar la UI
+// Disparar la carga del catálogo a nivel de módulo — antes del DOM —
+// para que la Promise esté en vuelo mientras el resto del JS se inicializa.
+const _catalogoListo = ensureProductosLoaded().catch(err =>
+    console.warn('[entry-index] prefetch del catálogo falló:', err)
+);
+
+document.addEventListener('DOMContentLoaded', async () => {
+    inicializarAdmin();
     iniciarAuthModal();
 
-    // Si viene redirigido desde admin.html (sin sesión), abrir modal de login
-    const authRedirect = sessionStorage.getItem('maye_auth_redirect');
-    if (authRedirect === 'admin' || authRedirect === 'dashboard' || authRedirect === 'checkout') {
-        sessionStorage.removeItem('maye_auth_redirect');
-        setTimeout(() => abrirModal('login'), 120);
-    }
+    // Esperar el catálogo de Supabase ANTES de montar los botones.
+    // Sin este await los botones se inyectan con los IDs del HTML estático
+    // (1, 2, 3…) que NO son los IDs reales de la BD → fallo de FK en wishlist,
+    // quickview vacío y el carrito llama a Supabase con IDs inexistentes.
+    await _catalogoListo;
 
     iniciarBotonesCarrito();
     iniciarFAQ();

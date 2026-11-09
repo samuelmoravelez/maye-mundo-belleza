@@ -11,8 +11,7 @@ import { RUTAS } from '../utils/constants.js';
     const session = getSession();
 
     if (!session) {
-        sessionStorage.setItem('maye_auth_redirect', 'admin');
-        window.location.replace(RUTAS.HOME);
+        window.location.replace(RUTAS.LOGIN);
         return;
     }
 

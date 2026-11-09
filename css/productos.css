@@ -29,7 +29,7 @@
 /* Grid de 5 columnas (una por categoría) */
 .categorias-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr));
     gap: 0;
 }
 
@@ -209,7 +209,7 @@
 
 .productos-cta__titulo {
     font-family: var(--fuente-titulos);
-    font-size: 1.7rem;
+    font-size: clamp(1.25rem, 1rem + 1.4vw, 1.7rem);
     font-weight: 700;
     color: var(--blanco-puro);
     margin-bottom: 10px;
@@ -237,6 +237,8 @@
     white-space: nowrap;
     transition: var(--transicion);
     flex-shrink: 0;
+    max-width: 100%;
+    justify-content: center;
 }
 
 .btn-cta-blanco:hover {
@@ -259,11 +261,6 @@
    8. RESPONSIVE
    ========================================================================== */
 @media (max-width: 768px) {
-    /* Categorías: 5 columnas → 3 en tablet */
-    .categorias-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
     .categoria-card {
         padding: 18px 10px 14px;
     }
@@ -274,11 +271,18 @@
 
     .filtros-pills {
         gap: 8px;
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
     }
 
     .filtro-pill {
         padding: 8px 16px;
         font-size: 0.8rem;
+        flex-shrink: 0;
     }
 
     .productos-cta__contenido {
@@ -286,13 +290,10 @@
         text-align: center;
     }
 
-    .productos-cta__titulo {
-        font-size: 1.4rem;
-    }
-
     .btn-cta-blanco {
         width: 100%;
         justify-content: center;
+        white-space: normal;
     }
 }
 

@@ -1,33 +1,19 @@
 // src/js/services/cartService.js
-// Carrito híbrido: localStorage (invitado) + Supabase (autenticado)
+// Carrito 100 % Supabase — fuente única de verdad.
+// Usuario no autenticado: contador 0, sin escritura local.
 
-import Storage from '../../../js/utils/storage.js';
-import { STORAGE_KEYS } from '../../../js/utils/constants.js';
 import { supabase } from './supabaseClient.js';
 import { getSession, isLoggedIn } from './authService.js';
 
-const CLAVE = STORAGE_KEYS.CARRITO;
-
-function _localItems() {
-    try {
-        const items = Storage.obtener(CLAVE, []);
-        return Array.isArray(items) ? items : [];
-    } catch {
-        return [];
-    }
-}
-
-function _persistLocal(items) {
-    Storage.guardar(CLAVE, items);
-    _dispatch(items);
-}
-
+// ── Dispatch de eventos ────────────────────────────────────────────────────
 function _dispatch(items) {
     if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('carrito-actualizado', { detail: { items } }));
+        window.dispatchEvent(new CustomEvent('cart:updated',        { detail: { items } }));
     }
 }
 
+// ── Obtener o crear el cart_id del usuario en Supabase ────────────────────
 async function _getOrCreateCartId(userId) {
     const { data: cart, error } = await supabase
         .from('carts')
@@ -46,6 +32,7 @@ async function _getOrCreateCartId(userId) {
         .insert({ user_id: userId })
         .select('id')
         .single();
+
     if (insErr) {
         console.error('[cartService] create cart:', insErr.message);
         return null;
@@ -53,6 +40,7 @@ async function _getOrCreateCartId(userId) {
     return created.id;
 }
 
+// ── Traer ítems del carrito desde Supabase ─────────────────────────────────
 async function _fetchRemoteItems(userId) {
     const cartId = await _getOrCreateCartId(userId);
     if (!cartId) return [];
@@ -78,16 +66,17 @@ async function _fetchRemoteItems(userId) {
         const imgs = (prod?.product_images ?? []).slice()
             .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
         return {
-            id: prod?.id ?? row.product_id,
-            nombre: prod?.name ?? 'Producto',
-            precio: Number(prod?.price ?? 0),
-            imagen: imgs[0]?.url ?? '',
-            cantidad: row.quantity,
+            id:          prod?.id ?? row.product_id,
+            nombre:      prod?.name ?? 'Producto',
+            precio:      Number(prod?.price ?? 0),
+            imagen:      imgs[0]?.url ?? '',
+            cantidad:    row.quantity,
             _cartItemId: row.id,
         };
     });
 }
 
+// ── Upsert / delete de un ítem en Supabase ─────────────────────────────────
 async function _upsertRemoteItem(userId, { id, cantidad }) {
     const cartId = await _getOrCreateCartId(userId);
     if (!cartId) return;
@@ -112,82 +101,68 @@ async function _upsertRemoteItem(userId, { id, cantidad }) {
             .eq('id', existing.id);
     } else {
         await supabase.from('cart_items').insert({
-            cart_id: cartId,
+            cart_id:    cartId,
             product_id: id,
-            quantity: cantidad,
+            quantity:   cantidad,
         });
     }
 }
 
+// ── Caché en memoria (se recarga con syncCartFromRemote) ───────────────────
+let _remoteCache = [];
+
 export function obtenerItems() {
-    if (!isLoggedIn()) return _localItems();
     return _remoteCache;
 }
 
-/** Caché sincronizada para lecturas síncronas cuando hay sesión */
-let _remoteCache = [];
-
+/**
+ * Sincroniza el caché en memoria con Supabase.
+ * - Usuario autenticado  → consulta cart_items y dispara eventos.
+ * - Usuario anónimo      → vacía el caché y dispara eventos con [].
+ */
 export async function syncCartFromRemote() {
     const session = getSession();
     if (!session?.id) {
-        _remoteCache = _localItems();
-        return _remoteCache;
+        _remoteCache = [];
+        _dispatch([]);
+        return [];
     }
     _remoteCache = await _fetchRemoteItems(session.id);
     _dispatch(_remoteCache);
     return _remoteCache;
 }
 
+// ── Operaciones de escritura ───────────────────────────────────────────────
+
 export async function agregarItem({ id, nombre, precio, imagen }) {
-    if (!isLoggedIn()) {
-        const items = _localItems();
-        const idx = items.findIndex(i => i.id === id);
-        if (idx !== -1) items[idx].cantidad += 1;
-        else items.push({ id, nombre, precio, imagen, cantidad: 1 });
-        _persistLocal(items);
-        return;
-    }
+    if (!isLoggedIn()) return; // sin sesión: no hacer nada
 
     const session = getSession();
-    const items = await _fetchRemoteItems(session.id);
-    const idx = items.findIndex(i => String(i.id) === String(id));
+    const items   = await _fetchRemoteItems(session.id);
+    const idx     = items.findIndex(i => String(i.id) === String(id));
     const cantidad = idx !== -1 ? items[idx].cantidad + 1 : 1;
     await _upsertRemoteItem(session.id, { id, cantidad });
     await syncCartFromRemote();
 }
 
 export async function eliminarItem(id) {
-    if (!isLoggedIn()) {
-        _persistLocal(_localItems().filter(i => i.id !== id));
-        return;
-    }
+    if (!isLoggedIn()) return;
     const session = getSession();
     await _upsertRemoteItem(session.id, { id, cantidad: 0 });
     await syncCartFromRemote();
 }
 
 export async function cambiarCantidad(id, cantidad) {
-    if (!isLoggedIn()) {
-        const items = _localItems();
-        const idx = items.findIndex(i => i.id === id);
-        if (idx === -1) return;
-        if (cantidad <= 0) items.splice(idx, 1);
-        else items[idx].cantidad = cantidad;
-        _persistLocal(items);
-        return;
-    }
+    if (!isLoggedIn()) return;
     const session = getSession();
     await _upsertRemoteItem(session.id, { id, cantidad });
     await syncCartFromRemote();
 }
 
 export async function vaciarCarrito() {
-    if (!isLoggedIn()) {
-        _persistLocal([]);
-        return;
-    }
+    if (!isLoggedIn()) return;
     const session = getSession();
-    const cartId = await _getOrCreateCartId(session.id);
+    const cartId  = await _getOrCreateCartId(session.id);
     if (cartId) {
         await supabase.from('cart_items').delete().eq('cart_id', cartId);
     }
@@ -195,32 +170,23 @@ export async function vaciarCarrito() {
     _dispatch([]);
 }
 
+// ── Helpers de lectura ─────────────────────────────────────────────────────
+
 export function contarItems() {
-    return obtenerItems().reduce((acc, i) => acc + i.cantidad, 0);
+    return _remoteCache.reduce((acc, i) => acc + i.cantidad, 0);
 }
 
 export function calcularTotal() {
-    return obtenerItems().reduce((acc, i) => acc + i.precio * i.cantidad, 0);
+    return _remoteCache.reduce((acc, i) => acc + i.precio * i.cantidad, 0);
 }
 
 /**
- * Fusiona el carrito local en Supabase tras iniciar sesión.
+ * Tras iniciar sesión: cualquier dato local previo se descarta —
+ * la fuente única es Supabase, así que solo se hace una sync normal.
+ * El parámetro userId se conserva para compatibilidad con las llamadas
+ * existentes en authService.js.
  * @param {string} userId
  */
 export async function mergeGuestCartOnLogin(userId) {
-    const local = _localItems();
-    if (!local.length) {
-        await syncCartFromRemote();
-        return;
-    }
-
-    const remote = await _fetchRemoteItems(userId);
-    for (const item of local) {
-        const rem = remote.find(r => String(r.id) === String(item.id));
-        const qty = (rem?.cantidad ?? 0) + item.cantidad;
-        await _upsertRemoteItem(userId, { id: item.id, cantidad: qty });
-    }
-
-    Storage.eliminar(CLAVE);
     await syncCartFromRemote();
 }

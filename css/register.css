@@ -1,0 +1,187 @@
+/* ==========================================================================
+   css/register.css — Página de Registro Split-Screen
+   Maye Mundo Belleza — Extensión y adaptación visual
+   ========================================================================== */
+
+/* ── 1. AJUSTES DEL WRAPPER DE REGISTRO ────────────────────────────────────── */
+.login-form-wrapper--register {
+    max-width: 480px;
+    padding: 6px 0;
+}
+
+/* ── 2. GRID 2 COLUMNAS (NOMBRE Y EMAIL EN DESKTOP) ─────────────────────────── */
+.register-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 640px) {
+    .register-grid-2col {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+/* ── 3. CAMPO DE TELÉFONO CON SELECTOR DE PREFIJO INTERNACIONAL ─────────────── */
+.input-wrapper--phone {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.phone-prefix-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.phone-prefix-select {
+    min-height: 48px;
+    padding: 10px 28px 10px 12px;
+    background: var(--fondo-crema);
+    border: 1.5px solid var(--borde-suave);
+    border-radius: var(--radio-md);
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--texto-oscuro);
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.phone-prefix-select:focus {
+    border-color: var(--verde-principal);
+    background: var(--blanco-puro);
+    box-shadow: 0 0 0 3px rgba(42, 140, 100, 0.14);
+}
+
+.phone-prefix-arrow {
+    position: absolute;
+    right: 8px;
+    color: var(--texto-mutado);
+    pointer-events: none;
+    font-size: 1rem;
+}
+
+.phone-input-inner {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.phone-inner-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--texto-mutado);
+    font-size: 1.15rem;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.login-input--phone {
+    padding-left: 42px;
+}
+
+.phone-input-inner:focus-within .phone-inner-icon {
+    color: var(--verde-principal);
+}
+
+/* Error en teléfono */
+.form-campo--error .phone-prefix-select {
+    border-color: #ef4444;
+    background: #fff5f5;
+}
+
+.form-campo--error .phone-inner-icon {
+    color: #ef4444;
+}
+
+/* ── 4. INDICADOR VISUAL DE REQUISITO DE CONTRASEÑA ─────────────────────────── */
+.password-requisito {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--texto-mutado);
+    margin-top: 6px;
+    transition: color 0.2s ease;
+}
+
+.password-requisito i {
+    font-size: 0.92rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.password-requisito--valido {
+    color: var(--verde-principal);
+    font-weight: 500;
+}
+
+.password-requisito--valido i {
+    color: var(--verde-principal);
+}
+
+.password-requisito--invalido {
+    color: #dc2626;
+}
+
+.password-requisito--invalido i {
+    color: #dc2626;
+}
+
+/* ── 5. CHECKBOX DE TÉRMINOS Y CONDICIONES ─────────────────────────────────── */
+.checkbox-label--terminos {
+    align-items: flex-start;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--texto-medio);
+}
+
+.checkbox-label--terminos a {
+    color: var(--verde-principal);
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color var(--transicion);
+}
+
+.checkbox-label--terminos a:hover {
+    color: var(--verde-oscuro);
+}
+
+.checkbox-label--terminos .checkbox-custom {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.form-campo--error .checkbox-label--terminos {
+    color: #dc2626;
+}
+
+/* ── 6. DETALLES ESTÉTICOS Y SEPARACIONES ADICIONALES ──────────────────────── */
+.login-form-col {
+    /* Permitir scroll fluido si la altura de pantalla es reducida */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(42, 140, 100, 0.2) transparent;
+}
+
+.login-form-col::-webkit-scrollbar {
+    width: 6px;
+}
+
+.login-form-col::-webkit-scrollbar-thumb {
+    background-color: rgba(42, 140, 100, 0.2);
+    border-radius: 999px;
+}
+
+@media (max-width: 767px) {
+    .login-form-wrapper--register {
+        max-width: 100%;
+        padding: 0;
+    }
+}

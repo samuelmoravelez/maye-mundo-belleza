@@ -13,11 +13,17 @@ export function iniciarMenu() {
         btnMenu.setAttribute('aria-expanded', estaAbierto);
     });
 
+    const cerrarMenu = () => {
+        menuPrincipal.classList.remove('abierto');
+        btnMenu.classList.remove('abierto');
+        btnMenu.setAttribute('aria-expanded', 'false');
+    };
+
     menuPrincipal.querySelectorAll('a').forEach(enlace => {
-        enlace.addEventListener('click', () => {
-            menuPrincipal.classList.remove('abierto');
-            btnMenu.classList.remove('abierto');
-            btnMenu.setAttribute('aria-expanded', 'false');
-        });
+        enlace.addEventListener('click', cerrarMenu);
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 900) cerrarMenu();
     });
 }

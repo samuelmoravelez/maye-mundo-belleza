@@ -19,7 +19,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 80px 20px;
+            padding: clamp(40px, 8vw, 80px) 16px;
             background: var(--fondo-crema);
             position: relative;
             overflow: hidden;
@@ -238,7 +238,7 @@
         /* Responsive */
         @media (max-width: 480px) {
             .nf-acciones { flex-direction: column; align-items: stretch; }
-            .nf-btn      { justify-content: center; }
+            .nf-btn      { justify-content: center; white-space: normal; }
             .nf-icono-wrap { width: 56px; height: 56px; }
             .nf-icono-wrap i { font-size: 1.55rem; }
         }

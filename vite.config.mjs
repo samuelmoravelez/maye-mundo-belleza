@@ -18,6 +18,9 @@ export default defineConfig({
                 assets: '',
                 rutas: {
                     home:          '/index.html',
+                    login:         '/login.html',
+                    register:      '/register.html',
+                    carrito:       '/carrito.html',
                     productos:     '/paginas/productos.html',
                     contacto:      '/paginas/contacto.html',
                     legales:       '/paginas/legales.html',
@@ -26,6 +29,7 @@ export default defineConfig({
                     dashboard:     '/dashboard.html',
                     checkout:      '/checkout.html',
                     pedidoExitoso: '/pedido-exitoso.html',
+                    confirmacion:  '/confirmacion.html',
                     notFound:      '/404.html',
                 },
             },
@@ -37,6 +41,9 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main:          resolve(__dirname, 'index.html'),
+                login:         resolve(__dirname, 'login.html'),
+                register:      resolve(__dirname, 'register.html'),
+                carrito:       resolve(__dirname, 'carrito.html'),
                 productos:     resolve(__dirname, 'paginas/productos.html'),
                 contacto:      resolve(__dirname, 'paginas/contacto.html'),
                 legales:       resolve(__dirname, 'paginas/legales.html'),
@@ -45,6 +52,7 @@ export default defineConfig({
                 dashboard:     resolve(__dirname, 'dashboard.html'),
                 checkout:      resolve(__dirname, 'checkout.html'),
                 pedidoExitoso: resolve(__dirname, 'pedido-exitoso.html'),
+                confirmacion:  resolve(__dirname, 'confirmacion.html'),
                 notFound:      resolve(__dirname, '404.html'),
             },
         },

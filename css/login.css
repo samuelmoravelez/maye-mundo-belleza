@@ -1,0 +1,888 @@
+/* ==========================================================================
+   css/login.css — Página de Login Split-Screen
+   Maye Mundo Belleza — Identidad visual oficial y tokens del proyecto
+   ========================================================================== */
+
+/* ── 1. CONTENEDOR PRINCIPAL Y PANTALLA COMPLETA ───────────────────────────── */
+.login-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: var(--fondo-crema);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(16px, 2.5vw, 40px);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Fondo ambiental suave */
+.login-page::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(184, 160, 228, 0.15) 0%, rgba(42, 140, 100, 0.05) 50%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.login-page::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(42, 140, 100, 0.12) 0%, rgba(184, 160, 228, 0.05) 50%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── 2. TARJETA SPLIT-SCREEN ────────────────────────────────────────────────── */
+.login-split-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1240px;
+    min-height: 680px;
+    background: var(--blanco-puro);
+    border-radius: var(--radio-2xl);
+    box-shadow: 0 20px 50px rgba(28, 63, 45, 0.08), 0 2px 10px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(229, 231, 235, 0.7);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+}
+
+/* ── 3. LADO IZQUIERDO: FORMULARIO ─────────────────────────────────────────── */
+.login-form-col {
+    padding: clamp(28px, 4vw, 56px) clamp(24px, 4.5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--blanco-puro);
+    min-width: 0;
+    overflow-y: auto;
+}
+
+.login-form-wrapper {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+}
+
+/* Cabecera superior: Logo oficial + enlace retorno */
+.login-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: clamp(24px, 3.5vh, 36px);
+}
+
+.login-logo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    transition: transform var(--transicion);
+}
+
+.login-logo-link:hover {
+    transform: translateY(-1px);
+}
+
+.login-logo-img {
+    width: auto;
+    height: clamp(38px, 4.2vw, 48px);
+    max-width: 180px;
+    object-fit: contain;
+}
+
+.login-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--texto-mutado);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: var(--radio-pill);
+    background: var(--fondo-gris);
+    transition: all var(--transicion);
+}
+
+.login-back-link:hover {
+    color: var(--verde-principal);
+    background: rgba(42, 140, 100, 0.08);
+}
+
+/* Encabezado de bienvenida */
+.login-header {
+    margin-bottom: clamp(20px, 3vh, 28px);
+}
+
+.login-titulo {
+    font-family: var(--fuente-titulos);
+    font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
+    font-weight: 700;
+    color: var(--texto-oscuro);
+    line-height: 1.2;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.login-subtitulo {
+    font-size: 0.92rem;
+    color: var(--texto-mutado);
+    line-height: 1.5;
+}
+
+/* ── 4. BOTÓN SOCIAL OAUTH (GOOGLE) ────────────────────────────────────────── */
+.login-social {
+    margin-bottom: 20px;
+}
+
+.btn-social-google {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--blanco-puro);
+    border: 1.5px solid var(--borde-medio);
+    border-radius: var(--radio-md);
+    color: var(--texto-oscuro);
+    font-family: var(--fuente-titulos);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transicion);
+    box-shadow: var(--sombra-xs);
+    padding: 10px 16px;
+}
+
+.btn-social-google:hover {
+    background: var(--fondo-gris);
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: var(--sombra-suave);
+}
+
+.btn-social-google:active {
+    transform: translateY(0);
+}
+
+.btn-social-google svg {
+    flex-shrink: 0;
+}
+
+/* Separador visual */
+.login-separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.login-separator::before,
+.login-separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--borde-suave);
+}
+
+.login-separator span {
+    padding: 0 14px;
+    color: var(--texto-mutado);
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ── 5. FORMULARIO E INPUTS ─────────────────────────────────────────────────── */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-campo {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-campo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.form-label {
+    font-family: var(--fuente-titulos);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texto-medio);
+    letter-spacing: 0.02em;
+}
+
+.form-link-olvido {
+    font-size: 0.8rem;
+    color: var(--verde-principal);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transicion);
+}
+
+.form-link-olvido:hover {
+    color: var(--verde-oscuro);
+    text-decoration: underline;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icono-left {
+    position: absolute;
+    left: 14px;
+    color: var(--texto-mutado);
+    font-size: 1.15rem;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.login-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px 12px 42px;
+    border: 1.5px solid var(--borde-suave);
+    border-radius: var(--radio-md);
+    font-family: var(--fuente-cuerpo);
+    font-size: 16px; /* Evita auto-zoom en iOS Safari */
+    color: var(--texto-oscuro);
+    background: var(--fondo-crema);
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.login-input--has-toggle {
+    padding-right: 48px;
+}
+
+.login-input::placeholder {
+    color: var(--texto-mutado);
+    opacity: 0.7;
+}
+
+.login-input:focus {
+    border-color: var(--verde-principal);
+    background: var(--blanco-puro);
+    box-shadow: 0 0 0 3px rgba(42, 140, 100, 0.14);
+}
+
+.login-input:focus ~ .input-icono-left,
+.input-wrapper:focus-within .input-icono-left {
+    color: var(--verde-principal);
+}
+
+/* Botón toggle password */
+.btn-toggle-password {
+    position: absolute;
+    right: 4px;
+    background: none;
+    border: none;
+    color: var(--texto-mutado);
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radio-circulo);
+    transition: color 0.2s, background 0.2s;
+    outline: none;
+}
+
+.btn-toggle-password:hover {
+    color: var(--verde-principal);
+    background: rgba(42, 140, 100, 0.08);
+}
+
+/* Estados de validación */
+.form-campo--error .login-input {
+    border-color: #ef4444;
+    background: #fff5f5;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-campo--error .input-icono-left {
+    color: #ef4444;
+}
+
+.campo-error-msg {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.76rem;
+    color: #ef4444;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.form-campo--error .campo-error-msg {
+    display: flex;
+}
+
+/* Fila de recordarme */
+.form-opciones {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: -2px;
+}
+
+.checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.84rem;
+    color: var(--texto-medio);
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-custom {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--verde-principal);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Alerta de notificación */
+.login-alerta {
+    padding: 12px 16px;
+    border-radius: var(--radio-md);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    animation: fadeInSlide 0.25s ease;
+}
+
+.login-alerta--error {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.login-alerta--error i {
+    font-size: 1.15rem;
+    color: #dc2626;
+    flex-shrink: 0;
+}
+
+.login-alerta--exito {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+.login-alerta--exito i {
+    font-size: 1.15rem;
+    color: #16a34a;
+    flex-shrink: 0;
+}
+
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Botón principal submit */
+.btn-submit-login {
+    width: 100%;
+    min-height: 50px;
+    font-size: 0.96rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    position: relative;
+    box-shadow: var(--sombra-verde);
+    margin-top: 4px;
+}
+
+.btn-submit-login:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-submit-login .spinner {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── 6. FOOTER DEL FORMULARIO ──────────────────────────────────────────────── */
+.login-footer {
+    margin-top: clamp(24px, 3vh, 32px);
+    text-align: center;
+}
+
+.login-cambio-flujo {
+    font-size: 0.88rem;
+    color: var(--texto-medio);
+    margin-bottom: 12px;
+}
+
+.login-link-registro {
+    color: var(--verde-principal);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--transicion);
+}
+
+.login-link-registro:hover {
+    color: var(--verde-oscuro);
+    text-decoration: underline;
+}
+
+.login-texto-legal {
+    font-size: 0.74rem;
+    color: var(--texto-mutado);
+    line-height: 1.45;
+}
+
+.login-texto-legal a {
+    color: var(--texto-medio);
+    text-decoration: underline;
+    transition: color var(--transicion);
+}
+
+.login-texto-legal a:hover {
+    color: var(--verde-principal);
+}
+
+/* ── 7. LADO DERECHO: CARRUSEL VISUAL DINÁMICO ─────────────────────────────── */
+.login-carrusel-col {
+    position: relative;
+    background: var(--verde-oscuro);
+    overflow: hidden;
+    padding: 16px;
+    display: flex;
+}
+
+.carrusel-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 560px;
+    border-radius: calc(var(--radio-2xl) - 8px);
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Slides track */
+.carrusel-slides {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.carrusel-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
+    z-index: 1;
+}
+
+.carrusel-slide.carrusel-slide--active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+}
+
+.carrusel-slide__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transform: scale(1.04);
+    transition: transform 6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.carrusel-slide--active .carrusel-slide__img {
+    transform: scale(1);
+}
+
+/* Superposición con gradiente oscuro en la parte inferior */
+.carrusel-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(15, 23, 18, 0.15) 0%,
+        rgba(15, 23, 18, 0.25) 40%,
+        rgba(15, 23, 18, 0.75) 75%,
+        rgba(15, 23, 18, 0.94) 100%
+    );
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Contenido de texto en la parte inferior */
+.carrusel-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: clamp(24px, 3.5vw, 44px);
+    z-index: 4;
+    color: var(--blanco-puro);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.carrusel-badge {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--radio-pill);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--blanco-puro);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.carrusel-badge i {
+    color: var(--lila-acento);
+    font-size: 0.9rem;
+}
+
+.carrusel-titulo {
+    font-family: var(--fuente-titulos);
+    font-size: clamp(1.35rem, 1.1rem + 0.9vw, 1.85rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--blanco-puro);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.carrusel-desc {
+    font-size: clamp(0.85rem, 0.8rem + 0.2vw, 0.94rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.88);
+    max-width: 90%;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Indicadores de diapositiva (dots) */
+.carrusel-indicadores {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    z-index: 5;
+}
+
+.carrusel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radio-pill);
+    background: rgba(255, 255, 255, 0.4);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.carrusel-dot:hover {
+    background: rgba(255, 255, 255, 0.75);
+}
+
+.carrusel-dot--active {
+    width: 28px;
+    background: var(--verde-claro);
+    box-shadow: 0 0 10px rgba(58, 171, 123, 0.6);
+}
+
+/* Controles de flecha (prev / next) discretos */
+.carrusel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radio-circulo);
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--blanco-puro);
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transicion);
+    z-index: 5;
+    opacity: 0;
+    outline: none;
+}
+
+.carrusel-container:hover .carrusel-btn {
+    opacity: 1;
+}
+
+.carrusel-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-50%) scale(1.08);
+}
+
+.carrusel-btn--prev { left: 16px; }
+.carrusel-btn--next { right: 16px; }
+
+/* ── 8. MODAL DE RECUPERACIÓN DE CONTRASEÑA ─────────────────────────────────── */
+.login-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 18, 0.65);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.login-modal-overlay--visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.login-modal-box {
+    background: var(--blanco-puro);
+    border-radius: var(--radio-xl);
+    width: 100%;
+    max-width: 460px;
+    padding: 28px 24px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    position: relative;
+    transform: translateY(16px);
+    transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.login-modal-overlay--visible .login-modal-box {
+    transform: translateY(0);
+}
+
+.login-modal-cerrar {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radio-circulo);
+    background: var(--fondo-gris);
+    border: none;
+    color: var(--texto-medio);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    transition: all var(--transicion);
+}
+
+.login-modal-cerrar:hover {
+    background: #e5e7eb;
+    color: var(--texto-oscuro);
+}
+
+.login-modal-titulo {
+    font-family: var(--fuente-titulos);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--texto-oscuro);
+    margin-bottom: 6px;
+}
+
+.login-modal-desc {
+    font-size: 0.85rem;
+    color: var(--texto-mutado);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* ── 9. REGLAS RESPONSIVE (MÓVIL, TABLET, TV) ──────────────────────────────── */
+
+/* Móviles (< 768px): Enfocar 100% en el formulario */
+@media (max-width: 767px) {
+    .login-page {
+        padding: 0;
+        background-color: var(--blanco-puro);
+        align-items: stretch;
+    }
+
+    .login-split-card {
+        grid-template-columns: 1fr;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .login-form-col {
+        padding: clamp(20px, 4vw, 32px) 16px 24px;
+        justify-content: flex-start;
+    }
+
+    .login-form-wrapper {
+        max-width: 100%;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+
+    .login-top-bar {
+        margin-bottom: 20px;
+    }
+
+    .login-titulo {
+        font-size: 1.5rem;
+    }
+
+    .login-carrusel-col {
+        display: none !important; /* Ocultar carrusel en móvil según especificación */
+    }
+
+    .login-input {
+        min-height: 48px; /* Táctil cómodo */
+        font-size: 16px;
+    }
+
+    .btn-submit-login,
+    .btn-social-google {
+        min-height: 48px;
+    }
+}
+
+/* Tablets (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .login-split-card {
+        grid-template-columns: 52% 48%;
+        min-height: 640px;
+        border-radius: var(--radio-xl);
+    }
+
+    .login-form-col {
+        padding: 32px 28px;
+    }
+
+    .carrusel-caption {
+        padding: 24px;
+    }
+
+    .carrusel-titulo {
+        font-size: 1.35rem;
+    }
+
+    .carrusel-desc {
+        font-size: 0.82rem;
+    }
+}
+
+/* Pantallas Grandes y TV (> 1440px) */
+@media (min-width: 1440px) {
+    .login-split-card {
+        max-width: 1340px;
+        min-height: 720px;
+    }
+
+    .login-form-col {
+        padding: 64px 72px;
+    }
+
+    .carrusel-caption {
+        padding: 56px;
+    }
+
+    .carrusel-titulo {
+        font-size: 2.1rem;
+    }
+
+    .carrusel-desc {
+        font-size: 1.05rem;
+    }
+}
+
+/* Smart TV / 4K (> 2000px) */
+@media (min-width: 2000px) {
+    .login-split-card {
+        max-width: 1540px;
+        min-height: 820px;
+    }
+
+    .login-form-col {
+        padding: 80px 96px;
+    }
+
+    .login-titulo {
+        font-size: 2.5rem;
+    }
+
+    .login-subtitulo {
+        font-size: 1.1rem;
+    }
+
+    .login-input {
+        min-height: 56px;
+        font-size: 18px;
+    }
+
+    .btn-submit-login {
+        min-height: 58px;
+        font-size: 1.1rem;
+    }
+}

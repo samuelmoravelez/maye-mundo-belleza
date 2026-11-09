@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión | Maye Mundo Belleza</title>
+    <meta name="description" content="Inicia sesión en tu cuenta de Maye Mundo Belleza para acceder a tus pedidos, lista de deseos y asesoría personalizada de belleza.">
+    
+    <!-- Favicon Oficial -->
+    <link rel="icon" href="https://res.cloudinary.com/ocnnxclz/image/upload/v1784219028/333_mvofgw.png" type="image/png">
+    
+    <!-- Remix Icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    
+    <!-- Tipografías Oficiales de Marca: Poppins & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Entry point Vite del módulo de Login -->
+    <script type="module" src="/js/entries/entry-login.js"></script>
+</head>
+<body>
+
+    <main class="login-page">
+        <!-- ── TARJETA SPLIT-SCREEN ── -->
+        <div class="login-split-card">
+
+            <!-- ══════════════════════════════════════════════════════════════════
+                 A. LADO IZQUIERDO: CONTENEDOR DEL FORMULARIO
+                 ══════════════════════════════════════════════════════════════════ -->
+            <section class="login-form-col" aria-labelledby="login-heading">
+                <div class="login-form-wrapper">
+
+                    <!-- 1. Header / Logo Oficial y Regreso -->
+                    <div class="login-top-bar">
+                        <a href="/index.html" class="login-logo-link" aria-label="Maye Mundo Belleza - Ir a Inicio">
+                            <img src="https://res.cloudinary.com/ocnnxclz/image/upload/v1787325615/logo_original_kd1pv8.svg"
+                                 alt="Maye Mundo Belleza"
+                                 class="login-logo-img"
+                                 width="160" height="48">
+                        </a>
+                        <a href="/index.html" class="login-back-link" title="Regresar a la tienda">
+                            <i class="ri-arrow-left-line"></i>
+                            <span>Ir a tienda</span>
+                        </a>
+                    </div>
+
+                    <!-- 2. Encabezado de Bienvenida -->
+                    <header class="login-header">
+                        <h1 class="login-titulo" id="login-heading">¡Hola de nuevo!</h1>
+                        <p class="login-subtitulo">Ingresa tus credenciales para acceder a tu cuenta y gestionar tus compras.</p>
+                    </header>
+
+                    <!-- 3. Botón de Registro Social (OAuth Google) -->
+                    <div class="login-social">
+                        <button type="button" class="btn-social-google" id="btn-google-login" aria-label="Continuar con Google">
+                            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                            </svg>
+                            <span>Continuar con Google</span>
+                        </button>
+                    </div>
+
+                    <!-- Separador Visual -->
+                    <div class="login-separator" role="separator">
+                        <span>o continúa con correo</span>
+                    </div>
+
+                    <!-- Alerta dinámica de retroalimentación -->
+                    <div id="login-alerta" class="login-alerta login-alerta--error" role="alert" style="display: none;">
+                        <i id="login-alerta-icono" class="ri-error-warning-fill"></i>
+                        <span id="login-alerta-texto"></span>
+                    </div>
+
+                    <!-- 4. Campos del Formulario de Inicio de Sesión -->
+                    <form id="form-login" class="login-form" novalidate>
+                        
+                        <!-- Campo: Correo Electrónico -->
+                        <div class="form-campo" id="campo-email">
+                            <label for="login-email" class="form-label">Correo electrónico</label>
+                            <div class="input-wrapper">
+                                <i class="ri-mail-line input-icono-left" aria-hidden="true"></i>
+                                <input type="email"
+                                       id="login-email"
+                                       name="email"
+                                       class="login-input"
+                                       placeholder="tu@email.com"
+                                       autocomplete="email"
+                                       required>
+                            </div>
+                            <span class="campo-error-msg">
+                                <i class="ri-error-warning-line"></i>
+                                <span>Ingresa un correo electrónico válido</span>
+                            </span>
+                        </div>
+
+                        <!-- Campo: Contraseña -->
+                        <div class="form-campo" id="campo-password">
+                            <div class="form-campo-header">
+                                <label for="login-password" class="form-label">Contraseña</label>
+                                <a href="#recuperar" id="link-recuperar-password" class="form-link-olvido" tabindex="0">
+                                    ¿Olvidaste tu contraseña?
+                                </a>
+                            </div>
+                            <div class="input-wrapper">
+                                <i class="ri-lock-line input-icono-left" aria-hidden="true"></i>
+                                <input type="password"
+                                       id="login-password"
+                                       name="password"
+                                       class="login-input login-input--has-toggle"
+                                       placeholder="••••••••"
+                                       autocomplete="current-password"
+                                       required>
+                                <button type="button"
+                                        id="btn-toggle-password"
+                                        class="btn-toggle-password"
+                                        aria-label="Mostrar contraseña"
+                                        tabindex="0">
+                                    <i class="ri-eye-line" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <span class="campo-error-msg">
+                                <i class="ri-error-warning-line"></i>
+                                <span>Ingresa tu contraseña</span>
+                            </span>
+                        </div>
+
+                        <!-- Fila de opciones: Recordar sesión -->
+                        <div class="form-opciones">
+                            <label class="checkbox-label" for="login-recordarme">
+                                <input type="checkbox" id="login-recordarme" class="checkbox-custom" checked>
+                                <span>Recordar mi sesión</span>
+                            </label>
+                        </div>
+
+                        <!-- 5. Acción Principal: Botón Submit -->
+                        <button type="submit" id="btn-login-submit" class="btn btn-primario btn-submit-login">
+                            <span class="btn-texto">
+                                <i class="ri-login-box-line"></i> Iniciar Sesión
+                            </span>
+                            <span class="btn-loader" style="display: none;">
+                                <i class="ri-loader-4-line spinner"></i> Verificando credenciales...
+                            </span>
+                        </button>
+                    </form>
+
+                    <!-- 6. Footer del Formulario -->
+                    <footer class="login-footer">
+                        <p class="login-cambio-flujo">
+                            ¿Aún no tienes una cuenta?
+                            <a href="/register.html" class="login-link-registro">Regístrate</a>
+                        </p>
+                        <p class="login-texto-legal">
+                            Al iniciar sesión aceptas nuestros
+                            <a href="/paginas/legales.html#terminos" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>
+                            y la
+                            <a href="/paginas/legales.html#privacidad" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>.
+                        </p>
+                    </footer>
+
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════════════
+                 B. LADO DERECHO: CARRUSEL VISUAL DINÁMICO (DESKTOP / TABLET)
+                 ══════════════════════════════════════════════════════════════════ -->
+            <aside class="login-carrusel-col" aria-label="Galería promocional de productos">
+                <div class="carrusel-container" id="carrusel-container">
+                    
+                    <!-- Pistas de diapositivas (rellenadas e hidratadas dinámicamente) -->
+                    <div class="carrusel-slides" id="carrusel-slides" role="region" aria-live="polite">
+                        <!-- Fallback accesible si JS demora en cargar -->
+                        <div class="carrusel-slide carrusel-slide--active">
+                            <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=85"
+                                 alt="Cuidado Capilar Premium"
+                                 class="carrusel-slide__img">
+                            <div class="carrusel-overlay"></div>
+                            <div class="carrusel-caption">
+                                <span class="carrusel-badge">
+                                    <i class="ri-sparkling-fill"></i> Cuidado Capilar Premium
+                                </span>
+                                <h2 class="carrusel-titulo">Fórmulas que nutren y transforman tu cabello</h2>
+                                <p class="carrusel-desc">Tratamientos intensivos y keratina que devuelven la vitalidad, sedosidad y fuerza.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones discretos de navegación anterior / siguiente -->
+                    <button type="button" class="carrusel-btn carrusel-btn--prev" id="carrusel-btn-prev" aria-label="Diapositiva anterior">
+                        <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="carrusel-btn carrusel-btn--next" id="carrusel-btn-next" aria-label="Siguiente diapositiva">
+                        <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+                    </button>
+
+                    <!-- Indicadores de diapositiva (dots) -->
+                    <div class="carrusel-indicadores" id="carrusel-indicadores" role="tablist" aria-label="Navegación de diapositivas"></div>
+
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <!-- ══════════════════════════════════════════════════════════════════════════
+         MODAL ACCESIBLE: RECUPERACIÓN DE CONTRASEÑA
+         ══════════════════════════════════════════════════════════════════════════ -->
+    <div id="modal-recuperar" class="login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-recuperar-titulo" aria-hidden="true">
+        <div class="login-modal-box">
+            <button type="button" class="login-modal-cerrar" id="btn-cerrar-recuperar" aria-label="Cerrar modal de recuperación">
+                <i class="ri-close-line" aria-hidden="true"></i>
+            </button>
+            <h2 class="login-modal-titulo" id="modal-recuperar-titulo">Recuperar Contraseña</h2>
+            <p class="login-modal-desc">Ingresa tu correo electrónico registrado y te enviaremos las instrucciones para restablecer tu acceso.</p>
+            
+            <div id="alerta-recuperar" class="login-alerta login-alerta--error" style="display: none; margin-bottom: 16px;"></div>
+
+            <form id="form-recuperar" novalidate>
+                <div class="form-campo" style="margin-bottom: 20px;">
+                    <label for="recuperar-email" class="form-label">Correo electrónico</label>
+                    <div class="input-wrapper">
+                        <i class="ri-mail-line input-icono-left" aria-hidden="true"></i>
+                        <input type="email"
+                               id="recuperar-email"
+                               class="login-input"
+                               placeholder="tu@email.com"
+                               autocomplete="email"
+                               required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primario w-full" style="width: 100%; min-height: 48px;">
+                    <i class="ri-send-plane-fill"></i> Enviar instrucciones
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -125,9 +125,9 @@
     min-height: 60vh;
 }
 .legales-layout {
-    max-width: 900px;
+    max-width: min(900px, 100%);
     margin: 0 auto;
-    padding: 40px 20px 0;
+    padding: clamp(20px, 4vw, 40px) var(--contenedor-pad) 0;
 }
 
 /* ── 4. PESTAÑAS ─────────────────────────────────────────────────────────── */

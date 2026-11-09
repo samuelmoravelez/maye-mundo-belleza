@@ -80,7 +80,7 @@ export function iniciarCatalogo() {
             const resultado = toggleFavorito(id);
 
             if (resultado.requiereLogin) {
-                window.dispatchEvent(new CustomEvent('auth:solicitar-login', { detail: { tab: 'login' } }));
+                window.location.href = '/login.html';
                 return;
             }
             // Actualizar icono y estado en TODAS las tarjetas con ese id

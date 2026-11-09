@@ -8,7 +8,8 @@
 //   abrirQuickView(productoId);        // llamar desde cualquier botón
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { obtenerProductos, formatearPrecio, ETIQUETAS, CATEGORIAS } from '../data/productos.data.js';
+import { obtenerProductos, formatearPrecio, ETIQUETAS, CATEGORIAS,
+         ensureProductosLoaded } from '../data/productos.data.js';
 import { agregarItem }                   from '../utils/carrito.js';
 import { toggleFavorito, esFavorito }    from '../utils/wishlistService.js';
 import { RUTAS }                         from '../utils/constants.js';
@@ -100,32 +101,104 @@ function _crearModal() {
 let _productoActual = null;
 
 // ── Abrir modal ───────────────────────────────────────────────────────────────
-export function abrirQuickView(productId) {
-    const productos = obtenerProductos();
-    const p = productos.find(x => String(x.id) === String(productId));
-    if (!p) return;
+/**
+ * Abre el modal de vista rápida para un producto dado su ID.
+ *
+ * BUG CORREGIDO — "Vista rápida no hace nada":
+ *   obtenerProductos() es síncrono y devuelve _cache. Si Supabase aún no
+ *   respondió, _cache = [] → find() devuelve undefined → return silencioso.
+ *   El usuario hace clic y no pasa nada, sin error visible.
+ *
+ * Solución: intentar primero con el caché síncrono (ruta rápida).
+ *   Si está vacío, esperar ensureProductosLoaded() y reintentar.
+ *   Mientras espera, mostrar el modal con un skeleton de carga.
+ */
+export async function abrirQuickView(productId) {
+    // ── Ruta rápida: caché ya disponible (caso normal post-carga) ────────
+    let productos = obtenerProductos();
 
+    if (productos.length > 0) {
+        const p = productos.find(x => String(x.id) === String(productId));
+        if (p) {
+            _abrirConProducto(p);
+            return;
+        }
+        // ID inexistente aunque el catálogo cargó → no existe el producto
+        console.warn('[quickView] Producto no encontrado en catálogo:', productId);
+        return;
+    }
+
+    // ── Ruta lenta: caché vacío → esperar Supabase y reintentar ─────────
+    // Mostrar el modal con skeleton mientras se espera
+    _mostrarSkeletonModal();
+
+    try {
+        await ensureProductosLoaded();
+        productos = obtenerProductos();
+    } catch (err) {
+        console.error('[quickView] Error cargando productos:', err);
+        _cerrarModal();
+        return;
+    }
+
+    const p = productos.find(x => String(x.id) === String(productId));
+    if (!p) {
+        console.warn('[quickView] Producto no encontrado tras carga:', productId);
+        _cerrarModal();
+        return;
+    }
+
+    _abrirConProducto(p);
+}
+
+function _abrirConProducto(p) {
     _productoActual = p;
     _rellenarModal(p);
 
     const overlay = document.getElementById(MODAL_ID);
+    if (!overlay) return;
     overlay.setAttribute('aria-hidden', 'false');
     overlay.classList.add('qv-overlay--visible');
     document.body.style.overflow = 'hidden';
 
-    // Focus al cerrar para accesibilidad
     setTimeout(() => document.getElementById('qv-cerrar')?.focus(), 200);
+}
+
+// Muestra el overlay con un spinner mientras se espera la carga asíncrona
+function _mostrarSkeletonModal() {
+    const overlay = document.getElementById(MODAL_ID);
+    if (!overlay) return;
+
+    const modal = overlay.querySelector('.qv-modal');
+    if (modal) {
+        modal.insertAdjacentHTML('beforeend',
+            `<div class="qv-skeleton-overlay" id="qv-skeleton-overlay"
+                  aria-live="polite" aria-label="Cargando producto…"
+                  style="position:absolute;inset:0;display:flex;align-items:center;
+                         justify-content:center;background:rgba(255,255,255,0.85);
+                         border-radius:inherit;z-index:10">
+                <i class="ri-loader-4-line"
+                   style="font-size:2.2rem;color:var(--verde-principal);
+                          animation:spin 0.8s linear infinite"></i>
+             </div>`
+        );
+    }
+
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.classList.add('qv-overlay--visible');
+    document.body.style.overflow = 'hidden';
 }
 
 // ── Cerrar modal ──────────────────────────────────────────────────────────────
 function _cerrarModal() {
     const overlay = document.getElementById(MODAL_ID);
     if (!overlay) return;
+    // Eliminar skeleton si quedó por una carga cancelada
+    document.getElementById('qv-skeleton-overlay')?.remove();
     overlay.classList.remove('qv-overlay--visible');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     _productoActual = null;
-    // Resetear cantidad
     const qty = document.getElementById('qv-cantidad');
     if (qty) qty.value = 1;
 }
@@ -211,12 +284,22 @@ function _rellenarModal(p) {
         `${RUTAS.PRODUCTO}?id=${p.id}`;
 }
 
-// ── Actualiza el icono del corazón en el modal ────────────────────────────────
+// ── Actualiza el icono del corazón en el modal según el estado real ────────────
 function _actualizarBtnWishlist(productId) {
     const btn  = document.getElementById('qv-btn-wishlist');
     const icon = document.getElementById('qv-heart-icon');
     if (!btn || !icon) return;
     const enLista = esFavorito(productId);
+    icon.className = enLista ? 'ri-heart-fill' : 'ri-heart-line';
+    btn.classList.toggle('qv-btn--wishlist-activo', enLista);
+    btn.setAttribute('aria-label', enLista ? 'Quitar de lista de deseos' : 'Agregar a lista de deseos');
+}
+
+// ── Aplica un estado visual optimista (antes de que Supabase confirme) ────────
+function _actualizarBtnWishlistOptimista(enLista) {
+    const btn  = document.getElementById('qv-btn-wishlist');
+    const icon = document.getElementById('qv-heart-icon');
+    if (!btn || !icon) return;
     icon.className = enLista ? 'ri-heart-fill' : 'ri-heart-line';
     btn.classList.toggle('qv-btn--wishlist-activo', enLista);
     btn.setAttribute('aria-label', enLista ? 'Quitar de lista de deseos' : 'Agregar a lista de deseos');
@@ -280,15 +363,45 @@ export function iniciarQuickView() {
     });
 
     // Toggle wishlist desde el modal
+    // BUG CORREGIDO: toggleFavorito es async. La versión anterior la llamaba
+    // de forma síncrona, de modo que `resultado` era una Promise (siempre
+    // truthy), no el objeto { ok, requiereLogin }. Eso hacía que la condición
+    // `resultado.requiereLogin` fuera undefined (falsy en Promise), pero
+    // `resultado` en sí era truthy → se ejecutaba lógica incorrecta.
+    // La corrección: llamar con .then()/.catch() y actualizar el icono
+    // SOLO cuando Supabase confirma la operación.
     document.getElementById('qv-btn-wishlist')?.addEventListener('click', () => {
         if (!_productoActual) return;
-        const resultado = toggleFavorito(_productoActual.id);
-        if (resultado.requiereLogin) {
-            _cerrarModal();
-            window.dispatchEvent(new CustomEvent('auth:solicitar-login', { detail: { tab: 'login' } }));
-            return;
-        }
-        _actualizarBtnWishlist(_productoActual.id);
+        const pid       = _productoActual.id;
+        const yaEnLista = esFavorito(pid);
+
+        // Feedback optimista inmediato
+        _actualizarBtnWishlistOptimista(!yaEnLista);
+
+        toggleFavorito(pid)
+            .then(resultado => {
+                if (resultado.requiereLogin) {
+                    // Revertir feedback y redirigir a login
+                    _actualizarBtnWishlistOptimista(yaEnLista);
+                    _cerrarModal();
+                    window.location.href = '/login.html';
+                    return;
+                }
+                if (!resultado.ok) {
+                    // Supabase rechazó → revertir
+                    console.warn('[quickView] toggleFavorito error:', resultado.error);
+                    _actualizarBtnWishlistOptimista(yaEnLista);
+                    return;
+                }
+                // Confirmado por Supabase — el estado optimista era correcto
+                _actualizarBtnWishlist(pid);
+                // Notificar al resto de la página (tarjetas del index, etc.)
+                window.dispatchEvent(new CustomEvent('wishlist-actualizada'));
+            })
+            .catch(err => {
+                console.error('[quickView] toggleFavorito fallo inesperado:', err);
+                _actualizarBtnWishlistOptimista(yaEnLista);
+            });
     });
 
     // Escuchar cambios de wishlist para actualizar el icono si el modal está abierto

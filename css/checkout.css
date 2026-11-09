@@ -23,13 +23,14 @@
 }
 
 .checkout-header__inner {
-    max-width: 1100px;
+    max-width: min(1100px, 100%);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 clamp(12px, 3vw, 24px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
+    min-width: 0;
 }
 
 .checkout-header__logo {
@@ -50,6 +51,10 @@
     font-size: 0.9rem;
     font-weight: 700;
     color: var(--texto-oscuro);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 42vw;
 }
 
 .checkout-header__steps {
@@ -88,11 +93,11 @@
 
 /* ── 2. GRID DE DOS COLUMNAS ────────────────────────────────────────────────── */
 .checkout-grid {
-    max-width: 1100px;
+    max-width: min(1100px, 100%);
     margin: 32px auto 0;
-    padding: 0 24px;
+    padding: 0 clamp(12px, 3vw, 24px);
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 400px);
     gap: 28px;
     align-items: start;
 }
@@ -167,7 +172,9 @@
 .co-campo textarea,
 .co-campo select {
     width: 100%;
-    padding: 11px 14px;
+    /* padding-left: 38px reserva espacio para el icono decorativo interior.
+       Sin este valor el icono queda encima del texto del usuario. */
+    padding: 11px 14px 11px 38px;
     background: var(--fondo-crema);
     border: 1.5px solid var(--borde-suave);
     border-radius: var(--radio-md);
@@ -196,6 +203,12 @@
 
 .co-campo textarea { resize: vertical; min-height: 72px; }
 
+/* Textarea: el icono se posiciona en el tope, no centrado */
+.co-campo__input-wrap:has(textarea) .co-campo__ico {
+    top: 13px;
+    transform: none;
+}
+
 .co-campo__error-msg {
     display: none;
     font-size: 0.72rem;
@@ -216,6 +229,7 @@
 .co-metodo {
     display: flex;
     align-items: flex-start;
+    flex-wrap: wrap;
     gap: 14px;
     padding: 16px 18px;
     border: 2px solid var(--borde-suave);
@@ -223,6 +237,7 @@
     cursor: pointer;
     transition: var(--transicion);
     position: relative;
+    min-width: 0;
 }
 
 .co-metodo:hover {
@@ -255,11 +270,25 @@
     flex-shrink: 0;
 }
 
+.co-metodo__icono--mercadopago { background: rgba(0, 158, 227, 0.12); color: #009ee3; }
+.co-metodo__badge-mp {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #0081bb;
+    background: rgba(0, 158, 227, 0.12);
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
 .co-metodo__icono--nequi       { background: rgba(165, 14, 148, 0.1); color: #a50e94; }
 .co-metodo__icono--bancolombia { background: rgba(255, 205, 0, 0.15);  color: #b37f00; }
 .co-metodo__icono--contraentrega { background: rgba(42, 140, 100, 0.1); color: var(--verde-principal); }
 
-.co-metodo__info { flex: 1; }
+.co-metodo__info { flex: 1; min-width: 0; }
 
 .co-metodo__nombre {
     font-family: var(--fuente-titulos);
@@ -661,6 +690,8 @@
     .checkout-grid { padding: 0 12px; margin-top: 16px; }
     .exito-card__body { padding: 20px 20px; }
     .exito-card__header { padding: 28px 20px 24px; }
+    .co-cupon-row { flex-wrap: wrap; }
+    .co-btn-cupon { width: 100%; justify-content: center; }
 }
 
 /* ── NUEVAS CLASES — inputs con icono, carrito vacío, separador, enlaces ── */
@@ -675,11 +706,15 @@
 .co-campo__ico {
     position: absolute;
     left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--texto-mutado, #9ca3af);
     font-size: 1rem;
     pointer-events: none;
     transition: color 0.2s;
     z-index: 1;
+    /* Garantiza que el icono nunca se mueva cuando el input gana focus */
+    line-height: 1;
 }
 
 .co-campo__input-wrap:focus-within .co-campo__ico {
@@ -689,12 +724,14 @@
 /* Input con padding para el icono */
 .co-campo__input {
     width: 100%;
+    min-width: 0;
+    min-height: 48px;
     padding: 11px 14px 11px 38px;
     background: var(--fondo-crema, #FAF7F2);
     border: 1.5px solid var(--borde-suave, #e5e7eb);
     border-radius: var(--radio-md, 8px);
     font-family: var(--fuente-cuerpo, 'Inter', sans-serif);
-    font-size: 0.9rem;
+    font-size: 16px;
     color: var(--texto-oscuro, #1a2e22);
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     outline: none;
@@ -1104,3 +1141,112 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUPÓN DE DESCUENTO
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.co-cupon-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+/* Botón "Aplicar" del cupón */
+.co-btn-cupon {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 20px;
+    background: var(--verde-principal);
+    color: var(--blanco-puro);
+    border: none;
+    border-radius: var(--radio-md);
+    font-family: var(--fuente-titulos);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--transicion);
+    flex-shrink: 0;
+    min-height: 44px;
+    position: relative;
+}
+.co-btn-cupon:hover:not(:disabled) {
+    background: var(--verde-oscuro);
+    transform: translateY(-1px);
+}
+.co-btn-cupon:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+.co-btn-cupon.cargando .co-spinner {
+    display: inline-block;
+}
+.co-btn-cupon.cargando .co-btn-texto {
+    opacity: 0;
+}
+
+/* Badge de cupón aplicado */
+.co-cupon-aplicado {
+    animation: fadeInUp 0.3s ease both;
+}
+.co-cupon-aplicado__badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    border-radius: var(--radio-md);
+    padding: 12px 14px;
+    color: #166534;
+}
+.co-cupon-aplicado__badge i:first-child {
+    font-size: 1.3rem;
+    color: #16a34a;
+    flex-shrink: 0;
+}
+.co-cupon-aplicado__badge > div {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.88rem;
+}
+.co-cupon-aplicado__quitar {
+    background: rgba(22,101,52,0.1);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #166534;
+    flex-shrink: 0;
+    transition: var(--transicion);
+}
+.co-cupon-aplicado__quitar:hover {
+    background: rgba(22,101,52,0.2);
+}
+
+/* Error del campo de cupón */
+#co-cupon-error {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.75rem;
+    color: var(--error);
+    min-height: 18px;
+}
+#co-cupon-error[hidden] { display: none; }
+
+/* Fila de descuento en totales */
+.co-totales__fila--descuento {
+    color: #16a34a;
+    font-weight: 600;
+}
+.co-totales__fila--descuento span:last-child::before {
+    content: '− ';
+}
+
+/* ── (Estilos de la pasarela anterior eliminados — listo para nueva integración) ── */

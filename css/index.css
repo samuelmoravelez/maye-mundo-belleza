@@ -55,7 +55,7 @@
 
 .titulo-hero {
     font-family: var(--fuente-titulos);
-    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-size: var(--fs-hero);
     font-weight: 700;
     line-height: 1.15;
     margin-bottom: 22px;
@@ -88,13 +88,13 @@
    2. BENEFICIOS (reemplaza Bootstrap cards)
    ========================================================================== */
 .seccion-beneficios {
-    padding: 80px 0;
+    padding: var(--padding-seccion);
     background-color: var(--blanco-puro);
 }
 .beneficios-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: clamp(16px, 2.4vw, 28px);
 }
 .beneficio-card {
     background-color: var(--fondo-crema);
@@ -163,13 +163,13 @@
    3. SOBRE NOSOTROS
    ========================================================================== */
 .sobre-nosotros {
-    padding: 90px 0;
+    padding: var(--padding-seccion);
     background-color: var(--fondo-crema);
 }
 .sobre-nosotros__grid {
     display: grid;
-    grid-template-columns: 1fr 1.2fr;
-    gap: 70px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: clamp(28px, 5vw, 70px);
     align-items: center;
 }
 .sobre-nosotros__imagen-wrap {
@@ -180,7 +180,9 @@
 }
 .sobre-nosotros__imagen {
     width: 100%;
-    height: 480px;
+    height: auto;
+    aspect-ratio: 6 / 7;
+    max-height: 520px;
     object-fit: cover;
     display: block;
     transition: transform 0.6s ease;
@@ -217,7 +219,7 @@
 }
 .sobre-nosotros__titulo {
     font-family: var(--fuente-titulos);
-    font-size: 2.4rem;
+    font-size: var(--fs-h1);
     font-weight: 700;
     color: var(--texto-oscuro);
     line-height: 1.2;
@@ -246,13 +248,13 @@
 /* ==========================================================================
    5. PRODUCTOS DESTACADOS (sección index)
    ========================================================================== */
-.seccion-productos { padding: 90px 0; background-color: var(--blanco-puro); }
+.seccion-productos { padding: var(--padding-seccion); background-color: var(--blanco-puro); }
 
 /* ==========================================================================
    6. FAQ
    ========================================================================== */
 .seccion-faq {
-    padding: 90px 0;
+    padding: var(--padding-seccion);
     background-color: var(--fondo-crema);
 }
 .faq-lista { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
@@ -270,12 +272,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 24px;
+    padding: clamp(14px, 2vw, 20px) clamp(16px, 2.4vw, 24px);
     background: none;
     border: none;
     cursor: pointer;
     font-family: var(--fuente-titulos);
-    font-size: 0.97rem;
+    font-size: clamp(0.88rem, 0.8rem + 0.4vw, 0.97rem);
     font-weight: 600;
     color: var(--texto-oscuro);
     text-align: left;
@@ -320,12 +322,12 @@
    ========================================================================== */
 .seccion-ubicacion-video {
     background-color: var(--blanco-puro);
-    padding: 90px 0;
+    padding: var(--padding-seccion);
 }
 .grid-ubicacion-video {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 56px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 56px);
     align-items: start;
 }
 .bloque-ubicacion-video { display: flex; flex-direction: column; gap: 18px; }
@@ -351,22 +353,21 @@
    9. RESPONSIVE
    ========================================================================== */
 @media (max-width: 992px) {
-    .beneficios-grid { grid-template-columns: repeat(2, 1fr); }
+    .sobre-nosotros__grid { grid-template-columns: 1fr; gap: 36px; }
+    .grid-ubicacion-video { grid-template-columns: 1fr; gap: 40px; }
 }
 @media (max-width: 768px) {
-    .titulo-hero { font-size: 2.2rem; }
-    .botones-hero { flex-direction: column; }
+    .botones-hero { flex-direction: column; align-items: stretch; }
     .botones-hero .btn { width: 100%; justify-content: center; }
-    .sobre-nosotros__grid { grid-template-columns: 1fr; gap: 36px; }
-    .sobre-nosotros__imagen { height: 300px; }
-    .sobre-nosotros__titulo { font-size: 1.85rem; }
+    .sobre-nosotros__imagen { max-height: 340px; }
     .sobre-nosotros__cta { align-self: stretch; justify-content: center; }
-    .grid-ubicacion-video { grid-template-columns: 1fr; gap: 40px; }
     .bloque-ubicacion-video .titulo-seccion,
     .bloque-ubicacion-video .subtitulo-seccion { text-align: center; }
+    .info-ubicacion li { flex-wrap: wrap; }
 }
 @media (max-width: 480px) {
-    .banner-hero { min-height: 75vh; }
-    .beneficios-grid { grid-template-columns: 1fr; }
-    .sobre-nosotros { padding: 60px 0; }
+    .banner-hero { min-height: 72vh; padding: 28px 16px; }
+    .subtitulo-hero { letter-spacing: 1.5px; font-size: 0.68rem; padding: 5px 12px; }
+    .sobre-nosotros { padding: var(--padding-seccion-sm); }
+    .faq-pregunta { align-items: flex-start; }
 }
